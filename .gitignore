@@ -1,5 +1,5 @@
 scrape-market-section/config.json
-/scrape-team-section/config.json
+/config.json
 /laliga-standings/config.json
 <<<<<<< Updated upstream
 .idea
@@ -10,3 +10,4 @@ scrape-market-section/config.json
 .idea/misc.xml
 /scrape-players-fantasy/config.json
 /config.json
+config.json

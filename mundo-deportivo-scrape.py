@@ -289,87 +289,13 @@ def scrape_personal_team_fantasy(email, password):
     driver.quit()
 
 
-def scrape_all_players_fantasy(email, password):
-    driver = webdriver.Chrome()
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument("--headless")
-    mundo_deportivo_liga_fantasy = "https://mister.mundodeportivo.com/new-onboarding/auth/email"
+def scrape_all_players_fantasy():
+    driver = login_fantasy_mundo_deportivo()
 
-    driver.get(mundo_deportivo_liga_fantasy)
-    wait1 = WebDriverWait(driver, 5)
-    wait2 = WebDriverWait(driver, 5)
-    wait3 = WebDriverWait(driver, 5)
-    wait4 = WebDriverWait(driver, 5)
+    #go directly to URL
+    driver.get("https://mister.mundodeportivo.com/more#players")
 
-    # Wait for the cookies to appear and click the button to accept them.
-    button_cookies = wait1.until(
-        ec.element_to_be_clickable(
-            (
-                By.ID,
-                'didomi-notice-agree-button'
-            )
-        )
-    )
-
-    button_cookies.click()
-
-    # Enter the email and password.
-    email_input = driver.find_element(By.ID, 'email')
-    email_input.send_keys(email)
-
-    password_input = driver.find_element(By.XPATH, '//*[@id="app"]/div/div[2]/div/form/div[2]/input')
-    password_input.send_keys(password)
-
-    # Click on the login button.
-    submit_button = wait2.until(
-        ec.element_to_be_clickable(
-            (
-                By.XPATH,
-                '//*[@id="app"]/div/div[2]/div/form/div[3]/button'
-            )
-        )
-    )
-    submit_button.click()
-
-    # Special wait to skip the first tutorial, when we start with a new account it will appear, so better to check it.
-    try:
-
-        skip_button = wait3.until(
-            ec.element_to_be_clickable(
-                (
-                    By.CLASS_NAME,
-                    'btn-tutorial-skip'
-                )
-            )
-        )
-        skip_button.click()
-
-    except Exception:
-        # Element not found, we just continue.
-        pass
-
-    # Select the more section, wait five seconds as it usually takes some time to load the page.
-    more_section = wait4.until(
-        ec.element_to_be_clickable(
-            (
-                By.XPATH,
-                '//*[@id="content"]/header/div[2]/ul/li[5]/a'
-            )
-        )
-    )
-    more_section.click()
-
-    players_section = wait4.until(
-        ec.element_to_be_clickable(
-            (
-                By.XPATH,
-                '//*[@id="content"]/div[2]/div[1]/button[2]'
-            )
-        )
-    )
-    players_section.click()
-
-    # ------------- Process to check if the more button exists, if it does, continue to click it until it disappears.
+    #rocess to check if the more button exists, if it does, continue to click it until it disappears.
     button_locator = (By.CLASS_NAME, 'search-players-more')
 
     # Set a maximum number of attempts to click the button (optional)
@@ -404,6 +330,7 @@ def scrape_all_players_fantasy(email, password):
             EC.element_to_be_clickable((By.CLASS_NAME, 'player-list'))
         )
         print(players_table.text)
+
 
         link_elements = players_table.find_elements(By.CSS_SELECTOR, 'a.btn-sw-link')
 
@@ -994,11 +921,11 @@ if __name__ == '__main__':
 
     email_fantasy = config['email']
     password_fantasy = config['password']
-    api_football = config['api-football']
+    #api_football = config['api-football']
 
-    scrape_market_section_fantasy()
+    #scrape_market_section_fantasy()
     #scrape_personal_team_fantasy(email_fantasy, password_fantasy)
     #scrape_la_liga_standings(api_football)
-    #scrape_all_players_fantasy(email_fantasy,password_fantasy)
+    scrape_all_players_fantasy()
     #scrape_players_stats_fantasy(email_fantasy, password_fantasy)
     #scrape_teams_information(email_fantasy, password_fantasy)
