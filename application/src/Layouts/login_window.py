@@ -5,7 +5,8 @@
 
 #
 
-import Utils.helper as h
+import Utils.helper as helper
+import Utils.routes as route
 
 
 def login():
@@ -13,29 +14,33 @@ def login():
 
     h, w = 210, 320
     new_size = 30
-    data_bytes_io = imp.io.BytesIO(imp.base64.b64decode(imp.pSG.EMOJI_BASE64_THINK))
-    img = imp.PIL.Image.open(data_bytes_io)
+    data_bytes_io = helper.io.BytesIO(helper.base64.b64decode(helper.pSG.EMOJI_BASE64_THINK))
+    img = helper.Image.open(data_bytes_io)
     cur_width, cur_height = img.size
     scale = min((new_size / cur_height), (new_size / cur_width))
-    img = img.resize((int(cur_width * scale), int(cur_height * scale)), imp.Resampling.LANCZOS)
-    bio = imp.io.BytesIO()
+    img = img.resize((int(cur_width * scale), int(cur_height * scale)), helper.Resampling.LANCZOS)
+    bio = helper.io.BytesIO()
     img.save(bio, format = "PNG")
-    new_emoji = imp.base64.b64encode(bio.getvalue())
+    new_emoji = helper.base64.b64encode(bio.getvalue())
+    img = helper.Image.open(route.fantasy_logo)
+    fl_w, fl_h = img.size
 
     layout = [
-        [imp.pSG.Column([
-            [imp.pSG.Image(filename = imp.fantasy_logo, key = "__IMAGE__", size = (w, (h // 2)))],
-            [imp.pSG.Column([[imp.pSG.Text("Login:", justification = "left", size = (10, 1))]]),
-             imp.pSG.Column([[imp.pSG.Input(key = "user", size = (25, 10))]])],
-            [imp.pSG.Column([[imp.pSG.Text("Password:", justification = "left", size = (10, 1))]],
-                            element_justification = "left"),
-             imp.pSG.Column([[imp.pSG.Input(enable_events = True, key = "pass", password_char = "*", size = (18, 1)),
-                              imp.pSG.Image(new_emoji, enable_events = True, key = "Mostrar"),
-                              imp.pSG.Button("login", bind_return_key = True, size = (0, 0))]])]],
+        [helper.pSG.Column([
+            [helper.pSG.Image(filename = route.fantasy_logo, key = "__IMAGE__", size = (fl_w, fl_h))],
+            [helper.pSG.Column([[helper.pSG.Text("Login:", justification = "left", size = (10, 1))]]),
+             helper.pSG.Column([[helper.pSG.Input(key = "user", size = (25, 10))]])],
+            [helper.pSG.Column([[helper.pSG.Text("Password:", justification = "left", size = (10, 1))]],
+                               element_justification = "left"),
+             helper.pSG.Column([[helper.pSG.Input(enable_events = True, key = "pass", password_char = "*",
+                                                  size = (18, 1)),
+                                 helper.pSG.Image(new_emoji, enable_events = True, key = "Mostrar"),
+                                 helper.pSG.Button("login", bind_return_key = True, size = (0, 0))]])]],
                 element_justification = "center")]
     ]
 
-    window = imp.pSG.Window("Bienvenido al asistente deportivo de Liga Fantasy del Mundo Deportivo", layout,
-                            element_justification = "center", size = (w, h), text_justification = "center")
+    window = helper.pSG.Window("Bienvenido al asistente deportivo de Liga Fantasy del Mundo Deportivo", layout,
+                               element_justification = "center", finalize = True, size = (w, h),
+                               text_justification = "center")
 
     return window

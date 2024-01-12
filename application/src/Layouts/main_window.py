@@ -9,24 +9,77 @@ import Utils.helper as helper
 import Utils.routes as route
 
 
-def test_tab():
+def filter_df(archivo_csv, lista):
+    # Lee el CSV completo en un DataFrame
+    df = helper.pandas.read_csv(archivo_csv)
 
-    height, width = ((helper.pSG.Window.get_screen_size()[1] // 100) * 100),\
-                    ((helper.pSG.Window.get_screen_size()[0] // 50) * 50)
+    # Filtra el DataFrame basado en la lista proporcionada
+    filtered = df[df.iloc[:, 0].isin(lista)]
+
+    return filtered
+
+
+def read_personal_team(nombre_archivo):
+    # Lee el CSV usando pandas y devuelve un DataFrame
+    try:
+        df = helper.pandas.read_csv(helper.path.join(route.users_folder, nombre_archivo + "_" +
+                                                     route.app_personal_team_file))
+
+        with open(helper.path.join(route.users_folder,
+                                   nombre_archivo + "_" + route.app_personal_team_file), "r") as file:
+            reader = helper.csv.reader(file)
+            list_id = [fila[0] for fila in reader]
+        return df, list_id
+    except Exception as e:
+        helper.pSG.popup_error(f"Error al leer el archivo CSV: {e}")
+        return None, None
+
+
+def tab_layout(dataframe):
+    datos = []
+
+    if dataframe is not None:
+        # Agrega la cabecera del CSV como etiquetas de texto
+        encabezado = [col for col in dataframe.columns]
+        datos.append(encabezado)
+
+        # Agrega una lista de Listbox para cada fila de datos
+        for _, row in dataframe.iterrows():
+            fila = [row['ID'], row['Name'], row['Market value'], row['Average value'],
+                    row['Ante penultimate match score'], row['Penultimate match score'], row['Last match score']]
+            datos.append(fila)
+
+    return datos
+
+
+def test_tab(u):
+
+    height, width = (((helper.pSG.Window.get_screen_size()[1] // 100) * 100) - 100), \
+                    (((helper.pSG.Window.get_screen_size()[0] // 100) * 100) - 100)
     # Definir el contenido de las pestañas
-    # if not helper.path.exists(route.current_path + str(height) + str(width) + ".png"):
-    #     helper.create_image(route.current_alignment, )
-    # if not helper.path.exists(route.recommendation_path + str(height) + str(width) + ".png"):
-    #     helper.create_image(route.future_alignment)
+    if not helper.path.exists(route.current_path + str(height) + str(width) + ".png"):
+        helper.create_image(route.current_alignment, route.current_path + str(height) + str(width))
+    if not helper.path.exists(route.recommendation_path + str(height) + str(width) + ".png"):
+        helper.create_image(route.future_alignment, route.recommendation_path + str(height) + str(width))
 
     current = route.current_path + str(height) + str(width) + ".png"
     recommendation = route.recommendation_path + str(height) + str(width) + ".png"
+
+    team_df, team_list = read_personal_team(u)
+    data = tab_layout(team_df)
+
     tab1_layout = [
         [
             helper.pSG.Column([
-                [helper.pSG.Text("Personal Team Title")],
-                [helper.pSG.Image(filename = current, key = "personal_team", size = (width // 2, height))]
-            ], element_justification = "center", size = (width // 2, height))
+                [helper.pSG.Image(filename = current, key = "personal_team", size = (width // 3, height))]
+            ], element_justification = "center", size = (width // 3, height)),
+            helper.pSG.Column([[helper.pSG.Table(values = data[1:], auto_size_columns = True, headings = data[0],
+                                                 display_row_numbers = False, justification = "center",
+                                                 num_rows = min(25, len(data) - 1), enable_events = True,
+                                                 expand_x = True, expand_y = False, enable_click_events = True,
+                                                 alternating_row_color = "red", selected_row_colors = "green on black",
+                                                 background_color = None, key = "-TABLE-")]],
+                              element_justification = "center", size = (2 * (width // 3), height)),
         ]
     ]
 
@@ -42,9 +95,7 @@ def test_tab():
         ]
     ]
 
-    tab3_layout = [
-        [helper.pSG.Text("Contenido inicial de la pestaña 3", key = "tab3_text")],
-    ]
+    tab3_layout = []
 
     tab4_layout = [
         [helper.pSG.Text("Contenido inicial de la pestaña 4", key = "tab4_text")],
@@ -66,6 +117,4 @@ def test_tab():
     window = helper.pSG.Window("Ejemplo de Pestañas en PySimpleGUI", layout, background_color = "yellow",
                                location = (10, 10), size = (width, height))
 
-    return window
-
-    # Bucle principal
+    return window, data
