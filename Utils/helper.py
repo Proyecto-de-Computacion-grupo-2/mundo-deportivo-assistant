@@ -9,7 +9,7 @@
 import Utils.routes as route
 
 import PySimpleGUI as pSG
-import asyncio, base64, csv, glob, hashlib, http.client, io, json, logging, math, pandas, platform, re, requests, schedule, shutil, sys, threading
+import asyncio, base64, csv, glob, hashlib, http.client, io, json, logging, math, pandas, platform, re, requests, shutil, sys, threading
 
 from application.src.Layouts import login_window, main_window
 from datetime import datetime, timedelta
@@ -93,7 +93,7 @@ def create_image(alignment_file, save_file, bot_not, back_height, back_width):
             raise ValueError(f"Unsupported future_alignment: {al}")
 
         for i, num in enumerate(rows):
-            total_width = (3050 // (num + 1))
+            total_width = (2650 // (num + 1))
             x_positions.extend([((total_width * (j + 1)) - 10) for j in range(num)])
 
         for row in range(len(rows)):
@@ -237,23 +237,22 @@ def extract_player_id(players_info):
     return whole_team_id
 
 
-def scrape_player_info(alt, t_p_i, t_p_ic, team_id):
+def scrape_player_info(t_p_i, t_p_ic, team_id):
     # Create an array to save players info.
     players = []
     positions = []
-    if not alt:
-        for player_info in t_p_ic:
-            # Split the text to create a list of player information.
-            position = player_info.find_element(By.TAG_NAME, "i").get_attribute("class")
-            if position == "pos-1":
-                position = "0"
-            elif position == "pos-2":
-                position = "1"
-            elif position == "pos-3":
-                position = "2"
-            elif position == "pos-4":
-                position = "3"
-            positions.append(position)
+    for player_info in t_p_ic:
+        # Split the text to create a list of player information.
+        position = player_info.find_element(By.TAG_NAME, "i").get_attribute("class")
+        if position == "pos-1":
+            position = "0"
+        elif position == "pos-2":
+            position = "1"
+        elif position == "pos-3":
+            position = "2"
+        elif position == "pos-4":
+            position = "3"
+        positions.append(position)
 
     for player_info in t_p_i:
         # Split the text to create a list of player information.
@@ -264,8 +263,7 @@ def scrape_player_info(alt, t_p_i, t_p_ic, team_id):
                                       replace("-", "0.0").strip() for item in raw_player_information]
         temp = [team_id[t_p_i.index(player_info)]]
         temp.extend(cleaned_player_information)
-        if not alt:
-            temp.extend(positions[t_p_i.index(player_info)])
+        temp.extend(positions[t_p_i.index(player_info)])
         players.append(temp)
     return players
 

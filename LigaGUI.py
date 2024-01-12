@@ -12,13 +12,9 @@ import Utils.routes as route
 def custom_login(user, pwd):
     helper.makedirs(helper.path.dirname(route.root_folder + "temp_file"), exist_ok = True)
 
-    # firefox_options = helper.webdriver.FirefoxOptions()
+    firefox_options = helper.webdriver.FirefoxOptions()
     # firefox_options.add_argument("--headless")
-    #driver = helper.webdriver.Firefox(options = firefox_options)
-
-    chrome_options = helper.webdriver.ChromeOptions()
-    chrome_options.add_argument("--headless")
-    driver = helper.webdriver.Chrome(options = chrome_options)
+    driver = helper.webdriver.Firefox(options = firefox_options)
 
     driver.set_page_load_timeout(300)
 
@@ -36,9 +32,15 @@ def custom_login(user, pwd):
     intercept = True
     while intercept:
         try:
-            disagree = helper.wait_click(driver, (helper.By.ID, "didomi-notice-disagree-button"), 4)
-            if disagree:
-                disagree.click()
+            more = helper.wait_click(driver, (helper.By.ID, "didomi-notice-learn-more-button"), 4)
+            if more:
+                more.click()
+            helper.sleep(helper.uniform(0.4, 0.6))
+            button_name = "//button[contains(@class, 'didomi-button-standard') and normalize-space() = 'Rechazar todo']"
+            not_consent_button = helper.wait_click(driver, driver.find_element(helper.By.XPATH, button_name), 4)
+            driver.execute_script("arguments[0].scrollIntoView(true);", not_consent_button)
+            if not_consent_button:
+                not_consent_button.click()
             intercept = False
         except (helper.ElementClickInterceptedException, helper.StaleElementReferenceException):
             helper.sleep(6)
@@ -71,17 +73,35 @@ def custom_login(user, pwd):
         driver.get("https://mister.mundodeportivo.com/team")
 
         team_players_table = driver.find_element(helper.By.CLASS_NAME, "player-list")
-
-        team_players_info = team_players_table.find_elements(helper.By.CLASS_NAME, "info")
-        team_players_icons = team_players_table.find_elements(helper.By.CLASS_NAME, "icons")
-
         whole_team_id = helper.extract_player_id(team_players_table)
 
-        players = helper.scrape_player_info(True, team_players_info, team_players_icons, whole_team_id)
+        team_players_icons = team_players_table.find_elements(helper.By.CLASS_NAME, "icons")
+        team_players_info = team_players_table.find_elements(helper.By.CLASS_NAME, "info")
+
+        players = helper.scrape_player_info(team_players_info, team_players_icons, whole_team_id)
 
         helper.write_to_csv(helper.path.join(route.users_folder, user + "_" + route.app_personal_team_file),
                             ["ID", "Name", "Market value", "Average value", "Ante penultimate match score",
-                             "Penultimate match score", "Last match score", "Position"], players, "w")
+                             "Penultimate match score", "Last match score"], players, "w")
+
+        driver.get("https://mister.mundodeportivo.com/market")
+
+        # Get the players' data table.
+        market_players_table = driver.find_element(helper.By.ID, "list-on-sale")
+        whole_team_id = helper.extract_player_id(market_players_table)
+
+        # Select each player.
+        market_players_icons = market_players_table.find_elements(helper.By.CLASS_NAME, "icons")
+        market_players_info = market_players_table.find_elements(helper.By.CLASS_NAME, "player-row")
+
+        #
+        players = helper.scrape_player_info(market_players_info, market_players_icons, whole_team_id)
+
+        # ------ Start process to save all the information in a CSV. ------
+        market_structure_header = ["ID", "Points", "Full name", "Market value", "Average value",
+                                   "Ante penultimate match score", "Penultimate match score", "Last match score",
+                                   "Attempt to buy"]
+        helper.write_to_csv(route.market_file, market_structure_header, players, "w")
 
         driver.quit()
 
@@ -89,7 +109,7 @@ def custom_login(user, pwd):
 
 
 login = helper.login_window.login()
-c, chosen_gif, event, incorrect, mostrar_password, u = None, None, "pass", True, False, None
+c, chosen_gif, event, incorrect, mostrar_password, u = None, None, "Aceptar", True, False, None
 
 while event != "Aceptar" and event != helper.WIN_CLOSED:
     if event == "inc":
@@ -120,7 +140,7 @@ while event != "Aceptar" and event != helper.WIN_CLOSED:
             elif values["pass"] == "":
                 login["pass"].set_focus()
 
-#u = "uem.ua2c@gmail.com"
+u = "uem.ua2c@gmail.com"
 window, datos = helper.main_window.test_tab(u)
 
 # Bucle principal
