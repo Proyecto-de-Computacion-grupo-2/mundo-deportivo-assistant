@@ -73,13 +73,15 @@ def custom_login(user, pwd):
         team_players_table = driver.find_element(helper.By.CLASS_NAME, "player-list")
 
         team_players_info = team_players_table.find_elements(helper.By.CLASS_NAME, "info")
+        team_players_icons = team_players_table.find_elements(helper.By.CLASS_NAME, "icons")
+
         whole_team_id = helper.extract_player_id(team_players_table)
 
-        players = helper.scrape_player_info(True, team_players_info, None, whole_team_id)
+        players = helper.scrape_player_info(True, team_players_info, team_players_icons, whole_team_id)
 
-        helper.write_to_csv(helper.path.join(route.users_folder ,user + "_" + route.app_personal_team_file),
+        helper.write_to_csv(helper.path.join(route.users_folder, user + "_" + route.app_personal_team_file),
                             ["ID", "Name", "Market value", "Average value", "Ante penultimate match score",
-                             "Penultimate match score", "Last match score"], players, "w")
+                             "Penultimate match score", "Last match score", "Position"], players, "w")
 
         driver.quit()
 
