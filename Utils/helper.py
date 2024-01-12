@@ -264,7 +264,8 @@ def scrape_player_info(alt, t_p_i, t_p_ic, team_id):
                                       replace("-", "0.0").strip() for item in raw_player_information]
         temp = [team_id[t_p_i.index(player_info)]]
         temp.extend(cleaned_player_information)
-        temp.extend(positions[t_p_i.index(player_info)])
+        if not alt:
+            temp.extend(positions[t_p_i.index(player_info)])
         players.append(temp)
     return players
 

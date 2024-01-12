@@ -56,6 +56,7 @@ def test_tab(u):
 
     height, width = (((helper.pSG.Window.get_screen_size()[1] // 100) * 100) - 100), \
                     (((helper.pSG.Window.get_screen_size()[0] // 100) * 100) - 100)
+
     # Definir el contenido de las pestañas
     helper.create_image(route.current_alignment, route.current_path + str(height) + str(width), True,
                         ((width // 2) - 100), (height - 100))

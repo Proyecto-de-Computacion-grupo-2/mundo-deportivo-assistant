@@ -12,9 +12,13 @@ import Utils.routes as route
 def custom_login(user, pwd):
     helper.makedirs(helper.path.dirname(route.root_folder + "temp_file"), exist_ok = True)
 
-    firefox_options = helper.webdriver.FirefoxOptions()
+    # firefox_options = helper.webdriver.FirefoxOptions()
     # firefox_options.add_argument("--headless")
-    driver = helper.webdriver.Firefox(options = firefox_options)
+    #driver = helper.webdriver.Firefox(options = firefox_options)
+
+    chrome_options = helper.webdriver.ChromeOptions()
+    chrome_options.add_argument("--headless")
+    driver = helper.webdriver.Chrome(options = chrome_options)
 
     driver.set_page_load_timeout(300)
 
@@ -32,15 +36,9 @@ def custom_login(user, pwd):
     intercept = True
     while intercept:
         try:
-            more = helper.wait_click(driver, (helper.By.ID, "didomi-notice-learn-more-button"), 4)
-            if more:
-                more.click()
-            helper.sleep(helper.uniform(0.4, 0.6))
-            button_name = "//button[contains(@class, 'didomi-button-standard') and normalize-space() = 'Rechazar todo']"
-            not_consent_button = helper.wait_click(driver, driver.find_element(helper.By.XPATH, button_name), 4)
-            driver.execute_script("arguments[0].scrollIntoView(true);", not_consent_button)
-            if not_consent_button:
-                not_consent_button.click()
+            disagree = helper.wait_click(driver, (helper.By.ID, "didomi-notice-disagree-button"), 4)
+            if disagree:
+                disagree.click()
             intercept = False
         except (helper.ElementClickInterceptedException, helper.StaleElementReferenceException):
             helper.sleep(6)
@@ -79,7 +77,7 @@ def custom_login(user, pwd):
 
         players = helper.scrape_player_info(True, team_players_info, None, whole_team_id)
 
-        helper.write_to_csv(route.users_folder + user + "_" + route.app_personal_team_file,
+        helper.write_to_csv(helper.path.join(route.users_folder ,user + "_" + route.app_personal_team_file),
                             ["ID", "Name", "Market value", "Average value", "Ante penultimate match score",
                              "Penultimate match score", "Last match score"], players, "w")
 
@@ -89,7 +87,7 @@ def custom_login(user, pwd):
 
 
 login = helper.login_window.login()
-c, chosen_gif, event, incorrect, mostrar_password, u = None, None, "Aceptar", True, False, None
+c, chosen_gif, event, incorrect, mostrar_password, u = None, None, "pass", True, False, None
 
 while event != "Aceptar" and event != helper.WIN_CLOSED:
     if event == "inc":
@@ -101,14 +99,12 @@ while event != "Aceptar" and event != helper.WIN_CLOSED:
             login["pass"].update(password_char = "")
         else:
             login["pass"].update(password_char = "*")
-    elif event == "login":
+    elif event == "Iniciar Sesión":
         if values["user"] and values["pass"]:
             event = "inc"
             u = values["user"]
             c = values["pass"]
             login.close()
-            loading = [route.image_folder + gif for gif in helper.listdir(route.image_folder) if "gif" in gif]
-            chosen_gif = helper.choice(loading)
             helper.pSG.popup_no_buttons("Checking credentials and downloading data...please be patient...",
                                         auto_close = True, auto_close_duration = 2)
             incorrect = custom_login(u, c)
@@ -122,7 +118,7 @@ while event != "Aceptar" and event != helper.WIN_CLOSED:
             elif values["pass"] == "":
                 login["pass"].set_focus()
 
-u = "uem.ua2c@gmail.com"
+#u = "uem.ua2c@gmail.com"
 window, datos = helper.main_window.test_tab(u)
 
 # Bucle principal

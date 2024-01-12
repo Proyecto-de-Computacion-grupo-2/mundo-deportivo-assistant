@@ -35,7 +35,7 @@ def login():
              helper.pSG.Column([[helper.pSG.Input(enable_events = True, key = "pass", password_char = "*",
                                                   size = (18, 1)),
                                  helper.pSG.Image(new_emoji, enable_events = True, key = "Mostrar"),
-                                 helper.pSG.Button("login", bind_return_key = True, size = (0, 0))]])]],
+                                 helper.pSG.Button("Iniciar Sesión", bind_return_key = True, size = (0, 0))]])]],
                 element_justification = "center")]
     ]
 
