@@ -77,7 +77,7 @@ def custom_login(user, pwd):
         team_players_info = team_players_table.find_elements(helper.By.CLASS_NAME, "info")
         whole_team_id = helper.extract_player_id(team_players_table)
 
-        players = helper.scrape_player_info(team_players_info, whole_team_id)
+        players = helper.scrape_player_info(True, team_players_info, None, whole_team_id)
 
         helper.write_to_csv(route.users_folder + user + "_" + route.app_personal_team_file,
                             ["ID", "Name", "Market value", "Average value", "Ante penultimate match score",

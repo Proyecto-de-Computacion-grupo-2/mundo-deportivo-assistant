@@ -57,10 +57,10 @@ def test_tab(u):
     height, width = (((helper.pSG.Window.get_screen_size()[1] // 100) * 100) - 100), \
                     (((helper.pSG.Window.get_screen_size()[0] // 100) * 100) - 100)
     # Definir el contenido de las pestañas
-    if not helper.path.exists(route.current_path + str(height) + str(width) + ".png"):
-        helper.create_image(route.current_alignment, route.current_path + str(height) + str(width))
-    if not helper.path.exists(route.recommendation_path + str(height) + str(width) + ".png"):
-        helper.create_image(route.future_alignment, route.recommendation_path + str(height) + str(width))
+    helper.create_image(route.current_alignment, route.current_path + str(height) + str(width), True,
+                        ((width // 2) - 100), (height - 100))
+    helper.create_image(route.future_alignment, route.recommendation_path + str(height) + str(width), True,
+                        ((width // 2) - 100), (height - 100))
 
     current = route.current_path + str(height) + str(width) + ".png"
     recommendation = route.recommendation_path + str(height) + str(width) + ".png"
@@ -78,7 +78,7 @@ def test_tab(u):
                                                  num_rows = min(25, len(data) - 1), enable_events = True,
                                                  expand_x = True, expand_y = False, enable_click_events = True,
                                                  alternating_row_color = "red", selected_row_colors = "green on black",
-                                                 background_color = None, key = "-TABLE-")]],
+                                                 key = "-TABLE-")]],
                               element_justification = "center", size = (2 * (width // 3), height)),
         ]
     ]
@@ -86,12 +86,12 @@ def test_tab(u):
     tab2_layout = [[
             helper.pSG.Column([
                 [helper.pSG.Text("Personal Team Title")],
-                [helper.pSG.Image(filename = current, key = "personal_team", size = (width // 2, height))]
-            ], element_justification = "center", size = (width // 2, height)),
+                [helper.pSG.Image(filename = current, key = "personal_team")]
+            ], element_justification = "center", size = (width // 2, height), background_color = "green"),
             helper.pSG.Column([
                 [helper.pSG.Text("Market Team Title")],
-                [helper.pSG.Image(filename = recommendation, key = "market_team", size = (width // 2, height))]
-            ], element_justification = "center", size = (width // 2, height))
+                [helper.pSG.Image(filename = recommendation, key = "market_team")]
+            ], element_justification = "center", size = (width // 2, height), background_color = "red")
         ]
     ]
 
