@@ -39,7 +39,11 @@ unecessary_columns = ['player_name', 'player_slug', 'player_userCount', 'team_na
 dataset = dataset.drop(columns=unecessary_columns)
 
 # Split the dataset
-train_dataset, test_dataset = train_test_split(dataset, test_size=0.2, random_state=0)
+max_year = dataset['season'].max()
+test_dataset = dataset[dataset['season'] == max_year]
+train_dataset = dataset[dataset['season'] != max_year]
+
+
 ids = test_dataset.pop('player_id')
 useless_ids = train_dataset.pop('player_id')
 train_labels = train_dataset.pop('rating')
@@ -138,21 +142,92 @@ real_ratings = test_labels.view(-1).cpu().numpy()
 #extract id column
 
 #translate id
-print(ids.head())
-for i in range(len(ids)):
-    id_value = ids.iloc[i]
-    translated_id = translate_id_to_fantasy(id_value)
-    ids.iloc[i] = translated_id
+ids = ids.apply(translate_id_to_fantasy)
 
-# Create a DataFrame for comparison
+#get game week from csv file
+game_week_csv = pd.read_csv('/Users/jorge/PycharmProjects/Model1/mundo-deportivo-assistant/models/points/BERTGamesWeek/predictions_mundo_deportivo.csv')
+game_week = game_week_csv['GameWeek'].max()
+
+test_dataset_copy = test_dataset.copy()
+
+
+id_to_position = dict(zip(game_week_csv['ID'], game_week_csv['Position']))
+
+
+positions = ids.apply(lambda x: id_to_position.get(x, np.nan))
+
+test_dataset_copy['Position'] = positions
+test_dataset_copy['ID'] = ids
+
+filtered_dataset = test_dataset_copy.dropna(subset=['Position'])
+
+filtered_ids = ids.map(id_to_position).dropna()
+
+filtered_test_data = test_dataset.loc[filtered_ids.index]
+
+filtered_ids.reset_index(drop=True, inplace=True)
+
+filtered_predictions = predicted_ratings[filtered_ids.index]
+
+#transform for mundo deportivo
+for i in range(len(filtered_predictions)):
+    if filtered_predictions[i] < 10 and filtered_predictions[i] > 9.3:
+        filtered_predictions[i] = 12
+    elif filtered_predictions[i] < 9.2 and filtered_predictions[i] > 8.6:
+        filtered_predictions[i] = 11
+    elif filtered_predictions[i] < 8.5 and filtered_predictions[i] > 8:
+        filtered_predictions[i] = 10
+    elif filtered_predictions[i] < 7.9 and filtered_predictions[i] > 7.8:
+        filtered_predictions[i] = 9
+    elif filtered_predictions[i] < 7.7 and filtered_predictions[i] > 7.6:
+        filtered_predictions[i] = 8
+    elif filtered_predictions[i] < 7.5 and filtered_predictions[i] > 7.4:
+        filtered_predictions[i] = 7
+    elif filtered_predictions[i] < 7.3 and filtered_predictions[i] > 7.2:
+        filtered_predictions[i] = 6
+    elif filtered_predictions[i] < 7.1 and filtered_predictions[i] > 7:
+        filtered_predictions[i] = 5
+    elif filtered_predictions[i] < 6.9 and filtered_predictions[i] > 6.8:
+        filtered_predictions[i] = 4
+    elif filtered_predictions[i] < 6.7 and filtered_predictions[i] > 6.6:
+        filtered_predictions[i] = 3
+    elif filtered_predictions[i] < 6.5 and filtered_predictions[i] > 6.4:
+        filtered_predictions[i] = 2
+    elif filtered_predictions[i] < 6.3 and filtered_predictions[i] > 6.2:
+        filtered_predictions[i] = 1
+    elif filtered_predictions[i] < 6.1 and filtered_predictions[i] > 6:
+        filtered_predictions[i] = 0
+    elif filtered_predictions[i] < 5.9 and filtered_predictions[i] > 5.8:
+        filtered_predictions[i] = -1
+    elif filtered_predictions[i] < 5.7 and filtered_predictions[i] > 5.4:
+        filtered_predictions[i] = -2
+    elif filtered_predictions[i] < 5.3 and filtered_predictions[i] > 5:
+        filtered_predictions[i] = -3
+    elif filtered_predictions[i] < 4.9 and filtered_predictions[i] > 0:
+        filtered_predictions[i] = -4
+
+ready_positions = [round(x) for x in filtered_dataset['Position']]
+
+print(filtered_dataset.head())
+
+ready_ids = [round(x) for x in filtered_dataset['ID']]
+
+print(filtered_predictions)
+
+filtered_predictions = [round(x) for x in filtered_predictions]
+
 ratings_comparison = pd.DataFrame({
-    'id': ids,
-    'real_rating': real_ratings,
-    'predicted_rating': predicted_ratings
+    'ID': ready_ids,
+    'Position': ready_positions,
+    'PredictedValue': filtered_predictions,
+    'GameWeek': game_week
 })
 
+ratings_comparison = ratings_comparison.drop_duplicates(subset=['ID'])
+
+
 # Save to CSV
-output_file_path = f"ResultsSofascore.csv"
+output_file_path = f"predictions_sofascore.csv"
 ratings_comparison.to_csv(output_file_path, index=False)
 
 print(f"File saved with real and predicted ratings to {output_file_path}")

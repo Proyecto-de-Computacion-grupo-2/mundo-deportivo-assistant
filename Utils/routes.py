@@ -64,6 +64,11 @@ git_log = path.join(data_folder, "git_log")
 # Models folders.
 values_folder = path.join(models_folder, "value", "predictions")
 plots_folder = path.join(values_folder, "plots")
+points_folder = path.join(models_folder,'points')
+bert_folder = path.join(points_folder,'BERTGamesWeek')
+predictions_mundo_deportivo = path.join(bert_folder,'predictions_mundo_deportivo.csv')
+predictions_sofa_score= path.join(points_folder,'predictions_sofascore.csv')
+
 
 git_lock = Lock()
 

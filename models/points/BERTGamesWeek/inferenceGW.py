@@ -84,8 +84,11 @@ if __name__ == "__main__":
     original_df = df.copy()
     df = preprocess_data(df)
 
-    # extract last game week
+    # Extract last game week
     last_game_week = df['Game Week'].max()
+
+    df = df[df['Game Week'] == last_game_week]
+    original_df = original_df[original_df['Game Week'] == last_game_week]
 
     selected_features = num_features
     numerical_features = df[selected_features].values
@@ -119,14 +122,24 @@ if __name__ == "__main__":
     # Evaluate the model
     predictions = model.predict(model_input).flatten()  # Flatten if predictions are in a multi-dimensional array
 
+    #round predictions
+    predictions = [round(x) for x in predictions]
 
+    #remove id rows that appear twice
+    original_df = original_df.drop_duplicates(subset=['ID'])
+
+    # make negative predictions positive
+    predictions = [abs(x) for x in predictions]
+
+    # Create a DataFrame with the predictions
     results_df = pd.DataFrame({
         'ID': original_df['ID'],
-        'True_Values': true_values,
-        'Predictions': predictions
+        'Position': original_df['Position'],
+        'PredictedValue': predictions,
+        'GameWeek': last_game_week+1
     })
 
     # Save the DataFrame to a CSV file
-    csv_file_path = f"ResultsGamesWeek{last_game_week+1}.csv"
+    csv_file_path = f"predictions_mundo_deportivo.csv"
     results_df.to_csv(csv_file_path, index=False)
     print(f"Predictions saved to CSV file: {csv_file_path}")
