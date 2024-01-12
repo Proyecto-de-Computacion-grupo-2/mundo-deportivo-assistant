@@ -9,15 +9,11 @@ import Utils.helper as helper
 import Utils.routes as route
 
 
-lorca = helper.platform.system()
-
-
 def custom_login(user, pwd):
-    if lorca != "Windows":
-        helper.makedirs(helper.path.dirname("/home/221A5673Geronimo/temp_file"), exist_ok = True)
+    helper.makedirs(helper.path.dirname(route.root_folder + "temp_file"), exist_ok = True)
 
     firefox_options = helper.webdriver.FirefoxOptions()
-    firefox_options.add_argument("--headless")
+    # firefox_options.add_argument("--headless")
     driver = helper.webdriver.Firefox(options = firefox_options)
 
     driver.set_page_load_timeout(300)
@@ -31,7 +27,7 @@ def custom_login(user, pwd):
             helper.sleep(2)
             pass
 
-    # Wait for the cookies to appear and click the button to accept them.
+    # Wait for the cookies to appear and click the button to deny them.
     helper.sleep(helper.uniform(0.4, 0.6))
     intercept = True
     while intercept:
@@ -64,40 +60,40 @@ def custom_login(user, pwd):
     if submit_button:
         submit_button.click()
 
-    # Special wait to skip the first tutorial, when we start with a new account it will appear, so better to check it.
-    helper.skip_button(driver, (helper.By.CLASS_NAME, "btn-tutorial-skip"))
+    if email_input.get_attribute("class") == "error":
+        driver.quit()
+        return True
+    else:
+        # Special wait to skip the first tutorial,
+        # when we start with a new account it will appear, so better to check it.
+        helper.skip_button(driver, (helper.By.CLASS_NAME, "btn-tutorial-skip"))
 
-    helper.sleep(helper.uniform(0.4, 0.8))
+        helper.sleep(helper.uniform(0.4, 0.8))
 
-    return driver
+        driver.get("https://mister.mundodeportivo.com/team")
 
+        team_players_table = driver.find_element(helper.By.CLASS_NAME, "player-list")
 
-window = helper.main_window.test_tab()
+        team_players_info = team_players_table.find_elements(helper.By.CLASS_NAME, "info")
+        whole_team_id = helper.extract_player_id(team_players_table)
 
-# Bucle principal
-k = 0
-while True:
-    event, values = window.read()
+        players = helper.scrape_player_info(team_players_info, whole_team_id)
 
-    if event == helper.pSG.WIN_CLOSED or event == 'Salir':
-        break
-    elif event == '-TABS-':
-        # Obtener el nombre de la pestaña activa
-        active_tab = values['-TABS-']
+        helper.write_to_csv(route.users_folder + user + "_" + route.app_personal_team_file,
+                            ["ID", "Name", "Market value", "Average value", "Ante penultimate match score",
+                             "Penultimate match score", "Last match score"], players, "w")
 
-        # Actualizar el contenido de la pestaña activa
-        if all(active_tab != ext for ext in ["tab1", "tab2"]):
-            window[f'{active_tab}_text'].update(value = window[f'{active_tab}_text'].get() + str(k))
-    k += 1
+        driver.quit()
 
-window.close()
-
+        return False
 
 
 login = helper.login_window.login()
-c, chosen_gif, event, mostrar_password, u = None, None, "pass", False, None
+c, chosen_gif, event, incorrect, mostrar_password, u = None, None, "Aceptar", True, False, None
 
 while event != "Aceptar" and event != helper.WIN_CLOSED:
+    if event == "inc":
+        login = helper.login_window.login()
     event, values = login.read()
     if event == "Mostrar":
         mostrar_password = not mostrar_password
@@ -107,27 +103,45 @@ while event != "Aceptar" and event != helper.WIN_CLOSED:
             login["pass"].update(password_char = "*")
     elif event == "login":
         if values["user"] and values["pass"]:
+            event = "inc"
             u = values["user"]
             c = values["pass"]
-            event = "Aceptar"
             login.close()
-            helper.pSG.popup(f"Usuario: {u}\nContraseña: {c}", auto_close = True, auto_close_duration = 2)
+            loading = [route.image_folder + gif for gif in helper.listdir(route.image_folder) if "gif" in gif]
+            chosen_gif = helper.choice(loading)
+            helper.pSG.popup_no_buttons("Checking credentials and downloading data...please be patient...",
+                                        auto_close = True, auto_close_duration = 2)
+            incorrect = custom_login(u, c)
+            if not incorrect:
+                event = "Aceptar"
+            else:
+                helper.pSG.popup_no_buttons("Wrong credentials, try again.", auto_close = True, auto_close_duration = 2)
         else:
             if values["user"] == "":
                 login["user"].set_focus()
             elif values["pass"] == "":
                 login["pass"].set_focus()
 
-if u and c:
-    loading = [route.image_folder + gif for gif in helper.listdir(route.image_folder) if "gif" in gif]
-    chosen_gif = helper.choice(loading)
-    # driver = custom_login(u, c)
-while not helper.path.exists("xd"):
-    helper.pSG.popup_animated(chosen_gif, grab_anywhere = False,
-                              location = ((helper.pSG.Window.get_screen_size()[0] // 2) - 60,
-                                          (helper.pSG.Window.get_screen_size()[1] // 2) - 80),
-                              message = "Downloading data,\nplease be patient...",
-                              no_titlebar = True, time_between_frames = 80)
+u = "uem.ua2c@gmail.com"
+window, datos = helper.main_window.test_tab(u)
 
-menu_eng = helper.main_window.test_tab()
-menu_eng.read()
+# Bucle principal
+k = 0
+while True:
+    event, values = window.read()
+    if event == helper.pSG.WIN_CLOSED or event == 'Salir':
+        break
+    elif event == '-TABS-':
+        # Obtener el nombre de la pestaña activa
+        active_tab = values['-TABS-']
+        # Actualizar el contenido de la pestaña activa
+        if all(active_tab != ext for ext in ["tab1", "tab2", "tab3"]):
+            window[f'{active_tab}_text'].update(value = window[f'{active_tab}_text'].get() + str(k))
+    elif "+CLICKED+" in event:
+        if not any(ext in event[2] for ext in [-1, None]):
+            helper.pSG.popup(f"ID seleccionado: {datos[(event[2][0] + 1)][0]}")
+            helper.pSG.popup_no_buttons(image = helper.path.join(route.plots_folder, str(datos[(event[2][0] + 1)][0]) +
+                                                                 "_market_value_prediction_plot.png"))
+
+    k += 1
+window.close()

@@ -1,0 +1,8 @@
+Model name: model_data_0108.txt
+RMSE: 2.292213677614903
+TensorFlow version: 2.15.0
+Is GPU available: True
+Number of Layers: 13
+Layers: ['InputLayer', 'InputLayer', 'TFBertModel', 'SlicingOpLambda', 'InputLayer', 'Concatenate', 'Dropout', 'Dense', 'BatchNormalization', 'Dense', 'LayerNormalization', 'Dropout', 'Dense']
+Optimizer: AdamW
+Loss Function: mse
