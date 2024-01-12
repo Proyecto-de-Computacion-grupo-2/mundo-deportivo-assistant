@@ -12,6 +12,10 @@ import Utils.routes as route
 def custom_login(user, pwd):
     helper.makedirs(helper.path.dirname(route.root_folder + "temp_file"), exist_ok = True)
 
+    # chrome_options = helper.webdriver.ChromeOptions()
+    # chrome_options.add_argument("--headless")
+    # driver = helper.webdriver.Chrome(options = chrome_options)
+
     firefox_options = helper.webdriver.FirefoxOptions()
     # firefox_options.add_argument("--headless")
     driver = helper.webdriver.Firefox(options = firefox_options)
@@ -32,15 +36,9 @@ def custom_login(user, pwd):
     intercept = True
     while intercept:
         try:
-            more = helper.wait_click(driver, (helper.By.ID, "didomi-notice-learn-more-button"), 4)
-            if more:
-                more.click()
-            helper.sleep(helper.uniform(0.4, 0.6))
-            button_name = "//button[contains(@class, 'didomi-button-standard') and normalize-space() = 'Rechazar todo']"
-            not_consent_button = helper.wait_click(driver, driver.find_element(helper.By.XPATH, button_name), 4)
-            driver.execute_script("arguments[0].scrollIntoView(true);", not_consent_button)
-            if not_consent_button:
-                not_consent_button.click()
+            disagree = helper.wait_click(driver, (helper.By.ID, "didomi-notice-disagree-button"), 4)
+            if disagree:
+                disagree.click()
             intercept = False
         except (helper.ElementClickInterceptedException, helper.StaleElementReferenceException):
             helper.sleep(6)
@@ -101,7 +99,8 @@ def custom_login(user, pwd):
         market_structure_header = ["ID", "Points", "Full name", "Market value", "Average value",
                                    "Ante penultimate match score", "Penultimate match score", "Last match score",
                                    "Attempt to buy"]
-        helper.write_to_csv(route.market_file, market_structure_header, players, "w")
+        helper.write_to_csv(helper.path.join(route.users_folder, user + "_" + route.app_personal_market_file),
+                            market_structure_header, players, "w")
 
         driver.quit()
 
@@ -109,7 +108,7 @@ def custom_login(user, pwd):
 
 
 login = helper.login_window.login()
-c, chosen_gif, event, incorrect, mostrar_password, u = None, None, "Aceptar", True, False, None
+c, chosen_gif, event, incorrect, mostrar_password, u = None, None, "pass", True, False, None
 
 while event != "Aceptar" and event != helper.WIN_CLOSED:
     if event == "inc":

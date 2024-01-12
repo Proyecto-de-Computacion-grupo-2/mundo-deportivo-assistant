@@ -96,3 +96,4 @@ rec = path.join(image_folder, "recommendation.png")
 fantasy_logo = path.join(image_folder, "mister-fantasy-md-logo_mod.png")
 football_loading = path.join(image_folder, "football_loading.gif")
 app_personal_team_file = "fantasy-personal-team-data.csv"
+app_personal_market_file = "fantasy-market-data.csv"
