@@ -78,7 +78,7 @@ def delete_profile():
             pass
 
 
-def create_image(alignment_file, save_file):
+def create_image(alignment_file, save_file, bot_not, back_height, back_width):
     def calculate_player_positions(al):
         positions = []
 
@@ -93,8 +93,8 @@ def create_image(alignment_file, save_file):
             raise ValueError(f"Unsupported future_alignment: {al}")
 
         for i, num in enumerate(rows):
-            total_width = 3650 // (num + 1)
-            x_positions.extend([((total_width * (j + 1)) - 510) for j in range(num)])
+            total_width = (3050 // (num + 1))
+            x_positions.extend([((total_width * (j + 1)) - 10) for j in range(num)])
 
         for row in range(len(rows)):
             current_row_positions = []
@@ -157,9 +157,15 @@ def create_image(alignment_file, save_file):
 
         image.close()
 
-    background.save(save_file + ".png", format = "PNG")
-    background = background.convert("RGB")
-    background.save(save_file + ".jpeg", format = "JPEG")
+    if not bot_not:
+        background.save(save_file + ".png", format = "PNG")
+        background = background.convert("RGB")
+        background.save(save_file + ".jpeg", format = "JPEG")
+    else:
+        background = background.resize((back_height, back_width))
+        background.save(save_file + ".png", format = "PNG")
+        background = background.convert("RGB")
+        background.save(save_file + ".jpeg", format = "JPEG")
 
     background.close()
 
@@ -231,22 +237,23 @@ def extract_player_id(players_info):
     return whole_team_id
 
 
-def scrape_player_info(t_p_i, t_p_ic, team_id):
+def scrape_player_info(alt, t_p_i, t_p_ic, team_id):
     # Create an array to save players info.
     players = []
     positions = []
-    for player_info in t_p_ic:
-        # Split the text to create a list of player information.
-        position = player_info.find_element(By.TAG_NAME, "i").get_attribute("class")
-        if position == "pos-1":
-            position = "0"
-        elif position == "pos-2":
-            position = "1"
-        elif position == "pos-3":
-            position = "2"
-        elif position == "pos-4":
-            position = "3"
-        positions.append(position)
+    if not alt:
+        for player_info in t_p_ic:
+            # Split the text to create a list of player information.
+            position = player_info.find_element(By.TAG_NAME, "i").get_attribute("class")
+            if position == "pos-1":
+                position = "0"
+            elif position == "pos-2":
+                position = "1"
+            elif position == "pos-3":
+                position = "2"
+            elif position == "pos-4":
+                position = "3"
+            positions.append(position)
 
     for player_info in t_p_i:
         # Split the text to create a list of player information.
