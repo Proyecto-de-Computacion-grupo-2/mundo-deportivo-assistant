@@ -37,10 +37,11 @@ def scrape_market_section_fantasy():
     whole_team_id = helper.extract_player_id(market_players_table)
 
     # Select each player.
+    market_players_icons = market_players_table.find_elements(helper.By.CLASS_NAME, "icons")
     market_players_info = market_players_table.find_elements(helper.By.CLASS_NAME, "player-row")
 
     #
-    players = helper.scrape_player_info(market_players_info, whole_team_id)
+    players = helper.scrape_player_info(market_players_info, market_players_icons, whole_team_id)
 
     # ------ Start process to save all the information in a CSV. ------
     market_structure_header = ["ID", "Points", "Full name", "Market value", "Average value",

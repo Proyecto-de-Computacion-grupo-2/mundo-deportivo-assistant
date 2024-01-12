@@ -75,11 +75,11 @@ def scrape_personal_team_fantasy():
     driver.get("https://mister.mundodeportivo.com/team")
 
     team_players_table = driver.find_element(helper.By.CLASS_NAME, "player-list")
+    whole_team_id = helper.extract_player_id(team_players_table)
 
     # Select each player.
     team_players_icons = team_players_table.find_elements(helper.By.CLASS_NAME, "icons")
     team_players_info = team_players_table.find_elements(helper.By.CLASS_NAME, "info")
-    whole_team_id = helper.extract_player_id(team_players_table)
 
     #
     players = helper.scrape_player_info(team_players_info, team_players_icons, whole_team_id)
