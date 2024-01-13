@@ -81,15 +81,6 @@ def optimise_lineup_greedy(df, lineups):
 
     return best_lineup, best_formation
 
-def format_lineup(df_lineup):
-    id_column = df_lineup['ID']
-    players_name = []
-    for id in id_column:
-        players_name.append(helper.id_name_mapping(id,"ID"))
-
-    return players_name
-
-
 def best_lineup_my_team(fantasy_lineups,predictions,filename):
     final_save = []
     # Create new CSV with my team joined to predictions.
@@ -102,14 +93,14 @@ def best_lineup_my_team(fantasy_lineups,predictions,filename):
     save_line_up = route.output_folder + '/optimise_my_team_' + filename + '.csv'
 
     formation_str = '-'.join(str(item) for item in best_formation)  # Convert formation to string
-    players_list = best_lineup_df['Name'].tolist()  # List of player names
+    players_list = best_lineup_df['ID'].tolist()  # List of player names
 
     # Combine formation and player names into one list
     combined_list = [formation_str] + players_list
 
     # Create a DataFrame with a single column
     final_save_df = pd.DataFrame(combined_list, columns=['Lineup'])
-    final_save.append(best_lineup_df['Name'].tolist())
+    final_save.append(best_lineup_df['ID'].tolist())
     final_save_df.to_csv(save_line_up, index=False, header=False)
 
 
@@ -148,8 +139,6 @@ def best_lineup_market(fantasy_lineups):
 if __name__ == '__main__':
     fantasy_lineups = [[4, 4, 2], [4, 5, 1], [4, 3, 3], [3, 4, 3], [3, 5, 2], [5, 4, 1],
                        [5, 3, 2]]  # Free lineups in the Mundo deportivo Fantasy League.
-    best_lineup_my_team(fantasy_lineups,route.players_predictions_mundo_deportivo,'mundo_deportivo')
-    best_lineup_my_team(fantasy_lineups,route.players_predictions_sofascore,'sofascore')
-
+    best_lineup_my_team(fantasy_lineups, route.players_predictions_mundo_deportivo, 'mundo_deportivo')
+    best_lineup_my_team(fantasy_lineups, route.players_predictions_sofascore, 'sofascore')
     best_lineup_market(fantasy_lineups)
-
