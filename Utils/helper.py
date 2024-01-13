@@ -78,6 +78,45 @@ def delete_profile():
             pass
 
 
+def extract():
+    df = pandas.read_csv(route.players_meta_data_file)
+    new_df = df.iloc[:, :2]
+    new = new_df.drop_duplicates()
+    new.to_csv(route.id_mapping, index = False)
+
+
+def id_name_mapping(entity, typ):
+    try:
+        df = pandas.read_csv(route.id_mapping)
+        if typ == "ID":
+            mask = (df["ID"].astype(str) == str(entity))
+        else:
+            mask = (df["Player full name"].astype(str) == str(entity))
+        result_df = df[mask]
+        if not result_df.empty:
+            result_dict = result_df.iloc[0].to_dict()
+            if typ == "ID":
+                return result_dict["Player full name"]
+            else:
+                return result_dict["ID"]
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+
+
+def custom_colours():
+    return {
+        "BACKGROUND": "#D9D9D9",
+        "TEXT":       "#000000",
+        "INPUT":      "#ffffff",
+        "TEXT_INPUT": "#000000",
+        "SCROLL":     "#D9D9D9",
+        "BUTTON":     ("#000000", "#ffffff"),
+        "PROGRESS":   ("#01826B", "#D0D0D0"),
+        "BORDER":     1, "SLIDER_DEPTH": 0, "PROGRESS_DEPTH": 0
+    }
+
+
 def create_image(alignment_file, save_file, bot_not, back_height, back_width):
     def calculate_player_positions(al):
         positions = []

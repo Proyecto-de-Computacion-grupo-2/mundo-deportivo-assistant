@@ -22,7 +22,10 @@ src_folder = path.join(application_folder, "src")
 function_folder = path.join(src_folder, "Functions")
 layout_folder = path.join(src_folder, "Layouts")
 models_folder = path.join(root_folder, "models")
-scrape_folder = path.join(root_folder, "scrape")
+if "scrape" not in root_folder:
+    scrape_folder = path.join(root_folder, "scrape")
+else:
+    scrape_folder = path.join(root_folder, "")
 temp_folder = path.join(root_folder, "temp_folder")
 # scrape_folder = path.join(root_folder, "/liga-fantasy/mundo-deportivo-scrape/scrape/"
 users_folder = path.join(application_folder, "users")
@@ -43,6 +46,7 @@ all_folders = [aux_folder, league_folder, players_folder, football_folder, sofas
 
 # Scrape file list.
 player_links_file = path.join(aux_folder, "fantasy-players-links.csv")
+id_mapping = path.join(aux_folder, "id_names.csv")
 timeout_file = path.join(aux_folder, "timeout.csv")
 market_file = path.join(players_folder, "fantasy-players-in-market.csv")
 personal_team_file = path.join(league_folder, "fantasy-personal-team-data.csv")
