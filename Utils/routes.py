@@ -105,3 +105,5 @@ football_loading = path.join(image_folder, "football_loading.gif")
 app_personal_team_file = "fantasy-personal-team-data.csv"
 app_personal_market_file = "fantasy-market-data.csv"
 personal_team_file = path.join(users_folder, "uem.ua2c@gmail.com_fantasy-personal-team-data.csv") #This should not be hardcoded
+app_market_file = path.join(users_folder, "uem.ua2c@gmail.com_fantasy-market-data.csv") #This should not be hardcoded
+
