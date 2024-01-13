@@ -93,6 +93,11 @@ def best_lineup_my_team(fantasy_lineups, predictions, filename):
     best_formation[0], best_formation[-1] = best_formation[-1], best_formation[0]
     save_line_up = route.output_folder + '/optimise_my_team_' + filename + '.csv'
 
+    # Save predictions to another file for later use
+    save_line_predictions = route.output_folder + '/optimise_my_team_predictions_' + filename + '.csv'
+    slp_df = best_lineup_df[['ID', 'PredictedValue',]]
+    slp_df.to_csv(save_line_predictions, index=False, header=False)
+
     formation_str = '-'.join(str(item) for item in best_formation)  # Convert formation to string
     players_list = best_lineup_df['ID'].tolist()  # List of player names
 
@@ -137,6 +142,10 @@ def best_lineup_market(fantasy_lineups, predictions, filename):
     best_formation[0], best_formation[-1] = best_formation[-1], best_formation[0]
 
     save_line_up = route.output_folder + '/optimise_market_' + filename + '.csv'
+    # Save predictions to another file for later use
+    save_line_predictions = route.output_folder + '/optimise_market_predictions_' + filename + '.csv'
+    slp_df = best_lineup_df[['ID', 'PredictedValue',]]
+    slp_df.to_csv(save_line_predictions, index=False, header=False)
 
     formation_str = '-'.join(str(item) for item in best_formation)  # Convert formation to string
     players_list = best_lineup_df['ID'].tolist()  # List of player names
