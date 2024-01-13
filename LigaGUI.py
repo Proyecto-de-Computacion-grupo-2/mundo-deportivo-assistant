@@ -12,13 +12,14 @@ import Utils.routes as route
 def custom_login(user, pwd):
     helper.makedirs(helper.path.dirname(route.root_folder + "temp_file"), exist_ok = True)
 
-    # chrome_options = helper.webdriver.ChromeOptions()
-    # chrome_options.add_argument("--headless")
-    # driver = helper.webdriver.Chrome(options = chrome_options)
+    chrome_options = helper.webdriver.ChromeOptions()
+    chrome_options.add_argument("--headless")
+    driver = helper.webdriver.Chrome(options = chrome_options)
 
-    firefox_options = helper.webdriver.FirefoxOptions()
-    # firefox_options.add_argument("--headless")
-    driver = helper.webdriver.Firefox(options = firefox_options)
+
+    #firefox_options = helper.webdriver.FirefoxOptions()
+    #firefox_options.add_argument("--headless")
+    #driver = helper.webdriver.Firefox(options = firefox_options)
 
     driver.set_page_load_timeout(300)
 
@@ -80,7 +81,7 @@ def custom_login(user, pwd):
 
         helper.write_to_csv(helper.path.join(route.users_folder, user + "_" + route.app_personal_team_file),
                             ["ID", "Name", "Market value", "Average value", "Ante penultimate match score",
-                             "Penultimate match score", "Last match score"], players, "w")
+                             "Penultimate match score", "Last match score", "Position"], players, "w")
 
         driver.get("https://mister.mundodeportivo.com/market")
 
@@ -98,7 +99,7 @@ def custom_login(user, pwd):
         # ------ Start process to save all the information in a CSV. ------
         market_structure_header = ["ID", "Points", "Full name", "Market value", "Average value",
                                    "Ante penultimate match score", "Penultimate match score", "Last match score",
-                                   "Attempt to buy"]
+                                   "Attempt to buy", "Position"]
         helper.write_to_csv(helper.path.join(route.users_folder, user + "_" + route.app_personal_market_file),
                             market_structure_header, players, "w")
 

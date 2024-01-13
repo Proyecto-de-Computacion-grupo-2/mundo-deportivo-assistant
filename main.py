@@ -1,14 +1,14 @@
 import itertools
 import pandas as pd
 import Utils.routes as route
+import Utils.helper as helper
 
-# Files routes
-players_predictions = 'players-prediction.csv'
 
 def merge_csv_by_id(csv_1, csv_2):
     # Load the CSV files into pandas DataFrames
     csv_1_df = pd.read_csv(csv_1)
     csv_2_df = pd.read_csv(csv_2)
+    csv_2_df.drop('Position', axis=1, inplace=True)
 
     # Perform a left join to keep all rows from the fantasy team data and only add matching IDs from the players prediction data
     merged_data = csv_1_df.merge(csv_2_df, on='ID', how='left')
@@ -81,27 +81,44 @@ def optimise_lineup_greedy(df, lineups):
 
     return best_lineup, best_formation
 
+def format_lineup(df_lineup):
+    id_column = df_lineup['ID']
+    players_name = []
+    for id in id_column:
+        players_name.append(helper.id_name_mapping(id,"ID"))
 
-def best_lineup_my_team(fantasy_lineups):
+    return players_name
+
+
+def best_lineup_my_team(fantasy_lineups,predictions,filename):
+    final_save = []
     # Create new CSV with my team joined to predictions.
-    df_team_predictions = merge_csv_by_id(route.personal_team_file, players_predictions)
+    df_team_predictions = merge_csv_by_id(route.personal_team_file, predictions)
 
     available_lineups = delete_impossible_formations(df_team_predictions, fantasy_lineups)
 
     best_lineup_df, best_formation = optimise_lineup_greedy(df_team_predictions, available_lineups)
     best_formation[0], best_formation[-1] = best_formation[-1], best_formation[0]
+    save_line_up = route.output_folder + '/optimise_my_team_' + filename + '.csv'
 
-    best_line_up_path = route.output_folder + 'optimise_my_team-{}.csv'.format('-'.join(map(str, best_formation)))
-    best_lineup_df = best_lineup_df[['ID', 'Position', 'PredictedValue', 'GameWeek']]
+    formation_str = '-'.join(str(item) for item in best_formation)  # Convert formation to string
+    players_list = best_lineup_df['Name'].tolist()  # List of player names
 
-    best_lineup_df.to_csv(best_line_up_path, index=False)
+    # Combine formation and player names into one list
+    combined_list = [formation_str] + players_list
+
+    # Create a DataFrame with a single column
+    final_save_df = pd.DataFrame(combined_list, columns=['Lineup'])
+    final_save.append(best_lineup_df['Name'].tolist())
+    final_save_df.to_csv(save_line_up, index=False, header=False)
+
 
 def create_df_team_market_players():
     # Create new CSV with my team and market predictions joined.
-    df_team_predictions_complete = merge_csv_by_id(route.personal_team_file, players_predictions)
+    df_team_predictions_complete = merge_csv_by_id(route.personal_team_file,  route.players_predictions_mundo_deportivo)
     df_team_predictions = df_team_predictions_complete[['ID', 'Position', 'PredictedValue', 'GameWeek']]
 
-    df_market_predictions_complete = merge_csv_by_id(route.market_file, players_predictions)
+    df_market_predictions_complete = merge_csv_by_id(route.market_file,  route.players_predictions_mundo_deportivo)
     df_market_predictions = df_market_predictions_complete[['ID', 'Position', 'PredictedValue', 'GameWeek']]
 
     df_market_team_players = pd.DataFrame(columns=df_team_predictions.columns)
@@ -131,6 +148,8 @@ def best_lineup_market(fantasy_lineups):
 if __name__ == '__main__':
     fantasy_lineups = [[4, 4, 2], [4, 5, 1], [4, 3, 3], [3, 4, 3], [3, 5, 2], [5, 4, 1],
                        [5, 3, 2]]  # Free lineups in the Mundo deportivo Fantasy League.
-    best_lineup_my_team(fantasy_lineups)
+    best_lineup_my_team(fantasy_lineups,route.players_predictions_mundo_deportivo,'mundo_deportivo')
+    best_lineup_my_team(fantasy_lineups,route.players_predictions_sofascore,'sofascore')
+
     best_lineup_market(fantasy_lineups)
 

@@ -49,7 +49,6 @@ player_links_file = path.join(aux_folder, "fantasy-players-links.csv")
 id_mapping = path.join(aux_folder, "id_names.csv")
 timeout_file = path.join(aux_folder, "timeout.csv")
 market_file = path.join(players_folder, "fantasy-players-in-market.csv")
-personal_team_file = path.join(league_folder, "fantasy-personal-team-data.csv")
 personal_lineup_file = path.join(files_folder, "current_alignment")
 team_data_file = path.join(league_folder, "fantasy-teams-data.csv")
 teams_players_file = path.join(league_folder, "fantasy-teams-players.csv")
@@ -66,6 +65,10 @@ git_lock_file = path.join(data_folder, ".git", "index.lock")
 git_log = path.join(data_folder, "git_log")
 
 # Models folders.
+players_predictions = path.join(models_folder, "points")
+players_predictions_sofascore = path.join(players_predictions, "predictions_sofascore.csv")
+players_predictions_bert = path.join(players_predictions, "BERTGamesWeek")
+players_predictions_mundo_deportivo = path.join(players_predictions_bert, "predictions_mundo_deportivo.csv")
 values_folder = path.join(models_folder, "value", "predictions")
 plots_folder = path.join(values_folder, "plots")
 
@@ -101,3 +104,4 @@ fantasy_logo = path.join(image_folder, "mister-fantasy-md-logo_mod.png")
 football_loading = path.join(image_folder, "football_loading.gif")
 app_personal_team_file = "fantasy-personal-team-data.csv"
 app_personal_market_file = "fantasy-market-data.csv"
+personal_team_file = path.join(users_folder, "uem.ua2c@gmail.com_fantasy-personal-team-data.csv") #This should not be hardcoded
