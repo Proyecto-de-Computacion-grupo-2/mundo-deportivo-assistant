@@ -7,12 +7,21 @@ import Utils.helper as helper
 def merge_csv_by_id(csv_1, csv_2):
     # Load the CSV files into pandas DataFrames
     csv_1_df = pd.read_csv(csv_1)
+    print(csv_1_df.dtypes)
+
     csv_2_df = pd.read_csv(csv_2)
+    print(csv_2_df.dtypes)
+
     csv_2_df.drop('Position', axis=1, inplace=True)
 
     # Perform a left join to keep all rows from the fantasy team data and only add matching IDs from the players prediction data
     merged_data = csv_1_df.merge(csv_2_df, on='ID', how='left')
+    print(merged_data.dtypes)
 
+    # Fill NaN values with 0
+    merged_data['PredictedValue'] = merged_data['PredictedValue'].fillna(0).astype(int)
+
+    merged_data['GameWeek'] = merged_data['GameWeek'].fillna(0).astype(int)
     return merged_data
 
 def delete_impossible_formations(df_team_predictions, fantasy_lineups):
@@ -95,7 +104,7 @@ def best_lineup_my_team(fantasy_lineups, predictions, filename):
 
     # Save predictions to another file for later use
     save_line_predictions = route.output_folder + '/optimise_my_team_predictions_' + filename + '.csv'
-    slp_df = best_lineup_df[['ID', 'PredictedValue',]]
+    slp_df = best_lineup_df[['ID', 'PredictedValue']]
     slp_df.to_csv(save_line_predictions, index=False, header=False)
 
     formation_str = '-'.join(str(item) for item in best_formation)  # Convert formation to string
@@ -144,7 +153,7 @@ def best_lineup_market(fantasy_lineups, predictions, filename):
     save_line_up = route.output_folder + '/optimise_market_' + filename + '.csv'
     # Save predictions to another file for later use
     save_line_predictions = route.output_folder + '/optimise_market_predictions_' + filename + '.csv'
-    slp_df = best_lineup_df[['ID', 'PredictedValue',]]
+    slp_df = best_lineup_df[['ID', 'PredictedValue']]
     slp_df.to_csv(save_line_predictions, index=False, header=False)
 
     formation_str = '-'.join(str(item) for item in best_formation)  # Convert formation to string
