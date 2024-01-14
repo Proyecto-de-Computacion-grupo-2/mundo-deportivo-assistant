@@ -104,6 +104,10 @@ def id_name_mapping(entity, typ):
         return None
 
 
+# def pred_to_alignment():
+
+
+
 def custom_colours():
     return {
         "BACKGROUND": "#D9D9D9",
@@ -163,7 +167,7 @@ def create_image(alignment_file, save_file, bot_not, back_height, back_width):
 
         af = int(lines[0])
 
-        ad = [line.strip() + ".png" for line in lines[1:]]
+        ad = [line.strip() for line in lines[1:]]
         return af, ad
 
     background = Image.open(route.background_path).convert("RGBA")
@@ -171,12 +175,13 @@ def create_image(alignment_file, save_file, bot_not, back_height, back_width):
     player_positions = calculate_player_positions(alignment_format)
 
     draw = ImageDraw.Draw(background, "RGBA")
-
-    for player in alignment_data:
+    image_data = [id_name_mapping(int(row.split(", ")[0].strip()), "ID") + ", " + row.split(", ")[1].strip() for row in
+                  alignment_data]
+    for id_line in alignment_data:
         list_images = listdir(route.image_folder)
         image_path = None
         for _ in list_images:
-            if player in _:
+            if id_name_mapping(id_line.split(", ")[0], "ID") in _:
                 image_path = path.join(route.image_folder, _)
                 break
 
@@ -184,13 +189,13 @@ def create_image(alignment_file, save_file, bot_not, back_height, back_width):
         image = old_image.resize((400, 400), Resampling.LANCZOS)
         mask = image.split()[3]
 
-        background.paste(image, player_positions[alignment_data.index(player)], mask)
+        background.paste(image, player_positions[alignment_data.index(id_line)], mask)
 
-        player_name = image_path.split("img/")[-1].split(".png")[0].split("_")[-1]
+        player_name = image_data[alignment_data.index(id_line)]
 
         _, _, w, h = draw.textbbox((0, 0), player_name, font = route.font)
-        text_position = (player_positions[alignment_data.index(player)][0] + ((image.width - w) // 2),
-                         player_positions[alignment_data.index(player)][1] + (image.height + 30))
+        text_position = (player_positions[alignment_data.index(id_line)][0] + ((image.width - w) // 2),
+                         player_positions[alignment_data.index(id_line)][1] + (image.height + 30))
 
         draw.text(text_position, player_name, font = route.font, fill = "white")
 

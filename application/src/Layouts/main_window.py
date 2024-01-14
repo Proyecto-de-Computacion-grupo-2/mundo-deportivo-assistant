@@ -5,6 +5,7 @@
 
 #
 
+import application.src.Functions.main_predictions as main_p
 import Utils.helper as helper
 import Utils.routes as route
 
@@ -53,35 +54,72 @@ def tab_layout(dataframe):
 
 
 def test_tab(u):
+    def merger(input1, input2, output):
+        with open(input1, "r") as file1:
+            lines1 = file1.read().splitlines()
 
-    custom_theme = {
-        "BACKGROUND": "#D9D9D9",
-        "TEXT":       "#000000",
-        "INPUT":      "#ffffff",
-        "TEXT_INPUT": "#000000",
-        "SCROLL":     "#D9D9D9",
-        "BUTTON":     ("#000000", "#ffffff"),
-        "PROGRESS":   ("#01826B", "#D0D0D0"),
-        "BORDER":     1, "SLIDER_DEPTH": 0, "PROGRESS_DEPTH": 0
-    }
+        # Leer el contenido del segundo archivo
+        with open(input2, "r") as file2:
+            lines2 = file2.read().splitlines()
 
-    helper.pSG.theme_add_new("MyCustomTheme", custom_theme)
+        # Crear un diccionario para almacenar la información del segundo archivo
+        data_dict = {}
+        for line in lines2:
+            parts = line.split(",")
+            if len(parts) == 2:
+                key = int(parts[0])
+                value = int(float(parts[1]))
+                data_dict[key] = value
+
+        # Combina la información de ambos archivos
+        result = [lines1[0]]
+        for line1 in lines1[1:]:
+            key = line1
+            if int(key) in data_dict.keys():
+                result.append(f"{key}, {data_dict[int(key)]}")
+            else:
+                result.append(key)
+
+        with open(output, "w", newline = "") as csv_file:
+            csv_file.writelines(", ".join([row]) + "\n" for row in result)
+
+    helper.pSG.theme_add_new("MyCustomTheme", helper.custom_colours())
 
     helper.pSG.theme("MyCustomTheme")
 
     height, width = (((helper.pSG.Window.get_screen_size()[1] // 100) * 100) - 100), \
                     (((helper.pSG.Window.get_screen_size()[0] // 100) * 100) - 100)
-    # Definir el contenido de las pestañas
+
+    fantasy_lineups = [[4, 4, 2], [4, 5, 1], [4, 3, 3], [3, 4, 3], [3, 5, 2], [5, 4, 1], [5, 3, 2]]
+
+    main_p.best_lineup_my_team(fantasy_lineups, route.players_predictions_mundo_deportivo, "mundo_deportivo")
+    main_p.best_lineup_my_team(fantasy_lineups, route.players_predictions_sofascore, "sofascore")
+    main_p.best_lineup_market(fantasy_lineups, route.players_predictions_mundo_deportivo, "mundo_deportivo")
+    main_p.best_lineup_market(fantasy_lineups, route.players_predictions_sofascore, "sofascore")
+
+    merger_list = [[route.op_my_team_md, route.op_my_team_p_md, route.merge_my_team_md],
+                   [route.op_my_team_ss, route.op_my_team_p_ss, route.merge_my_team_ss],
+                   [route.op_market_md, route.op_market_p_md, route.merge_market_md],
+                   [route.op_market_ss, route.op_market_p_ss, route.merge_market_ss]]
+    for i in merger_list:
+        merger(i[0], i[1], i[2])
+
     helper.create_image(route.current_alignment, route.index_current_path + str(height) + str(width), True,
                         (width // 3), (height - 80))
-    helper.create_image(route.current_alignment, route.current_path + str(height) + str(width), True,
+    helper.create_image(route.merge_my_team_md, route.my_team_md_img + str(height) + str(width), True,
                         ((width // 2) - 100), (height - 100))
-    helper.create_image(route.future_alignment, route.recommendation_path + str(height) + str(width), True,
+    helper.create_image(route.merge_my_team_ss, route.my_team_ss_img + str(height) + str(width), True,
+                        ((width // 2) - 100), (height - 100))
+    helper.create_image(route.merge_market_md, route.market_md_img + str(height) + str(width), True,
+                        ((width // 2) - 100), (height - 100))
+    helper.create_image(route.merge_market_ss, route.market_ss_img + str(height) + str(width), True,
                         ((width // 2) - 100), (height - 100))
 
     index = route.index_current_path + str(height) + str(width) + ".png"
-    current = route.current_path + str(height) + str(width) + ".png"
-    recommendation = route.recommendation_path + str(height) + str(width) + ".png"
+    my_team_md = route.my_team_md_img + str(height) + str(width) + ".png"
+    market_md = route.my_team_ss_img + str(height) + str(width) + ".png"
+    my_team_ss = route.market_md_img + str(height) + str(width) + ".png"
+    market_ss = route.market_ss_img + str(height) + str(width) + ".png"
 
     team_df, team_list = read_personal_team(u)
     data = tab_layout(team_df)
@@ -104,11 +142,11 @@ def test_tab(u):
     tab2_layout = [[
             helper.pSG.Column([
                 [helper.pSG.Text("Personal Team Title")],
-                [helper.pSG.Image(filename = current, key = "personal_team_s")]
+                [helper.pSG.Image(filename = my_team_ss, key = "personal_team_s")]
             ], element_justification = "center", size = (width // 2, height), background_color = "green"),
             helper.pSG.Column([
                 [helper.pSG.Text("Market Team Title")],
-                [helper.pSG.Image(filename = recommendation, key = "market_team_s")]
+                [helper.pSG.Image(filename = market_ss, key = "market_team_s")]
             ], element_justification = "center", size = (width // 2, height), background_color = "red")
         ]
     ]
@@ -116,11 +154,11 @@ def test_tab(u):
     tab3_layout = [[
             helper.pSG.Column([
                 [helper.pSG.Text("Personal Team Title")],
-                [helper.pSG.Image(filename = current, key = "personal_team_m")]
+                [helper.pSG.Image(filename = my_team_md, key = "personal_team_m")]
             ], element_justification = "center", size = (width // 2, height), background_color = "red"),
             helper.pSG.Column([
                 [helper.pSG.Text("Market Team Title")],
-                [helper.pSG.Image(filename = recommendation, key = "market_team_m")]
+                [helper.pSG.Image(filename = market_md, key = "market_team_m")]
             ], element_justification = "center", size = (width // 2, height), background_color = "green")
         ]]
 

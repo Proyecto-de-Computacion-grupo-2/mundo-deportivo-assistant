@@ -41,7 +41,10 @@ football_folder = path.join(data_folder, "football")
 output_folder = path.join(data_folder, "output")
 sofascore_folder = path.join(data_folder, "sofascore")
 backup_folder = path.join(data_folder, "backup")
-image_folder = path.join(root_folder, "img")
+if "scrape" not in root_folder:
+    image_folder = path.join(root_folder, "img")
+else:
+    image_folder = path.abspath(path.join(root_folder, "..", "img"))
 all_folders = [aux_folder, league_folder, players_folder, football_folder, sofascore_folder]
 
 # Scrape file list.
@@ -60,6 +63,7 @@ players_market_temp_info_file_bak = path.join(players_folder, "fantasy-temp-mark
 players_game_week_stats_file = path.join(players_folder, "fantasy-games-week-players-stats.csv")
 standings_file = path.join(football_folder, "standings-la-liga.csv")
 sofascore_data = path.join(sofascore_folder, "data")
+players_s_route = path.join(sofascore_folder, "players-data-sofascore.csv")
 players_s_data = "players-data-sofascore.csv"
 git_lock_file = path.join(data_folder, ".git", "index.lock")
 git_log = path.join(data_folder, "git_log")
@@ -71,6 +75,19 @@ players_predictions_bert = path.join(players_predictions, "BERTGamesWeek")
 players_predictions_mundo_deportivo = path.join(players_predictions_bert, "predictions_mundo_deportivo.csv")
 values_folder = path.join(models_folder, "value", "predictions")
 plots_folder = path.join(values_folder, "plots")
+op_market_md = path.join(output_folder, "optimise_market_mundo_deportivo.csv")
+op_market_p_md = path.join(output_folder, "optimise_market_predictions_mundo_deportivo.csv")
+op_market_ss = path.join(output_folder, "optimise_market_sofascore.csv")
+op_market_p_ss = path.join(output_folder, "optimise_market_predictions_sofascore.csv")
+op_my_team_md = path.join(output_folder, "optimise_my_team_mundo_deportivo.csv")
+op_my_team_p_md = path.join(output_folder, "optimise_my_team_predictions_mundo_deportivo.csv")
+op_my_team_ss = path.join(output_folder, "optimise_my_team_sofascore.csv")
+op_my_team_p_ss = path.join(output_folder, "optimise_my_team_predictions_sofascore.csv")
+merge_market_md = path.join(files_folder, "future_market_md")
+merge_my_team_md = path.join(files_folder, "future_my_team_md")
+merge_market_ss = path.join(files_folder, "future_market_ss")
+merge_my_team_ss = path.join(files_folder, "future_my_team_ss")
+
 
 git_lock = Lock()
 
@@ -81,14 +98,9 @@ index_current_path = path.join(image_folder, "index_current")
 current_path = path.join(image_folder, "current")
 current_bot_path_png = path.join(image_folder, "current.png")
 current_bot_path_jpeg = path.join(image_folder, "current.jpeg")
-recommendation_path = path.join(image_folder, "recommendation")
-recommendation_bot_path_png = path.join(image_folder, "recommendation.png")
-recommendation_bot_path_jpeg = path.join(image_folder, "recommendation.jpeg")
 font = ImageFont.truetype(path.join(utils_folder, "DejaVuSerifCondensed-Italic.ttf"), 60)
 font_market = ImageFont.truetype(path.join(utils_folder, "DejaVuSerifCondensed-Italic.ttf"), 18)
-future_alignment = path.join(files_folder, "future_alignment")
 current_alignment = path.join(files_folder, "current_alignment")
-future_alignment_bak = path.join(backup_folder, "future_alignment_bak")
 current_alignment_bak = path.join(backup_folder, "current_alignment_bak")
 market = path.join(players_folder, "fantasy-players-in-market.csv")
 market_players = path.join(image_folder, "market_players.jpeg")
@@ -99,11 +111,11 @@ log_player = path.join(scrape_folder, "log_player")
 log_teams = path.join(scrape_folder, "log_teams")
 
 # Application folders.
-rec = path.join(image_folder, "recommendation.png")
 fantasy_logo = path.join(image_folder, "mister-fantasy-md-logo_mod.png")
 football_loading = path.join(image_folder, "football_loading.gif")
 app_personal_team_file = "fantasy-personal-team-data.csv"
 app_personal_market_file = "fantasy-market-data.csv"
-personal_team_file = path.join(users_folder, "uem.ua2c@gmail.com_fantasy-personal-team-data.csv") #This should not be hardcoded
-app_market_file = path.join(users_folder, "uem.ua2c@gmail.com_fantasy-market-data.csv") #This should not be hardcoded
-
+market_md_img = path.join(image_folder, "future_market_md")
+my_team_md_img = path.join(image_folder, "future_my_team_md")
+market_ss_img = path.join(image_folder, "future_market_ss")
+my_team_ss_img = path.join(image_folder, "future_my_team_ss")
