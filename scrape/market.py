@@ -14,12 +14,12 @@ logger = "Defined"
 
 # For debugging, this sets up a formatting for a logfile, and where it is.
 try:
-    if not helper.path.exists(route.scrape_folder + "market.log"):
-        helper.logging.basicConfig(filename = route.scrape_folder + "market.log", level = helper.logging.ERROR,
+    if not helper.path.exists(route.market_log):
+        helper.logging.basicConfig(filename = route.market.log, level = helper.logging.ERROR,
                                    format = "%(asctime)s %(levelname)s %(name)s %(message)s")
         logger = helper.logging.getLogger(__name__)
     else:
-        helper.logging.basicConfig(filename = route.scrape_folder + "market.log", level = helper.logging.ERROR,
+        helper.logging.basicConfig(filename = route.market.log, level = helper.logging.ERROR,
                                    format = "%(asctime)s %(levelname)s %(name)s %(message)s")
         logger = helper.logging.getLogger(__name__)
 except Exception as error:
@@ -64,16 +64,14 @@ def scrape_personal_lineup_fantasy():
     whole_lineup = team_players_lineup.find_elements(helper.By.TAG_NAME, "button")
     whole_lineup_id = [i.get_attribute("data-id_player") for i in whole_lineup if
                        i.get_attribute("data-id_player") is not None if i.get_attribute("data-id_player").isdigit()]
-    list_images = helper.listdir(route.image_folder)
-    whole_lineup_name = []
-    for i in whole_lineup_id:
-        for _ in list_images:
-            if i == _.split("_")[0]:
-                whole_lineup_name.append(_.split(".png")[0].split("_")[-1])
 
-    current = [[formation]] + [[i] for i in whole_lineup_name]
+    whole_lineup_points = [_.find_element(helper.By.CLASS_NAME, "points").get_attribute("data-points") for _ in
+                           whole_lineup if "slot" in _.get_attribute("id")]
 
-    helper.write_to_csv(route.personal_lineup_file, False, current, "w")
+    current = [[formation]] + [[i + ", " + j] for i, j in zip(whole_lineup_id, whole_lineup_points)]
+
+    with open(route.personal_lineup_file, "w", newline = "") as csv_file:
+        csv_file.writelines(", ".join(row) + "\n" for row in current)
     driver.quit()
 
 

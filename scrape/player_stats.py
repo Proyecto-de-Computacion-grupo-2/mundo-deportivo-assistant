@@ -63,14 +63,12 @@ logger = "Defined"
 
 # For debugging, this sets up a formatting for a logfile, and where it is.
 try:
-    if not helper.path.exists(route.scrape_folder + "player_stats.log"):
-        helper.logging.basicConfig(filename = route.scrape_folder + "player_stats.log",
-                                   level = helper.logging.ERROR,
+    if not helper.path.exists(route.player_log):
+        helper.logging.basicConfig(filename = route.player_log, level = helper.logging.ERROR,
                                    format = "%(asctime)s %(levelname)s %(name)s %(message)s")
         logger = helper.logging.getLogger(__name__)
     else:
-        helper.logging.basicConfig(filename = route.scrape_folder + "player_stats.log",
-                                   level = helper.logging.ERROR,
+        helper.logging.basicConfig(filename = route.player_log, level = helper.logging.ERROR,
                                    format = "%(asctime)s %(levelname)s %(name)s %(message)s")
         logger = helper.logging.getLogger(__name__)
 except Exception as error:
@@ -96,7 +94,7 @@ def scrape_fantasy_players_meta_data(driver, u):
     player_image = driver.find_element(helper.By.CSS_SELECTOR, ".player-pic img").get_attribute("src").split("?version")
     response = helper.requests.get(player_image[0])
     data_id = u.split("/")[-2]
-    img_file = route.image_folder + data_id + "_" + player_complete_name + ".png"
+    img_file = helper.path.join(route.image_folder, data_id + "_" + player_complete_name + ".png")
     helper.makedirs(helper.path.dirname(img_file), exist_ok = True)
     with open(img_file, "wb") as img:
         img.write(response.content)

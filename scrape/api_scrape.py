@@ -14,12 +14,12 @@ logger = "Defined"
 
 # For debugging, this sets up a formatting for a logfile, and where it is.
 try:
-    if not helper.path.exists(route.scrape_folder + "api_scrape.log"):
-        helper.logging.basicConfig(filename = route.scrape_folder + "api_scrape.log", level = helper.logging.ERROR,
+    if not helper.path.exists(route.api_log):
+        helper.logging.basicConfig(filename = route.api_log, level = helper.logging.ERROR,
                                    format = "%(asctime)s %(levelname)s %(name)s %(message)s")
         logger = helper.logging.getLogger(__name__)
     else:
-        helper.logging.basicConfig(filename = route.scrape_folder + "api_scrape.log", level = helper.logging.ERROR,
+        helper.logging.basicConfig(filename = route.api_log, level = helper.logging.ERROR,
                                    format = "%(asctime)s %(levelname)s %(name)s %(message)s")
         logger = helper.logging.getLogger(__name__)
 except Exception as error:
@@ -217,7 +217,7 @@ if __name__ == "__main__":
             pass
     call_sofascore_instructions(23)
     try:
-        helper.remove(route.players_s_data)
+        helper.remove(route.players_s_route)
     except FileNotFoundError:
         pass
     consolidate_all_csv()

@@ -11,43 +11,49 @@ import Utils.routes as route
 
 
 def filter_df(archivo_csv, lista):
-    # Lee el CSV completo en un DataFrame
     df = helper.pandas.read_csv(archivo_csv)
 
-    # Filtra el DataFrame basado en la lista proporcionada
     filtered = df[df.iloc[:, 0].isin(lista)]
 
     return filtered
 
 
 def read_personal_team(nombre_archivo):
-    # Lee el CSV usando pandas y devuelve un DataFrame
     try:
-        df = helper.pandas.read_csv(helper.path.join(route.users_folder, nombre_archivo + "_" +
-                                                     route.app_personal_team_file))
+        df = []
+        for i in [route.app_personal_team_file, route.app_personal_market_file]:
+            df.append(helper.pandas.read_csv(helper.path.join(route.users_folder, nombre_archivo + "_" + i)))
 
         with open(helper.path.join(route.users_folder,
                                    nombre_archivo + "_" + route.app_personal_team_file), "r") as file:
             reader = helper.csv.reader(file)
             list_id = [fila[0] for fila in reader]
-        return df, list_id
+        return df[0], df[1], list_id
     except Exception as e:
         helper.pSG.popup_error(f"Error al leer el archivo CSV: {e}")
         return None, None
 
 
-def tab_layout(dataframe):
+def tab_layout(dataframe, typ):
     datos = []
 
     if dataframe is not None:
-        # Agrega la cabecera del CSV como etiquetas de texto
-        encabezado = [col for col in dataframe.columns]
-        datos.append(encabezado)
+        if typ == "team":
+            datos.append([dataframe.columns[0], dataframe.columns[1], dataframe.columns[2], dataframe.columns[3],
+                          dataframe.columns[5], dataframe.columns[6]])
+        elif typ == "market":
+            datos.append([dataframe.columns[0], dataframe.columns[1], dataframe.columns[2], dataframe.columns[3],
+                          dataframe.columns[4], dataframe.columns[6], dataframe.columns[7], dataframe.columns[8]])
 
-        # Agrega una lista de Listbox para cada fila de datos
         for _, row in dataframe.iterrows():
-            fila = [row["ID"], row["Name"], row["Market value"], row["Average value"],
-                    row["Ante penultimate match score"], row["Penultimate match score"], row["Last match score"]]
+            fila = None
+            if typ == "team":
+                fila = [row["ID"], row["Name"], row["Market value"], row["Average value"],
+                        row["Penultimate match score"], row["Last match score"]]
+            elif typ == "market":
+                fila = [row["ID"], row["Points"], row["Full name"], row["Market value"],
+                        row["Average value"], row["Penultimate match score"], row["Last match score"],
+                        row["Attempt to buy"]]
             datos.append(fila)
 
     return datos
@@ -87,33 +93,20 @@ def test_tab(u):
 
     helper.pSG.theme("MyCustomTheme")
 
-    height, width = (((helper.pSG.Window.get_screen_size()[1] // 100) * 100) - 100), \
-                    (((helper.pSG.Window.get_screen_size()[0] // 100) * 100) - 100)
+    height, width = (((helper.pSG.Window.get_screen_size()[1] // 100) * 100) - 50), \
+                    (((helper.pSG.Window.get_screen_size()[0] // 100) * 100) - 50)
 
     fantasy_lineups = [[4, 4, 2], [4, 5, 1], [4, 3, 3], [3, 4, 3], [3, 5, 2], [5, 4, 1], [5, 3, 2]]
 
-    main_p.best_lineup_my_team(fantasy_lineups, route.players_predictions_mundo_deportivo, "mundo_deportivo")
-    main_p.best_lineup_my_team(fantasy_lineups, route.players_predictions_sofascore, "sofascore")
-    main_p.best_lineup_market(fantasy_lineups, route.players_predictions_mundo_deportivo, "mundo_deportivo")
-    main_p.best_lineup_market(fantasy_lineups, route.players_predictions_sofascore, "sofascore")
+    # main_p.best_lineup_my_team(u, fantasy_lineups, route.players_predictions_mundo_deportivo, "mundo_deportivo")
+    # main_p.best_lineup_my_team(u, fantasy_lineups, route.players_predictions_sofascore, "sofascore")
+    # main_p.best_lineup_market(u, fantasy_lineups, route.players_predictions_mundo_deportivo, "mundo_deportivo")
+    # main_p.best_lineup_market(u, fantasy_lineups, route.players_predictions_sofascore, "sofascore")
 
     merger_list = [[route.op_my_team_md, route.op_my_team_p_md, route.merge_my_team_md],
                    [route.op_my_team_ss, route.op_my_team_p_ss, route.merge_my_team_ss],
                    [route.op_market_md, route.op_market_p_md, route.merge_market_md],
                    [route.op_market_ss, route.op_market_p_ss, route.merge_market_ss]]
-    for i in merger_list:
-        merger(i[0], i[1], i[2])
-
-    helper.create_image(route.current_alignment, route.index_current_path + str(height) + str(width), True,
-                        (width // 3), (height - 80))
-    helper.create_image(route.merge_my_team_md, route.my_team_md_img + str(height) + str(width), True,
-                        ((width // 2) - 100), (height - 100))
-    helper.create_image(route.merge_my_team_ss, route.my_team_ss_img + str(height) + str(width), True,
-                        ((width // 2) - 100), (height - 100))
-    helper.create_image(route.merge_market_md, route.market_md_img + str(height) + str(width), True,
-                        ((width // 2) - 100), (height - 100))
-    helper.create_image(route.merge_market_ss, route.market_ss_img + str(height) + str(width), True,
-                        ((width // 2) - 100), (height - 100))
 
     index = route.index_current_path + str(height) + str(width) + ".png"
     my_team_md = route.my_team_md_img + str(height) + str(width) + ".png"
@@ -121,49 +114,68 @@ def test_tab(u):
     my_team_ss = route.market_md_img + str(height) + str(width) + ".png"
     market_ss = route.market_ss_img + str(height) + str(width) + ".png"
 
-    team_df, team_list = read_personal_team(u)
-    data = tab_layout(team_df)
+    for i in merger_list:
+        merger(i[0], i[1], i[2])
+
+    o_list = [route.merge_my_team_md, route.merge_market_md, route.merge_my_team_ss,
+              route.merge_market_ss]
+    i_list = [my_team_md, market_md, my_team_ss, market_ss]
+
+    helper.create_image(route.current_alignment, index.split(".png")[0], True, (width // 3), (height - 80))
+
+    for i in i_list:
+        helper.create_image(o_list[i_list.index(i)], i.split(".png")[0], True, (width // 2), (height - 80))
+
+    team_df, market_df, team_list = read_personal_team(u)
+    data_team = tab_layout(team_df, "team")
+    data_market = tab_layout(market_df, "market")
 
     tab1_layout = [
         [
             helper.pSG.Column([
                 [helper.pSG.Image(filename = index, key = "personal_team")]
             ], element_justification = "center", size = ((width // 3), height)),
-            helper.pSG.Column([[helper.pSG.Table(values = data[1:], auto_size_columns = True, headings = data[0],
-                                                 display_row_numbers = False, justification = "center",
-                                                 num_rows = min(25, len(data) - 1), enable_events = True,
-                                                 expand_x = True, expand_y = False, enable_click_events = True,
-                                                 alternating_row_color = "red", selected_row_colors = "green on black",
-                                                 key = "-TABLE-")]],
-                              element_justification = "center", size = (2 * (width // 3), height)),
+            helper.pSG.Column([[helper.pSG.Table(values = data_team[1:], auto_size_columns = True,
+                                                 headings = data_team[0], display_row_numbers = False,
+                                                 justification = "center", num_rows = min(25, len(data_team) - 1),
+                                                 enable_events = True, expand_x = True, expand_y = False,
+                                                 enable_click_events = True, alternating_row_color = "green",
+                                                 selected_row_colors = "green on black", key = "-TABLE1-")],
+                               [helper.pSG.Image(filename = None, key = "team_values")]],
+                              element_justification = "left", size = (2 * (width // 3), height))
         ]
     ]
 
     tab2_layout = [[
             helper.pSG.Column([
-                [helper.pSG.Text("Personal Team Title")],
+                [helper.pSG.Text("Predicción de equipo con jugadores en plantilla.")],
                 [helper.pSG.Image(filename = my_team_ss, key = "personal_team_s")]
-            ], element_justification = "center", size = (width // 2, height), background_color = "green"),
+            ], element_justification = "center", size = (width // 2, height)),
             helper.pSG.Column([
-                [helper.pSG.Text("Market Team Title")],
+                [helper.pSG.Text("Predicción de equipo con jugadores en plantilla y jugadores de mercado.")],
                 [helper.pSG.Image(filename = market_ss, key = "market_team_s")]
-            ], element_justification = "center", size = (width // 2, height), background_color = "red")
+            ], element_justification = "center", size = (width // 2, height))
         ]
     ]
 
     tab3_layout = [[
             helper.pSG.Column([
-                [helper.pSG.Text("Personal Team Title")],
+                [helper.pSG.Text("Predicción de equipo con jugadores en plantilla")],
                 [helper.pSG.Image(filename = my_team_md, key = "personal_team_m")]
-            ], element_justification = "center", size = (width // 2, height), background_color = "red"),
+            ], element_justification = "center", size = (width // 2, height)),
             helper.pSG.Column([
-                [helper.pSG.Text("Market Team Title")],
+                [helper.pSG.Text("Predicción de equipo con jugadores en plantilla y jugadores de mercado.")],
                 [helper.pSG.Image(filename = market_md, key = "market_team_m")]
-            ], element_justification = "center", size = (width // 2, height), background_color = "green")
+            ], element_justification = "center", size = (width // 2, height))
         ]]
 
     tab4_layout = [
-        [helper.pSG.Text("Contenido inicial de la pestaña 4", key = "tab4_text")],
+        [helper.pSG.Table(values = data_market[1:], auto_size_columns = True, headings = data_market[0],
+                          display_row_numbers = False, justification = "center",
+                          num_rows = min(25, len(data_market) - 1), enable_events = True, expand_x = True,
+                          expand_y = False, enable_click_events = True, alternating_row_color = "green",
+                          selected_row_colors = "green on black", key = "-TABLE2-")],
+        [helper.pSG.Image(filename = None, key = "market_values")]
     ]
 
     # Diseño principal con pestañas
@@ -179,7 +191,7 @@ def test_tab(u):
         [helper.pSG.Button("Salir")]
     ]
 
-    window = helper.pSG.Window("Ejemplo de Pestañas en PySimpleGUI", layout, background_color = "yellow",
+    window = helper.pSG.Window("Ejemplo de Pestañas en PySimpleGUI", layout,
                                location = (10, 10), size = (width, height))
 
-    return window, data
+    return window, data_team, data_market, width

@@ -109,7 +109,7 @@ def custom_login(user, pwd):
 
 
 login = helper.login_window.login()
-c, chosen_gif, event, incorrect, mostrar_password, u = None, None, "pass", True, False, None
+c, chosen_gif, event, incorrect, mostrar_password, u = None, None, "Aceptar", True, False, None
 
 while event != "Aceptar" and event != helper.WIN_CLOSED:
     if event == "inc":
@@ -128,7 +128,7 @@ while event != "Aceptar" and event != helper.WIN_CLOSED:
             c = values["pass"]
             login.close()
             helper.pSG.popup_no_buttons("Checking credentials and downloading data...please be patient...",
-                                        auto_close = True, auto_close_duration = 2)
+                                        auto_close = True, auto_close_duration = 4)
             incorrect = custom_login(u, c)
             if not incorrect:
                 event = "Aceptar"
@@ -141,7 +141,7 @@ while event != "Aceptar" and event != helper.WIN_CLOSED:
                 login["pass"].set_focus()
 
 u = "uem.ua2c@gmail.com"
-window, datos = helper.main_window.test_tab(u)
+window, datos_team, datos_market, w = helper.main_window.test_tab(u)
 
 # Bucle principal
 k = 0
@@ -149,17 +149,22 @@ while True:
     event, values = window.read()
     if event == helper.pSG.WIN_CLOSED or event == 'Salir':
         break
-    elif event == '-TABS-':
-        # Obtener el nombre de la pestaña activa
-        active_tab = values['-TABS-']
-        # Actualizar el contenido de la pestaña activa
-        if all(active_tab != ext for ext in ["tab1", "tab2", "tab3"]):
-            window[f'{active_tab}_text'].update(value = window[f'{active_tab}_text'].get() + str(k))
-    elif "+CLICKED+" in event:
+    elif "+CLICKED+" in event and "-TABLE1-" in event:
         if not any(ext in event[2] for ext in [-1, None]):
-            helper.pSG.popup(f"ID seleccionado: {datos[(event[2][0] + 1)][0]}")
-            helper.pSG.popup_no_buttons(image = helper.path.join(route.plots_folder, str(datos[(event[2][0] + 1)][0]) +
-                                                                 "_market_value_prediction_plot.png"))
+            new_size = (2 * (w // 3)) - 50
+            img = helper.Image.open(helper.path.join(route.plots_folder, str(datos_market[(event[2][0] + 1)][0]) +
+                                                     "_market_value_prediction_plot.png"))
+            cur_width, cur_height = img.size
+            scale = min((new_size / cur_height), (new_size / cur_width))
+            img = img.resize((int(cur_width * scale), int(cur_height * scale)), helper.Resampling.LANCZOS)
+            bio = helper.io.BytesIO()
+            img.save(helper.path.join(route.temp_img_show), format = "PNG")
+            window["team_values"].update(filename = helper.path.join(route.temp_img_show))
+    elif "+CLICKED+" in event and "-TABLE2-" in event:
+        if not any(ext in event[2] for ext in [-1, None]):
+            window["market_values"].update(filename = helper.path.join(route.plots_folder,
+                                                                       str(datos_market[(event[2][0] + 1)][0]) +
+                                                                       "_market_value_prediction_plot.png"))
 
     k += 1
 window.close()

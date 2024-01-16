@@ -136,8 +136,8 @@ def create_image(alignment_file, save_file, bot_not, back_height, back_width):
             raise ValueError(f"Unsupported future_alignment: {al}")
 
         for i, num in enumerate(rows):
-            total_width = (2650 // (num + 1))
-            x_positions.extend([((total_width * (j + 1)) - 10) for j in range(num)])
+            total_width = (3250 // (num + 1))
+            x_positions.extend([((total_width * (j + 1)) - 310) for j in range(num)])
 
         for row in range(len(rows)):
             current_row_positions = []
@@ -326,7 +326,7 @@ def login_fantasy_mundo_deportivo():
     # driver = webdriver.Chrome(options = chrome_options)
 
     firefox_options = webdriver.FirefoxOptions()
-    # firefox_options.add_argument("--headless")
+    firefox_options.add_argument("--headless")
     driver = webdriver.Firefox(options = firefox_options)
 
     driver.set_page_load_timeout(30)

@@ -55,7 +55,7 @@ def delete_impossible_formations(df_team_predictions, fantasy_l):
         return 0
     # available_lineups now contains all the lineups you can create with the current players.
     else:
-        print("Available Lineups:", available_lineups)
+        # print("Available Lineups:", available_lineups)
         return available_lineups
 
 
@@ -67,12 +67,12 @@ def optimise_lineup_greedy(df, lineups):
     best_formation = None
 
     for lineup in lineups:
-        gk = df_sorted[df_sorted["Position"] == 0].head(1)
-        defs = df_sorted[df_sorted["Position"] == 1].head(lineup[0])
-        mids = df_sorted[df_sorted["Position"] == 2].head(lineup[1])
         fwds = df_sorted[df_sorted["Position"] == 3].head(lineup[2])
+        mids = df_sorted[df_sorted["Position"] == 2].head(lineup[1])
+        defs = df_sorted[df_sorted["Position"] == 1].head(lineup[0])
+        gk = df_sorted[df_sorted["Position"] == 0].head(1)
 
-        current_lineup = helper.pandas.concat([gk, defs, mids, fwds])
+        current_lineup = helper.pandas.concat([fwds, mids, defs, gk])
         total_value = current_lineup["PredictedValue"].sum()
 
         if total_value > best_value:
@@ -83,10 +83,11 @@ def optimise_lineup_greedy(df, lineups):
     return best_lineup, best_formation
 
 
-def best_lineup_my_team(fantasy_l, predictions, filename):
+def best_lineup_my_team(user, fantasy_l, predictions, filename):
     final_save = []
     # Create new CSV with my team joined to predictions.
-    df_team_predictions = merge_csv_by_id(route.personal_team_file, predictions)
+    df_team_predictions = merge_csv_by_id(helper.path.join(route.users_folder, user + "_" +
+                                                           route.app_personal_team_file), predictions)
 
     available_lineups = delete_impossible_formations(df_team_predictions, fantasy_l)
 
@@ -111,13 +112,15 @@ def best_lineup_my_team(fantasy_l, predictions, filename):
     final_save_df.to_csv(save_line_up, index = False, header = False)
 
 
-def create_df_team_market_players(predictions):
+def create_df_team_market_players(user, predictions):
     # Create new DF with my team and predictions joined.
-    df_team_predictions_complete = merge_csv_by_id(route.personal_team_file,  predictions)
+    df_team_predictions_complete = merge_csv_by_id(helper.path.join(route.users_folder, user + "_" +
+                                                                    route.app_personal_team_file), predictions)
     df_team_predictions = df_team_predictions_complete[["ID", "Position", "PredictedValue", "GameWeek"]]
 
     # Create new DF with market and predictions joined.
-    df_market_predictions_complete = merge_csv_by_id(route.app_market_file,  predictions)
+    df_market_predictions_complete = merge_csv_by_id(helper.path.join(route.users_folder, user + "_" +
+                                                                      route.app_personal_market_file), predictions)
     df_market_predictions = df_market_predictions_complete[["ID", "Position", "PredictedValue", "GameWeek"]]
 
     df_market_team_players = helper.pandas.DataFrame(columns = df_team_predictions.columns)
@@ -134,14 +137,14 @@ def create_df_team_market_players(predictions):
     return df_market_team_players
 
 
-def best_lineup_market(fantasy_l, predictions, filename):
+def best_lineup_market(user, fantasy_l, predictions, filename):
     final_save = []
 
-    df_market_team_players = create_df_team_market_players(predictions)
+    df_market_team_players = create_df_team_market_players(user, predictions)
     available_lineups = delete_impossible_formations(df_market_team_players, fantasy_l)
 
     best_lineup_df, best_formation = optimise_lineup_greedy(df_market_team_players, available_lineups)
-    best_formation[0], best_formation[-1] = best_formation[-1], best_formation[0]
+    # best_formation[0], best_formation[-1] = best_formation[-1], best_formation[0]
 
     save_line_up = helper.path.join(route.output_folder, "optimise_market_" + filename)
     # Save predictions to another file for later use

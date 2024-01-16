@@ -14,17 +14,17 @@ from bs4 import BeautifulSoup
 logger = "Defined"
 
 # For debugging, this sets up a formatting for a logfile, and where it is.
-# try:
-#     if not helper.path.exists(route.scrape_folder + "fantasy_teams.log"):
-#         helper.logging.basicConfig(filename = route.scrape_folder + "fantasy_teams.log", level = helper.logging.ERROR,
-#                                    format = "%(asctime)s %(levelname)s %(name)s %(message)s")
-#         logger = helper.logging.getLogger(__name__)
-#     else:
-#         helper.logging.basicConfig(filename = route.scrape_folder + "fantasy_teams.log", level = helper.logging.ERROR,
-#                                    format = "%(asctime)s %(levelname)s %(name)s %(message)s")
-#         logger = helper.logging.getLogger(__name__)
-# except Exception as error:
-#     logger.exception(error)
+try:
+    if not helper.path.exists(route.teams_log):
+        helper.logging.basicConfig(filename = route.teams_log, level = helper.logging.ERROR,
+                                   format = "%(asctime)s %(levelname)s %(name)s %(message)s")
+        logger = helper.logging.getLogger(__name__)
+    else:
+        helper.logging.basicConfig(filename = route.teams_log, level = helper.logging.ERROR,
+                                   format = "%(asctime)s %(levelname)s %(name)s %(message)s")
+        logger = helper.logging.getLogger(__name__)
+except Exception as error:
+    logger.exception(error)
 
 
 def scrape_all_players_fantasy():
@@ -197,7 +197,7 @@ def scrape_teams_information():
 
 
 if __name__ == "__main__":
-    # scrape_all_players_fantasy()
+    scrape_all_players_fantasy()
     scrape_personal_team_fantasy()
     scrape_teams_information()
     helper.delete_profile()
