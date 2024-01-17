@@ -11,7 +11,6 @@ import Utils.routes as route
 # Gameweek headers.
 players_meta_data_header = ["ID", "Player full name", "Position", "Current Value", "Points", "Average", "Matches",
                             "Goals", "Cards", "Time Stamp"]
-fix_format_header = ["ID", "Name", "Value", "Date"]
 spanish_map_list = ["id", "player full name", "posición", "game week", "equipo", "contrincante", "mixto", "as score",
                     "marca score", "mundo deportivo score", "sofa score", "valor actual", "puntos", "media", "partidos",
                     "goles metadata", "tarjetas", "pases totales", "pases precisos", "balones en largo totales",
@@ -55,8 +54,7 @@ english_list = ["ID", "Player full name", "Position", "Game Week", "Team", "Oppo
                 "Expected Goals", "Key Passes", "Expected Assists", "Average Season 15/16", "Average Season 16/17",
                 "Average Season 17/18", "Average Season 18/19", "Average Season 19/20", "Average Season 20/21",
                 "Average Season 21/22", "Average Season 22/23", "Average Season 23/24", "Timestamp"]
-url_lock = helper.threading.Lock()
-lock = helper.threading.Lock()
+
 
 # So it didn't show any warning of variable may be undefined.
 logger = "Defined"
@@ -355,35 +353,6 @@ def process_urls(am, av, aw, header, url):
     driver.quit()
 
 
-def fix_format():
-    with lock:
-        csv1 = helper.pandas.read_csv(route.players_market_temp_info_file)
-        csv2 = helper.pandas.read_csv(route.players_market_temp_info_file_new)
-
-        # Combinar los DataFrames por la columna de nombres
-        merged_data = helper.pandas.merge(csv1, csv2, on = "Name", how = "outer")
-
-        # Rellenar los valores NaN con ceros
-        merged_data = merged_data.fillna(0)
-
-        # Guardar el resultado en un nuevo CSV
-        merged_data.to_csv(route.players_market_temp_info_file, index = False)
-        try:
-            with open(route.players_market_temp_info_file, "r", encoding = "utf-8") as f:
-                temp_file = helper.csv.reader(f)
-                temp_list = list(temp_file)
-                aux = []
-                for player in range(1, len(temp_list)):
-                    for value in range(1, (len(temp_list[player][1:]) + 1)):
-                        aux.append([temp_list[player][0], temp_list[player][1], temp_list[player][value],
-                                    temp_list[0][value]])
-            helper.copy_bak(route.players_market_temp_info_file, route.players_market_temp_info_file_bak)
-            helper.write_to_csv(route.players_market_info_file, fix_format_header, aux, "w")
-        except IndexError as err:
-            logger.exception(err)
-            pass
-
-
 def scrape_players_stats_fantasy():
     url_csv_file = helper.read_player_url()
     if helper.path.exists(route.timeout_file):
@@ -396,13 +365,13 @@ def scrape_players_stats_fantasy():
 
     if helper.path.exists(route.timeout_file):
         for i in helper.read_timeout_url():
-            process_urls(i[0], am, av, aw, header)
+            process_urls(am, av, aw, header, i[0])
     o_all_meta = sorted(am, key = lambda x: x[0])
     o_all_value = sorted(av, key = lambda x: x[0])
     o_all_week = sorted(aw, key = lambda x: (x[0][0], x[0][1:]))
     helper.write_to_csv(route.players_meta_data_file, players_meta_data_header, o_all_meta, "w")
     helper.write_to_csv(route.players_market_temp_info_file_new, header, o_all_value, "w")
-    fix_format()
+    helper.fix_format()
     helper.write_to_csv(route.players_game_week_stats_file, english_list, False, "w")
     for p in o_all_week:
         p.reverse()

@@ -69,26 +69,31 @@ def scrape_all_players_fantasy():
     driver.quit()
 
 
-def scrape_personal_team_fantasy():
-    driver = helper.login_fantasy_mundo_deportivo()
+def scrape_personal_team_fantasy(app: bool, driver, user):
+    if not app:
+        driver = helper.login_fantasy_mundo_deportivo()
 
-    driver.get("https://mister.mundodeportivo.com/team")
+    if driver is not None:
+        driver.get("https://mister.mundodeportivo.com/team")
 
-    team_players_table = driver.find_element(helper.By.CLASS_NAME, "player-list")
-    whole_team_id = helper.extract_player_id(team_players_table)
+        team_players_table = driver.find_element(helper.By.CLASS_NAME, "player-list")
+        whole_team_id = helper.extract_player_id(team_players_table)
 
-    # Select each player.
-    team_players_icons = team_players_table.find_elements(helper.By.CLASS_NAME, "icons")
-    team_players_info = team_players_table.find_elements(helper.By.CLASS_NAME, "info")
+        # Select each player.
+        team_players_icons = team_players_table.find_elements(helper.By.CLASS_NAME, "icons")
+        team_players_info = team_players_table.find_elements(helper.By.CLASS_NAME, "info")
 
-    #
-    players = helper.scrape_player_info(team_players_info, team_players_icons, whole_team_id)
+        players = helper.scrape_player_info(team_players_info, team_players_icons, whole_team_id)
 
-    # ------- Start process to save all the information in a CSV. --------
-    team_players_header = ["ID", "Name", "Market value", "Average value", "Ante penultimate match score",
-                           "Penultimate match score", "Last match score", "Position"]
-    helper.write_to_csv(route.personal_team_file, team_players_header, players, "w")
-    driver.quit()
+        # ------- Start process to save all the information in a CSV. --------
+        team_players_header = ["ID", "Name", "Market value", "Average value", "Ante penultimate match score",
+                               "Penultimate match score", "Last match score", "Position"]
+        if app:
+            helper.write_to_csv(helper.path.join(route.users_folder, user + "_" + route.app_personal_team_file),
+                                team_players_header, players, "w")
+        else:
+            helper.write_to_csv(route.personal_team_file, team_players_header, players, "w")
+            driver.quit()
 
 
 def scrape_teams_information():
@@ -198,7 +203,7 @@ def scrape_teams_information():
 
 if __name__ == "__main__":
     scrape_all_players_fantasy()
-    scrape_personal_team_fantasy()
+    scrape_personal_team_fantasy(False, None, None)
     scrape_teams_information()
     helper.delete_profile()
     for folder in route.all_folders:

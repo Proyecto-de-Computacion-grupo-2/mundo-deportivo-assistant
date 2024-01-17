@@ -15,40 +15,45 @@ logger = "Defined"
 # For debugging, this sets up a formatting for a logfile, and where it is.
 try:
     if not helper.path.exists(route.market_log):
-        helper.logging.basicConfig(filename = route.market.log, level = helper.logging.ERROR,
+        helper.logging.basicConfig(filename = route.market_log, level = helper.logging.ERROR,
                                    format = "%(asctime)s %(levelname)s %(name)s %(message)s")
         logger = helper.logging.getLogger(__name__)
     else:
-        helper.logging.basicConfig(filename = route.market.log, level = helper.logging.ERROR,
+        helper.logging.basicConfig(filename = route.market_log, level = helper.logging.ERROR,
                                    format = "%(asctime)s %(levelname)s %(name)s %(message)s")
         logger = helper.logging.getLogger(__name__)
 except Exception as error:
     logger.exception(error)
 
 
-def scrape_market_section_fantasy():
-    driver = helper.login_fantasy_mundo_deportivo()
+def scrape_market_section_fantasy(app: bool, driver, user):
+    if not app:
+        driver = helper.login_fantasy_mundo_deportivo()
 
-    # Select the markets section, wait ten seconds as it usually takes some time to load the page.
-    driver.get("https://mister.mundodeportivo.com/market")
+    if driver is not None:
+        # Select the markets section, wait ten seconds as it usually takes some time to load the page.
+        driver.get("https://mister.mundodeportivo.com/market")
 
-    # Get the players' data table.
-    market_players_table = driver.find_element(helper.By.ID, "list-on-sale")
-    whole_team_id = helper.extract_player_id(market_players_table)
+        # Get the players' data table.
+        market_players_table = driver.find_element(helper.By.ID, "list-on-sale")
+        whole_team_id = helper.extract_player_id(market_players_table)
 
-    # Select each player.
-    market_players_icons = market_players_table.find_elements(helper.By.CLASS_NAME, "icons")
-    market_players_info = market_players_table.find_elements(helper.By.CLASS_NAME, "player-row")
+        # Select each player.
+        market_players_icons = market_players_table.find_elements(helper.By.CLASS_NAME, "icons")
+        market_players_info = market_players_table.find_elements(helper.By.CLASS_NAME, "player-row")
 
-    #
-    players = helper.scrape_player_info(market_players_info, market_players_icons, whole_team_id)
+        players = helper.scrape_player_info(market_players_info, market_players_icons, whole_team_id)
 
-    # ------ Start process to save all the information in a CSV. ------
-    market_structure_header = ["ID", "Points", "Full name", "Market value", "Average value",
-                               "Ante penultimate match score", "Penultimate match score", "Last match score",
-                               "Attempt to buy"]
-    helper.write_to_csv(route.market_file, market_structure_header, players, "w")
-    driver.quit()
+        # ------ Start process to save all the information in a CSV. ------
+        market_structure_header = ["ID", "Points", "Full name", "Market value", "Average value",
+                                   "Ante penultimate match score", "Penultimate match score", "Last match score",
+                                   "Attempt to buy"]
+        if app:
+            helper.write_to_csv(helper.path.join(route.users_folder, user + "_" + route.app_personal_market_file),
+                                market_structure_header, players, "w")
+        else:
+            helper.write_to_csv(route.market_file, market_structure_header, players, "w")
+        driver.quit()
 
 
 def scrape_personal_lineup_fantasy():
@@ -76,7 +81,7 @@ def scrape_personal_lineup_fantasy():
 
 
 if __name__ == "__main__":
-    scrape_market_section_fantasy()
+    scrape_market_section_fantasy(False, None, None)
     scrape_personal_lineup_fantasy()
     helper.delete_profile()
     for folder in route.all_folders:

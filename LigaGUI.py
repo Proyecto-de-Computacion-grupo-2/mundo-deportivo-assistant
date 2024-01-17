@@ -8,6 +8,9 @@
 import Utils.helper as helper
 import Utils.routes as route
 
+from scrape.fantasy_teams import scrape_personal_team_fantasy
+from scrape.market import scrape_market_section_fantasy
+
 
 def custom_login(user, pwd):
     helper.makedirs(helper.path.dirname(route.root_folder + "temp_file"), exist_ok = True)
@@ -16,10 +19,9 @@ def custom_login(user, pwd):
     chrome_options.add_argument("--headless")
     driver = helper.webdriver.Chrome(options = chrome_options)
 
-
-    #firefox_options = helper.webdriver.FirefoxOptions()
-    #firefox_options.add_argument("--headless")
-    #driver = helper.webdriver.Firefox(options = firefox_options)
+    # firefox_options = helper.webdriver.FirefoxOptions()
+    # firefox_options.add_argument("--headless")
+    # driver = helper.webdriver.Firefox(options = firefox_options)
 
     driver.set_page_load_timeout(300)
 
@@ -63,45 +65,15 @@ def custom_login(user, pwd):
         driver.quit()
         return True
     else:
-        # Special wait to skip the first tutorial,
-        # when we start with a new account it will appear, so better to check it.
         helper.skip_button(driver, (helper.By.CLASS_NAME, "btn-tutorial-skip"))
 
         helper.sleep(helper.uniform(0.4, 0.8))
 
-        driver.get("https://mister.mundodeportivo.com/team")
+        scrape_personal_team_fantasy(True, driver, user)
 
-        team_players_table = driver.find_element(helper.By.CLASS_NAME, "player-list")
-        whole_team_id = helper.extract_player_id(team_players_table)
+        helper.sleep(helper.uniform(0.4, 0.8))
 
-        team_players_icons = team_players_table.find_elements(helper.By.CLASS_NAME, "icons")
-        team_players_info = team_players_table.find_elements(helper.By.CLASS_NAME, "info")
-
-        players = helper.scrape_player_info(team_players_info, team_players_icons, whole_team_id)
-
-        helper.write_to_csv(helper.path.join(route.users_folder, user + "_" + route.app_personal_team_file),
-                            ["ID", "Name", "Market value", "Average value", "Ante penultimate match score",
-                             "Penultimate match score", "Last match score", "Position"], players, "w")
-
-        driver.get("https://mister.mundodeportivo.com/market")
-
-        # Get the players' data table.
-        market_players_table = driver.find_element(helper.By.ID, "list-on-sale")
-        whole_team_id = helper.extract_player_id(market_players_table)
-
-        # Select each player.
-        market_players_icons = market_players_table.find_elements(helper.By.CLASS_NAME, "icons")
-        market_players_info = market_players_table.find_elements(helper.By.CLASS_NAME, "player-row")
-
-        #
-        players = helper.scrape_player_info(market_players_info, market_players_icons, whole_team_id)
-
-        # ------ Start process to save all the information in a CSV. ------
-        market_structure_header = ["ID", "Points", "Full name", "Market value", "Average value",
-                                   "Ante penultimate match score", "Penultimate match score", "Last match score",
-                                   "Attempt to buy", "Position"]
-        helper.write_to_csv(helper.path.join(route.users_folder, user + "_" + route.app_personal_market_file),
-                            market_structure_header, players, "w")
+        scrape_market_section_fantasy(True, driver, user)
 
         driver.quit()
 
@@ -109,7 +81,7 @@ def custom_login(user, pwd):
 
 
 login = helper.login_window.login()
-c, chosen_gif, event, incorrect, mostrar_password, u = None, None, "pass", True, False, None
+c, chosen_gif, event, incorrect, mostrar_password, u = None, None, "Aceptar", True, False, None
 
 while event != "Aceptar" and event != helper.WIN_CLOSED:
     if event == "inc":
@@ -154,11 +126,7 @@ while True:
             new_size = (2 * (w // 3)) - 50
             img = helper.Image.open(helper.path.join(route.plots_folder, str(datos_market[(event[2][0] + 1)][0]) +
                                                      "_market_value_prediction_plot.png"))
-            cur_width, cur_height = img.size
-            scale = min((new_size / cur_height), (new_size / cur_width))
-            img = img.resize((int(cur_width * scale), int(cur_height * scale)), helper.Resampling.LANCZOS)
-            bio = helper.io.BytesIO()
-            img.save(helper.path.join(route.temp_img_show), format = "PNG")
+            helper.image_resize(img, new_size, helper.path.join(route.temp_img_show))
             window["team_values"].update(filename = helper.path.join(route.temp_img_show))
     elif "+CLICKED+" in event and "-TABLE2-" in event:
         if not any(ext in event[2] for ext in [-1, None]):
