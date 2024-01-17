@@ -138,7 +138,7 @@ def test_tab(u):
             helper.pSG.Column([[helper.pSG.Table(values = data_team[1:], auto_size_columns = True,
                                                  headings = data_team[0], display_row_numbers = False,
                                                  justification = "center", num_rows = min(25, len(data_team) - 1),
-                                                 enable_events = True, expand_x = True, expand_y = False,
+                                                 enable_events = True, expand_x = True, expand_y = True,
                                                  enable_click_events = True, alternating_row_color = "green",
                                                  selected_row_colors = "green on black", key = "-TABLE1-")],
                                [helper.pSG.Image(filename = None, key = "team_values")]],
@@ -187,11 +187,9 @@ def test_tab(u):
                             key = "tab3")],
             [helper.pSG.Tab("Predicciones de valor jugadores de mercado", tab4_layout, element_justification = "center",
                             key = "tab4")]
-        ], enable_events = True, key = "-TABS-", size = (width, (height - 50)))],
-        [helper.pSG.Button("Salir")]
+        ], enable_events = True, key = "-TABS-", size = (width, (height - 50)))]
     ]
 
-    window = helper.pSG.Window("Ejemplo de Pestañas en PySimpleGUI", layout,
-                               location = (10, 10), size = (width, height))
+    window = helper.pSG.Window("UA2C", layout, location = (20, 20), size = (width, height))
 
     return window, data_team, data_market, width

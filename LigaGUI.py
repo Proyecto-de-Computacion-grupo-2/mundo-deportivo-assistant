@@ -13,7 +13,6 @@ from scrape.market import scrape_market_section_fantasy
 
 
 def custom_login(user, pwd):
-    helper.makedirs(helper.path.dirname(route.root_folder + "temp_file"), exist_ok = True)
 
     chrome_options = helper.webdriver.ChromeOptions()
     chrome_options.add_argument("--headless")
@@ -61,7 +60,18 @@ def custom_login(user, pwd):
     if submit_button:
         submit_button.click()
 
-    if email_input.get_attribute("class") == "error":
+    try:
+        failed_login = any(driver.find_element(helper.By.CLASS_NAME, ext) for ext in ["alert-box", "alert-red"])
+    except (helper.NoSuchElementException, helper.StaleElementReferenceException, helper.TimeoutException):
+        failed_login = None
+        pass
+    try:
+        inc = email_input.get_attribute("class")
+    except (helper.NoSuchElementException, helper.StaleElementReferenceException, helper.TimeoutException):
+        inc = None
+        pass
+
+    if (inc == "error") or failed_login is not None:
         driver.quit()
         return True
     else:
@@ -81,7 +91,7 @@ def custom_login(user, pwd):
 
 
 login = helper.login_window.login()
-c, chosen_gif, event, incorrect, mostrar_password, u = None, None, "Aceptar", True, False, None
+c, chosen_gif, event, incorrect, mostrar_password, u = None, None, "pass", True, False, None
 
 while event != "Aceptar" and event != helper.WIN_CLOSED:
     if event == "inc":
@@ -100,39 +110,52 @@ while event != "Aceptar" and event != helper.WIN_CLOSED:
             c = values["pass"]
             login.close()
             helper.pSG.popup_no_buttons("Checking credentials and downloading data...please be patient...",
-                                        auto_close = True, auto_close_duration = 4)
+                                        auto_close = True, auto_close_duration = 4, font = route.font_popup)
             incorrect = custom_login(u, c)
             if not incorrect:
                 event = "Aceptar"
             else:
-                helper.pSG.popup_no_buttons("Wrong credentials, try again.", auto_close = True, auto_close_duration = 2)
+                helper.pSG.popup_no_buttons("Wrong credentials, try again.", auto_close = True, auto_close_duration = 2,
+                                            font = route.font_popup)
         else:
             if values["user"] == "":
                 login["user"].set_focus()
             elif values["pass"] == "":
                 login["pass"].set_focus()
 
-u = "uem.ua2c@gmail.com"
-window, datos_team, datos_market, w = helper.main_window.test_tab(u)
+if u:
+    window, datos_team, datos_market, w = helper.main_window.test_tab(u)
 
-# Bucle principal
-k = 0
-while True:
-    event, values = window.read()
-    if event == helper.pSG.WIN_CLOSED or event == 'Salir':
-        break
-    elif "+CLICKED+" in event and "-TABLE1-" in event:
-        if not any(ext in event[2] for ext in [-1, None]):
-            new_size = (2 * (w // 3)) - 50
-            img = helper.Image.open(helper.path.join(route.plots_folder, str(datos_market[(event[2][0] + 1)][0]) +
-                                                     "_market_value_prediction_plot.png"))
-            helper.image_resize(img, new_size, helper.path.join(route.temp_img_show))
-            window["team_values"].update(filename = helper.path.join(route.temp_img_show))
-    elif "+CLICKED+" in event and "-TABLE2-" in event:
-        if not any(ext in event[2] for ext in [-1, None]):
-            window["market_values"].update(filename = helper.path.join(route.plots_folder,
-                                                                       str(datos_market[(event[2][0] + 1)][0]) +
-                                                                       "_market_value_prediction_plot.png"))
+    # Bucle principal
+    while event != helper.WIN_CLOSED:
+        event, values = window.read()
+        new_size = (2 * (w // 3)) - 50
+        if event != helper.WIN_CLOSED:
+            if "+CLICKED+" in event and "-TABLE1-" in event:
+                if not any(ext in event[2] for ext in [-1, None]):
+                    try:
+                        img = helper.Image.open(helper.path.join(route.plots_folder,
+                                                                 str(datos_team[(event[2][0] + 1)][0]) +
+                                                                 "_market_value_prediction_plot.png"))
+                        helper.image_resize(img, new_size, helper.path.join(route.temp_img_show))
+                        window["team_values"].update(filename = helper.path.join(route.temp_img_show))
+                    except FileNotFoundError:
+                        helper.pSG.popup_no_buttons("Player is very new to the League, "
+                                                    "no data is available yet for this player.",
+                                                    auto_close = True, auto_close_duration = 5, font = route.font_popup)
+                        pass
+            elif "+CLICKED+" in event and "-TABLE2-" in event:
+                if not any(ext in event[2] for ext in [-1, None]):
+                    try:
+                        img = helper.Image.open(helper.path.join(route.plots_folder,
+                                                                 str(datos_market[(event[2][0] + 1)][0]) +
+                                                                 "_market_value_prediction_plot.png"))
+                        helper.image_resize(img, new_size, helper.path.join(route.temp2_img_show))
+                        window["market_values"].update(filename = helper.path.join(route.temp2_img_show))
+                    except FileNotFoundError:
+                        helper.pSG.popup_no_buttons("Player is very new to the League, "
+                                                    "no data is available yet for this player.",
+                                                    auto_close = True, auto_close_duration = 5, font = route.font_popup)
+                        pass
 
-    k += 1
-window.close()
+    window.close()

@@ -9,7 +9,7 @@
 import Utils.routes as route
 
 import PySimpleGUI as pSG
-import asyncio, base64, csv, glob, hashlib, http.client, io, json, logging, math, pandas, platform, re, requests, shutil, sys, threading
+import asyncio, base64, csv, glob, hashlib, http.client, io, json, logging, math, pandas, re, requests, shutil, sys, threading
 
 from application.src.Layouts import login_window, main_window
 from datetime import datetime, timedelta
@@ -24,6 +24,7 @@ from selenium.common import ElementClickInterceptedException, NoSuchElementExcep
     TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
+from platform import system
 from time import sleep
 from telegram import Bot, error, Update
 from telegram.ext import Application, ApplicationBuilder, CallbackContext, CommandHandler, ContextTypes, filters,\
@@ -34,20 +35,17 @@ from telegram.ext import Application, ApplicationBuilder, CallbackContext, Comma
 logger = "Defined"
 
 # For debugging, this sets up a formatting for a logfile, and where it is.
-
-lorca = platform.system()
-if lorca != "Windows":
-    try:
-        if not path.exists(route.root_folder + "helper.log"):
-            logging.basicConfig(filename = route.root_folder + "helper.log", level = logging.ERROR,
-                                format = "%(asctime)s %(levelname)s %(name)s %(message)s")
-            logger = logging.getLogger(__name__)
-        else:
-            logging.basicConfig(filename = route.root_folder + "helper.log", level = logging.ERROR,
-                                format = "%(asctime)s %(levelname)s %(name)s %(message)s")
-            logger = logging.getLogger(__name__)
-    except Exception as error:
-        logger.exception(error)
+try:
+    if not path.exists(route.root_folder + "helper.log"):
+        logging.basicConfig(filename = route.root_folder + "helper.log", level = logging.ERROR,
+                            format = "%(asctime)s %(levelname)s %(name)s %(message)s")
+        logger = logging.getLogger(__name__)
+    else:
+        logging.basicConfig(filename = route.root_folder + "helper.log", level = logging.ERROR,
+                            format = "%(asctime)s %(levelname)s %(name)s %(message)s")
+        logger = logging.getLogger(__name__)
+except Exception as error:
+    logger.exception(error)
 
 
 def automated_commit(who: str):
@@ -102,10 +100,6 @@ def id_name_mapping(entity, typ):
     except Exception as e:
         print(f"Error: {e}")
         return None
-
-
-# def pred_to_alignment():
-
 
 
 def custom_colours():
@@ -212,6 +206,13 @@ def create_image(alignment_file, save_file, bot_not, back_height, back_width):
         background.save(save_file + ".jpeg", format = "JPEG")
 
     background.close()
+
+
+def image_resize(img, new, out):
+    cur_width, cur_height = img.size
+    scale = min((new / cur_height), (new / cur_width))
+    img = img.resize((int(cur_width * scale), int(cur_height * scale)), Resampling.LANCZOS)
+    img.save(out, format = "PNG")
 
 
 def wait_click(driv, selector, t):
@@ -324,9 +325,9 @@ def login_fantasy_mundo_deportivo():
     chrome_options = webdriver.ChromeOptions()
     driver = webdriver.Chrome(options = chrome_options)
 
-    #firefox_options = webdriver.FirefoxOptions()
-    #firefox_options.add_argument("--headless")
-    #driver = webdriver.Firefox(options = firefox_options)
+    # firefox_options = webdriver.FirefoxOptions()
+    # firefox_options.add_argument("--headless")
+    # driver = webdriver.Firefox(options = firefox_options)
 
     driver.set_page_load_timeout(30)
 

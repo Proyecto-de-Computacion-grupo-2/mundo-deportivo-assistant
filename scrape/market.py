@@ -47,7 +47,7 @@ def scrape_market_section_fantasy(app: bool, driver, user):
         # ------ Start process to save all the information in a CSV. ------
         market_structure_header = ["ID", "Points", "Full name", "Market value", "Average value",
                                    "Ante penultimate match score", "Penultimate match score", "Last match score",
-                                   "Attempt to buy"]
+                                   "Attempt to buy", "Position"]
         if app:
             helper.write_to_csv(helper.path.join(route.users_folder, user + "_" + route.app_personal_market_file),
                                 market_structure_header, players, "w")
