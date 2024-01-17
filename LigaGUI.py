@@ -109,7 +109,7 @@ def custom_login(user, pwd):
 
 
 login = helper.login_window.login()
-c, chosen_gif, event, incorrect, mostrar_password, u = None, None, "Aceptar", True, False, None
+c, chosen_gif, event, incorrect, mostrar_password, u = None, None, "pass", True, False, None
 
 while event != "Aceptar" and event != helper.WIN_CLOSED:
     if event == "inc":

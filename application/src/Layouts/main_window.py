@@ -98,10 +98,10 @@ def test_tab(u):
 
     fantasy_lineups = [[4, 4, 2], [4, 5, 1], [4, 3, 3], [3, 4, 3], [3, 5, 2], [5, 4, 1], [5, 3, 2]]
 
-    # main_p.best_lineup_my_team(u, fantasy_lineups, route.players_predictions_mundo_deportivo, "mundo_deportivo")
-    # main_p.best_lineup_my_team(u, fantasy_lineups, route.players_predictions_sofascore, "sofascore")
-    # main_p.best_lineup_market(u, fantasy_lineups, route.players_predictions_mundo_deportivo, "mundo_deportivo")
-    # main_p.best_lineup_market(u, fantasy_lineups, route.players_predictions_sofascore, "sofascore")
+    main_p.best_lineup_my_team(u, fantasy_lineups, route.players_predictions_mundo_deportivo, "mundo_deportivo")
+    main_p.best_lineup_my_team(u, fantasy_lineups, route.players_predictions_sofascore, "sofascore")
+    main_p.best_lineup_market(u, fantasy_lineups, route.players_predictions_mundo_deportivo, "mundo_deportivo")
+    main_p.best_lineup_market(u, fantasy_lineups, route.players_predictions_sofascore, "sofascore")
 
     merger_list = [[route.op_my_team_md, route.op_my_team_p_md, route.merge_my_team_md],
                    [route.op_my_team_ss, route.op_my_team_p_ss, route.merge_my_team_ss],

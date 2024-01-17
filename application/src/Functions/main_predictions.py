@@ -144,7 +144,7 @@ def best_lineup_market(user, fantasy_l, predictions, filename):
     available_lineups = delete_impossible_formations(df_market_team_players, fantasy_l)
 
     best_lineup_df, best_formation = optimise_lineup_greedy(df_market_team_players, available_lineups)
-    # best_formation[0], best_formation[-1] = best_formation[-1], best_formation[0]
+    best_formation[0], best_formation[-1] = best_formation[-1], best_formation[0]
 
     save_line_up = helper.path.join(route.output_folder, "optimise_market_" + filename)
     # Save predictions to another file for later use
