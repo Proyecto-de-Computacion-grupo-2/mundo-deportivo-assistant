@@ -321,13 +321,12 @@ def login_fantasy_mundo_deportivo():
     email_fantasy = c["email"]
     password_fantasy = c["password"]
 
-    # chrome_options = webdriver.ChromeOptions()
-    # chrome_options.add_argument("--headless")
-    # driver = webdriver.Chrome(options = chrome_options)
+    chrome_options = webdriver.ChromeOptions()
+    driver = webdriver.Chrome(options = chrome_options)
 
-    firefox_options = webdriver.FirefoxOptions()
-    firefox_options.add_argument("--headless")
-    driver = webdriver.Firefox(options = firefox_options)
+    #firefox_options = webdriver.FirefoxOptions()
+    #firefox_options.add_argument("--headless")
+    #driver = webdriver.Firefox(options = firefox_options)
 
     driver.set_page_load_timeout(30)
 

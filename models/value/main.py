@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib import ticker
 from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import mean_squared_error
 import itertools
@@ -22,7 +23,7 @@ def save_prediction(player_id, date, value):
     })
 
     # Define the file name
-    prediction_csv = "auxiliary/fantasy_market_value_prediction_unsorted.csv"
+    prediction_csv = "predictions/fantasy_market_value_prediction.csv"
 
     # Check if the file exists to decide whether to write header
     file_exists = os.path.exists(prediction_csv)
@@ -32,21 +33,9 @@ def save_prediction(player_id, date, value):
 
     print(f"Predictions appended to {prediction_csv}")
 
-def sort_prediction_by_id(prediction_file):
-    df = pd.read_csv(f"{prediction_file}")
-
-    # Sort the DataFrame by the 'ID' column
-    df_sorted = df.sort_values(by='ID')
-
-    # Optionally, reset the index if you want a new sequential index after sorting
-    df_sorted = df_sorted.reset_index(drop=True)
-
-    # If you want to save the sorted DataFrame to a new file
-    df_sorted.to_csv('predictions/fantasy_market_value_prediction_sorted.csv', index=False)
-
-
 def evaluate_arima_model(data, arima_order):
     try:
+        print(f"Evaluating ARIMA model with order {arima_order} on data:\n{data.head()}")
         model = ARIMA(data, order=arima_order)
         model_fit = model.fit()
         error = mean_squared_error(data, model_fit.fittedvalues)
@@ -54,7 +43,6 @@ def evaluate_arima_model(data, arima_order):
     except Exception as e:
         print(f"Error in model evaluation for order {arima_order}: {e}")
         return (arima_order, float("inf"))
-
 
 def plot_arima_predictions(data, order, player_id, forecast_days):
     try:
@@ -74,9 +62,14 @@ def plot_arima_predictions(data, order, player_id, forecast_days):
         #plt.plot(data, label='Actual Data', color='blue')
         #plt.plot(in_sample_pred, label='In-sample Prediction', alpha=0.7, color='green')
         plt.plot(forecast_index, forecast_values, label=f'{forecast_days}-day Forecast', alpha=0.7, color='orange')
-        plt.title(f'ARIMA Model Validation and {forecast_days}-day Forecast for {player_id}')
+        plt.title(f'Predición Arima para {player_id} en los siguientes {forecast_days} días')
         plt.xlabel('Date')
         plt.ylabel('Value')
+
+        # Format y-axis to avoid scientific notation
+        ax = plt.gca()
+        ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: '{:,.0f}'.format(x)))
+
         plt.legend()
         plt.savefig(f'predictions/plots/{player_id}_market_value_prediction_plot.png')
         plt.close()
@@ -85,7 +78,7 @@ def plot_arima_predictions(data, order, player_id, forecast_days):
         # Print the forecast values
         print(f"\n{forecast_days}-day Forecast for {player_id}:")
         for date, value in zip(forecast_index, forecast_values):
-            print(f"{date.date()}: {value}")
+            #print(f"{date.date()}: {value}")
             # Save players prediction to CSV file.
             save_prediction(player_id, date, value)
 
@@ -170,6 +163,12 @@ if __name__ == '__main__':
     # Convert column into a datetime format.
     df['Date'] = pd.to_datetime(df['Date'], dayfirst=True)
 
+    # Convert 'Value' column to numeric, setting non-numeric values to NaN
+    df['Value'] = pd.to_numeric(df['Value'], errors='coerce')
+
+    # Drop rows where 'Value' is NaN
+    df = df.dropna(subset=['Value'])
+
     # Set the column 'Date' as an index.
     # By setting the 'Date' column as the index, each row can be efficiently accessed or referenced by its date.
     df.set_index('Date', inplace=True)
@@ -243,6 +242,3 @@ if __name__ == '__main__':
     most_common_params = Counter(all_params).most_common(1)[0][0]
     print("\nMost Common ARIMA Parameters (Generic Model) for All Players:")
     print(f"P: {most_common_params[0]}, D: {most_common_params[1]}, Q: {most_common_params[2]}")
-
-    # Sort predictions CSV by ID.
-    sort_prediction_by_id('auxiliary/fantasy_market_value_prediction_unsorted.csv')
