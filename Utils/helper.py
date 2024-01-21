@@ -12,6 +12,7 @@ import PySimpleGUI as pSG
 import asyncio, base64, csv, glob, hashlib, http.client, io, json, logging, math, pandas, re, requests, shutil, sys, threading
 
 from application.src.Layouts import login_window, main_window
+from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from random import choice, uniform
 from os import chdir, getcwd, listdir, makedirs, path, remove, system
@@ -31,21 +32,22 @@ from telegram.ext import Application, ApplicationBuilder, CallbackContext, Comma
     JobQueue, InlineQueryHandler, MessageHandler, Updater
 
 
-# So it didn't show any warning of variable may be undefined.
-logger = "Defined"
-
 # For debugging, this sets up a formatting for a logfile, and where it is.
-try:
-    if not path.exists(route.root_folder + "helper.log"):
-        logging.basicConfig(filename = route.root_folder + "helper.log", level = logging.ERROR,
-                            format = "%(asctime)s %(levelname)s %(name)s %(message)s")
-        logger = logging.getLogger(__name__)
-    else:
-        logging.basicConfig(filename = route.root_folder + "helper.log", level = logging.ERROR,
-                            format = "%(asctime)s %(levelname)s %(name)s %(message)s")
-        logger = logging.getLogger(__name__)
-except Exception as error:
-    logger.exception(error)
+def define_logger(file):
+    logg = "Defined"
+    try:
+        if not path.exists(file):
+            logging.basicConfig(filename = file, level = logging.ERROR,
+                                format = "%(asctime)s %(levelname)s %(name)s %(message)s")
+            logg = logging.getLogger(__name__)
+        else:
+            logging.basicConfig(filename = file, level = logging.ERROR,
+                                format = "%(asctime)s %(levelname)s %(name)s %(message)s")
+            logg = logging.getLogger(__name__)
+        return logg
+    except Exception as err:
+        logg.exception(err)
+        return logg
 
 
 def automated_commit(who: str):
@@ -64,16 +66,6 @@ def automated_commit(who: str):
             gl.write("Commit: " + who + ", " + datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + "\n")
         if path.exists(route.git_lock_file):
             system("cd " + route.root_folder + "data/.git && rm index.lock")
-
-
-def delete_profile():
-    temp_f = path.join("/home", "221A5673Geronimo", "temp_folder")
-    for i in listdir(temp_f):
-        try:
-            shutil.rmtree(path.join(temp_f, i))
-        except FileNotFoundError as err:
-            logger.exception(err)
-            pass
 
 
 def extract():
@@ -127,7 +119,7 @@ def create_image(alignment_file, save_file, bot_not, back_height, back_width):
 
         rows = players_per_row.get(al)
         if rows is None:
-            raise ValueError(f"Unsupported future_alignment: {al}")
+            rows = players_per_row.get(int(str(al)[-1] + str(al)[1] + str(al)[0]))
 
         for i, num in enumerate(rows):
             total_width = (3250 // (num + 1))
@@ -208,11 +200,45 @@ def create_image(alignment_file, save_file, bot_not, back_height, back_width):
     background.close()
 
 
-def image_resize(img, new, out):
+def image_resize(img, new, typ, out):
     cur_width, cur_height = img.size
-    scale = min((new / cur_height), (new / cur_width))
+    if typ == 0:
+        scale = (new / cur_width)
+    else:
+        scale = (new / cur_height)
     img = img.resize((int(cur_width * scale), int(cur_height * scale)), Resampling.LANCZOS)
     img.save(out, format = "PNG")
+
+
+def fix_format():
+    with threading.Lock():
+        csv1 = pandas.read_csv(route.players_market_temp_info_file)
+        csv2 = pandas.read_csv(route.players_market_temp_info_file_new)
+
+        columns_to_add = [col for col in csv2.columns if col not in csv1.columns]
+
+        # Agregar las columnas faltantes al dataframe resultante
+        merged_data = pandas.merge(csv1, csv2[columns_to_add + ["Name"]], on = "Name", how = "outer").fillna(int(0))
+
+        merged_data = merged_data.drop_duplicates()
+
+        # Guardar el resultado en un nuevo CSV
+        merged_data.to_csv(route.players_market_temp_info_file, index = False)
+        try:
+            with open(route.players_market_temp_info_file, "r", encoding = "utf-8") as f:
+                temp_file = csv.reader(f)
+                temp_list = list(temp_file)
+                aux = []
+                for player in range(1, len(temp_list)):
+                    if temp_list[player][0] != "0":
+                        for value in range(2, (len(temp_list[player][1:]) + 1)):
+                            aux.append([temp_list[player][0], temp_list[player][1], str(int(temp_list[player][value])),
+                                        temp_list[0][value]])
+            copy_bak(route.players_market_temp_info_file, route.players_market_temp_info_file_bak)
+            write_to_csv(route.players_market_info_file, ["ID", "Name", "Value", "Date"], aux, "w")
+        except IndexError as err:
+            logger.exception(err)
+            pass
 
 
 def wait_click(driv, selector, t):
@@ -314,20 +340,19 @@ def scrape_player_info(t_p_i, t_p_ic, team_id):
 
 
 def login_fantasy_mundo_deportivo():
-    makedirs(path.dirname(route.root_folder + "temp_file"), exist_ok = True)
-    # with open(route.scrape_folder + "config.json", "r", encoding = "utf-8") as cf:
     with open("config.json", "r", encoding = "utf-8") as cf:
         c = json.load(cf)
 
     email_fantasy = c["email"]
     password_fantasy = c["password"]
 
-    chrome_options = webdriver.ChromeOptions()
-    driver = webdriver.Chrome(options = chrome_options)
+    # chrome_options = webdriver.ChromeOptions()
+    # chrome_options.add_argument("--headless")
+    # driver = webdriver.Chrome(options = chrome_options)
 
-    # firefox_options = webdriver.FirefoxOptions()
+    firefox_options = webdriver.FirefoxOptions()
     # firefox_options.add_argument("--headless")
-    # driver = webdriver.Firefox(options = firefox_options)
+    driver = webdriver.Firefox(options = firefox_options)
 
     driver.set_page_load_timeout(30)
 
@@ -402,3 +427,6 @@ def scrape_backup(folder, backup):
                 logger.exception(err)
         else:
             shutil.copy(original_path, back_path)
+
+
+logger = define_logger(route.helper_log)
