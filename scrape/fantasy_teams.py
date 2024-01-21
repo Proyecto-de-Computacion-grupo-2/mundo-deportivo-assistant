@@ -8,24 +8,6 @@
 import Utils.helper as helper
 import Utils.routes as route
 
-from bs4 import BeautifulSoup
-
-# So it didn't show any warning of variable may be undefined.
-logger = "Defined"
-
-# For debugging, this sets up a formatting for a logfile, and where it is.
-try:
-    if not helper.path.exists(route.teams_log):
-        helper.logging.basicConfig(filename = route.teams_log, level = helper.logging.ERROR,
-                                   format = "%(asctime)s %(levelname)s %(name)s %(message)s")
-        logger = helper.logging.getLogger(__name__)
-    else:
-        helper.logging.basicConfig(filename = route.teams_log, level = helper.logging.ERROR,
-                                   format = "%(asctime)s %(levelname)s %(name)s %(message)s")
-        logger = helper.logging.getLogger(__name__)
-except Exception as error:
-    logger.exception(error)
-
 
 def scrape_all_players_fantasy():
     """
@@ -151,7 +133,7 @@ def scrape_teams_information():
         # In this for once with all players links we get the name, surname and position
         for player in player_hrefs:
             driver.get(player)
-            soup = BeautifulSoup(driver.page_source, "html.parser")
+            soup = helper.BeautifulSoup(driver.page_source, "html.parser")
 
             # Extract class = pos-" text
             position_class = soup.select_one(".team-position i")["class"][0]
@@ -168,7 +150,7 @@ def scrape_teams_information():
 
             teams_players_data.append([team_name, position, name, surname])
         driver.get(user_element)
-        soup = BeautifulSoup(driver.page_source, "html.parser")
+        soup = helper.BeautifulSoup(driver.page_source, "html.parser")
 
         # Select the parent div element with the class "wrapper" to narrow down the search
         parent_div = soup.find(name = "div", class_ = "wrapper items thin-scrollbar")
@@ -202,10 +184,10 @@ def scrape_teams_information():
 
 
 if __name__ == "__main__":
+    logger = helper.define_logger(route.teams_log)
     scrape_all_players_fantasy()
     scrape_personal_team_fantasy(False, None, None)
     scrape_teams_information()
-    helper.delete_profile()
     for folder in route.all_folders:
         helper.scrape_backup(folder, route.backup_folder)
-    helper.automated_commit("Teams.")
+    # helper.automated_commit("Teams.")

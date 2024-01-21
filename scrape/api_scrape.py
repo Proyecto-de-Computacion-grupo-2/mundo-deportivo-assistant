@@ -9,23 +9,6 @@ import Utils.routes as route
 import Utils.helper as helper
 
 
-# So it didn't show any warning of variable may be undefined.
-logger = "Defined"
-
-# For debugging, this sets up a formatting for a logfile, and where it is.
-try:
-    if not helper.path.exists(route.api_log):
-        helper.logging.basicConfig(filename = route.api_log, level = helper.logging.ERROR,
-                                   format = "%(asctime)s %(levelname)s %(name)s %(message)s")
-        logger = helper.logging.getLogger(__name__)
-    else:
-        helper.logging.basicConfig(filename = route.api_log, level = helper.logging.ERROR,
-                                   format = "%(asctime)s %(levelname)s %(name)s %(message)s")
-        logger = helper.logging.getLogger(__name__)
-except Exception as error:
-    logger.exception(error)
-
-
 def call_sofascore_instructions(y):
     data = fetch_data(y)
     save_to_csv(data, y, filename = route.sofascore_data + str(y) + ".csv")
@@ -199,9 +182,10 @@ if __name__ == "__main__":
     with open("config.json", "r", encoding = "utf-8") as config_file:
         config = helper.json.load(config_file)
 
+    logger = helper.define_logger(route.api_log)
+
     api_football = config["api-football"]
 
-    # it = datetime.now()
     scrape_la_liga_standings(api_football)
 
     yearlist = [15, 16, 17, 18, 19, 20, 21, 22]
@@ -221,8 +205,6 @@ if __name__ == "__main__":
     except FileNotFoundError:
         pass
     consolidate_all_csv()
-    helper.delete_profile()
     for folder in route.all_folders:
         helper.scrape_backup(folder, route.backup_folder)
-    helper.automated_commit("API.")
-    # print(str(helper.datetime.now() - it))
+    # helper.automated_commit("API.")

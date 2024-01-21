@@ -5,9 +5,6 @@
 
 #
 
-# CODE NUMBERS
-"""
-"""
 
 from PIL import ImageFont
 from os import getcwd, path
@@ -46,6 +43,7 @@ all_folders = [aux_folder, league_folder, players_folder, football_folder, sofas
 
 # Scrape file list.
 api_log = path.join(bot_folder, "api.log")
+helper_log = path.join(bot_folder, "helper.log")
 teams_log = path.join(bot_folder, "teams.log")
 market_log = path.join(bot_folder, "market.log")
 player_log = path.join(bot_folder, "player.log")
@@ -115,6 +113,7 @@ market_bak = path.join(backup_folder, "fantasy-players-in-market_bot.csv_bak")
 fantasy_logo = path.join(image_folder, "mister-fantasy-md-logo_mod.png")
 football_loading = path.join(image_folder, "football_loading.gif")
 app_personal_team_file = "fantasy-personal-team-data.csv"
+app_personal_lineup_file = "personal_lineup"
 app_personal_market_file = "fantasy-market-data.csv"
 market_md_img = path.join(image_folder, "future_market_md")
 my_team_md_img = path.join(image_folder, "future_my_team_md")

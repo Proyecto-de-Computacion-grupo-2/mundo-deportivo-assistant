@@ -192,4 +192,4 @@ def test_tab(u):
 
     window = helper.pSG.Window("UA2C", layout, location = (20, 20), size = (width, height))
 
-    return window, data_team, data_market, width
+    return window, data_team, data_market, width, height

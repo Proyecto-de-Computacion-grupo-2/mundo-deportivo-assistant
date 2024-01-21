@@ -9,18 +9,18 @@ import Utils.helper as helper
 import Utils.routes as route
 
 from scrape.fantasy_teams import scrape_personal_team_fantasy
-from scrape.market import scrape_market_section_fantasy
+from scrape.market import scrape_market_section_fantasy, scrape_personal_lineup_fantasy
 
 
 def custom_login(user, pwd):
 
-    chrome_options = helper.webdriver.ChromeOptions()
-    chrome_options.add_argument("--headless")
-    driver = helper.webdriver.Chrome(options = chrome_options)
+    # chrome_options = helper.webdriver.ChromeOptions()
+    # chrome_options.add_argument("--headless")
+    # driver = helper.webdriver.Chrome(options = chrome_options)
 
-    # firefox_options = helper.webdriver.FirefoxOptions()
-    # firefox_options.add_argument("--headless")
-    # driver = helper.webdriver.Firefox(options = firefox_options)
+    firefox_options = helper.webdriver.FirefoxOptions()
+    firefox_options.add_argument("--headless")
+    driver = helper.webdriver.Firefox(options = firefox_options)
 
     driver.set_page_load_timeout(300)
 
@@ -85,6 +85,8 @@ def custom_login(user, pwd):
 
         scrape_market_section_fantasy(True, driver, user)
 
+        scrape_personal_lineup_fantasy(True, driver, user)
+
         driver.quit()
 
         return False
@@ -124,12 +126,13 @@ while event != "Aceptar" and event != helper.WIN_CLOSED:
                 login["pass"].set_focus()
 
 if u:
-    window, datos_team, datos_market, w = helper.main_window.test_tab(u)
+    window, datos_team, datos_market, w, h = helper.main_window.test_tab(u)
 
     # Bucle principal
     while event != helper.WIN_CLOSED:
         event, values = window.read()
-        new_size = (2 * (w // 3)) - 50
+        new_size1 = (2 * (w // 3)) - 50
+        new_size2 = (h // 2) - 20
         if event != helper.WIN_CLOSED:
             if "+CLICKED+" in event and "-TABLE1-" in event:
                 if not any(ext in event[2] for ext in [-1, None]):
@@ -137,7 +140,7 @@ if u:
                         img = helper.Image.open(helper.path.join(route.plots_folder,
                                                                  str(datos_team[(event[2][0] + 1)][0]) +
                                                                  "_market_value_prediction_plot.png"))
-                        helper.image_resize(img, new_size, helper.path.join(route.temp_img_show))
+                        helper.image_resize(img, new_size1, 0, helper.path.join(route.temp_img_show))
                         window["team_values"].update(filename = helper.path.join(route.temp_img_show))
                     except FileNotFoundError:
                         helper.pSG.popup_no_buttons("Player is very new to the League, "
@@ -150,7 +153,7 @@ if u:
                         img = helper.Image.open(helper.path.join(route.plots_folder,
                                                                  str(datos_market[(event[2][0] + 1)][0]) +
                                                                  "_market_value_prediction_plot.png"))
-                        helper.image_resize(img, new_size, helper.path.join(route.temp2_img_show))
+                        helper.image_resize(img, new_size2, 1, helper.path.join(route.temp2_img_show))
                         window["market_values"].update(filename = helper.path.join(route.temp2_img_show))
                     except FileNotFoundError:
                         helper.pSG.popup_no_buttons("Player is very new to the League, "
