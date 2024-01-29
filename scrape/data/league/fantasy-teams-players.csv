@@ -1,0 +1,273 @@
+Team Name,Position,Name,Surname
+Admin,Forward,Mikel,Oyarzabal
+Admin,Forward,Vinícius,Júnior
+Admin,Midfielder,,Isco
+Admin,Midfielder,Nico,Williams
+Admin,Midfielder,,Pepelu
+Admin,Defence,Dani,Carvajal
+Admin,Defence,Yuri,Berchiche
+Admin,Defence,Aitor,Ruibal
+Admin,Defence,Daniel,Vivian
+Admin,Defence,Kieran,Tierney
+Admin,Goalkeeper,Jeremías,Ledesma
+Admin,Defence,David,López
+Admin,Defence,Óscar,Mingueza
+Admin,Midfielder,Arda,Güler
+Admin,Midfielder,Brahim,Díaz
+Admin,Midfielder,Renato,Tapia
+Admin,Midfielder,Takefusa,Kubo
+Admin,Forward,Giuliano,Simeone
+Admin,Forward,,Sandro
+Admin,Forward,Vitor,Roque
+M31-G6-AcMilanesa,Forward,Álvaro,Morata
+M31-G6-AcMilanesa,Forward,Ilias,Akhomach
+M31-G6-AcMilanesa,Midfielder,Frenkie De,Jong
+M31-G6-AcMilanesa,Midfielder,Alex,Baena
+M31-G6-AcMilanesa,Midfielder,Viktor,Tsygankov
+M31-G6-AcMilanesa,Midfielder,Pablo,Torre
+M31-G6-AcMilanesa,Defence,José Luis,Gayà
+M31-G6-AcMilanesa,Defence,Gabriel,Paulista
+M31-G6-AcMilanesa,Defence,Antonio,Rüdiger
+M31-G6-AcMilanesa,Defence,Yan,Couto
+M31-G6-AcMilanesa,Goalkeeper,Giorgi,Mamardashvili
+M31-G6-AcMilanesa,Defence,Eric,García
+M31-G6-AcMilanesa,Defence,Nacho,Fernández
+M31-G6-AcMilanesa,Midfielder,Aurélien,Tchouaméni
+M31-G6-AcMilanesa,Forward,,Rodrygo
+M32-G7-KleinGroup,Forward,Raúl de,Tomás
+M32-G7-KleinGroup,Forward,Sory,Kaba
+M32-G7-KleinGroup,Midfielder,Samuel,Lino
+M32-G7-KleinGroup,Midfielder,Rubén,García
+M32-G7-KleinGroup,Midfielder,Óscar,Melendo
+M32-G7-KleinGroup,Midfielder,Manu,Morlanes
+M32-G7-KleinGroup,Defence,Sergio,Akieme
+M32-G7-KleinGroup,Defence,Antonio,Raíllo
+M32-G7-KleinGroup,Defence,Andoni,Gorosabel
+M32-G7-KleinGroup,Defence,Lucas,Pires
+M32-G7-KleinGroup,Goalkeeper,Jan,Oblak
+M32-G7-KleinGroup,Goalkeeper,Juan Carlos,Martín
+M32-G7-KleinGroup,Defence,Víctor,Díaz
+M32-G7-KleinGroup,Midfielder,Joel,Roca
+M32-G7-KleinGroup,Midfielder,José,Mari
+M*****,Forward,Juanmi,Latasa
+M*****,Forward,Marc,Guiu
+M*****,Midfielder,Lucas,Torró
+M*****,Midfielder,Gonzalo,Melero
+M*****,Midfielder,Omar,Mascarell
+M*****,Midfielder,Óscar,Rodríguez
+M*****,Defence,Nahuel,Molina
+M*****,Defence,Yeray,Álvarez
+M*****,Defence,César,Montes
+M*****,Defence,Daley,Sinkgraven
+M*****,Goalkeeper,Unai,Marrero
+M*****,Goalkeeper,Pepe,Reina
+M*****,Midfielder,Brian,Ocampo
+M*****,Midfielder,Nabil,Fekir
+M*****,Forward,Jon,Magunazelaia
+M31-G2-UA2C,Forward,Robert,Lewandowski
+M31-G2-UA2C,Midfielder,Toni,Kroos
+M31-G2-UA2C,Midfielder,Fede,Valverde
+M31-G2-UA2C,Midfielder,Luis,Rioja
+M31-G2-UA2C,Midfielder,Jude,Bellingham
+M31-G2-UA2C,Midfielder,Mikel,Vesga
+M31-G2-UA2C,Defence,Aitor,Paredes
+M31-G2-UA2C,Defence,Juanlu,Sánchez
+M31-G2-UA2C,Defence,Sergio,Ramos
+M31-G2-UA2C,Defence,Rubén,Peña
+M31-G2-UA2C,Goalkeeper,Iñaki,Peña
+M31-G2-UA2C,Defence,Kike,Salas
+M31-G2-UA2C,Defence,Loïc,Badé
+M31-G2-UA2C,Midfielder,Fran,Pérez
+M31-G5-REALE,Forward,Memphis,Depay
+M31-G5-REALE,Forward,Ben Brereton,Díaz
+M31-G5-REALE,Midfielder,Álex,Berenguer
+M31-G5-REALE,Midfielder,Mikel,Merino
+M31-G5-REALE,Midfielder,Njegoš,Petrović
+M31-G5-REALE,Defence,Aïssa,Mandi
+M31-G5-REALE,Defence,Pablo,Maffeo
+M31-G5-REALE,Defence,Eric,Curbelo
+M31-G5-REALE,Defence,Mihailo,Ristić
+M31-G5-REALE,Goalkeeper,Unai,Simón
+M31-G5-REALE,Goalkeeper,Jaume,Doménech
+M31-G5-REALE,Midfielder,José Ángel,Pozo
+M31-G5-REALE,Midfielder,Sergio,Ruiz
+M31-G5-REALE,Midfielder,Toni,Villa
+M31-G5-REALE,Forward,,Bebé
+M31-G3-CactusPanda,Forward,Ante,Budimir
+M31-G3-CactusPanda,Forward,,Raphinha
+M31-G3-CactusPanda,Forward,Lamine,Yamal
+M31-G3-CactusPanda,Midfielder,Sergio,Arribas
+M31-G3-CactusPanda,Midfielder,Antonio,Blanco
+M31-G3-CactusPanda,Midfielder,Lucas,Robertone
+M31-G3-CactusPanda,Midfielder,Máximo,Perrone
+M31-G3-CactusPanda,Defence,Jesús,Navas
+M31-G3-CactusPanda,Defence,Ronald,Araújo
+M31-G3-CactusPanda,Defence,Miguel,Gutiérrez
+M31-G3-CactusPanda,Goalkeeper,Claudio,Bravo
+M31-G3-CactusPanda,Forward,Radamel,Falcao
+M31-G1-FutX,Forward,Gorka,Guruzeta
+M31-G1-FutX,Forward,,Sávio
+M31-G1-FutX,Forward,Léo,Baptistão
+M31-G1-FutX,Midfielder,Fran,Beltrán
+M31-G1-FutX,Midfielder,,Suso
+M31-G1-FutX,Midfielder,Rodrigo,Sanchez
+M31-G1-FutX,Midfielder,Rodrigo De,Paul
+M31-G1-FutX,Defence,José,Giménez
+M31-G1-FutX,Defence,Diego,Rico
+M31-G1-FutX,Defence,Fali,Giménez
+M31-G1-FutX,Goalkeeper,Sergio,Herrera
+M31-G1-FutX,Defence,,Chumi
+M32-G3-GoalAnalitics,Forward,Jørgen Strand,Larsen
+M32-G3-GoalAnalitics,Forward,Artem,Dovbyk
+M32-G3-GoalAnalitics,Midfielder,Óliver,Torres
+M32-G3-GoalAnalitics,Midfielder,Ivan,Rakitić
+M32-G3-GoalAnalitics,Midfielder,Marc,Roca
+M32-G3-GoalAnalitics,Midfielder,Aimar,Oroz
+M32-G3-GoalAnalitics,Midfielder,Beñat,Turrientes
+M32-G3-GoalAnalitics,Defence,Germán,Pezzella
+M32-G3-GoalAnalitics,Defence,José,Copete
+M32-G3-GoalAnalitics,Defence,Daley,Blind
+M32-G3-GoalAnalitics,Goalkeeper,Paulo,Gazzaniga
+M32-G3-GoalAnalitics,Defence,Juanma,Herzog
+M32-G3-GoalAnalitics,Defence,Kamil,Piatkowski
+M32-G3-GoalAnalitics,Defence,Lucas,Vázquez
+M32-G3-GoalAnalitics,Defence,,Marcão
+M32-G3-GoalAnalitics,Defence,Martin,Valjent
+M32-G3-GoalAnalitics,Midfielder,Yellu,Santiago
+M32-G3-GoalAnalitics,Forward,Darwin,Machís
+M32-G3-GoalAnalitics,Forward,Shon,Weissman
+M32-G5-BabooManager,Forward,Hugo,Duro
+M32-G5-BabooManager,Forward,Diego,López
+M32-G5-BabooManager,Forward,Ayoze,Pérez
+M32-G5-BabooManager,Midfielder,Brais,Méndez
+M32-G5-BabooManager,Midfielder,Luis,Milla
+M32-G5-BabooManager,Midfielder,Eduardo,Camavinga
+M32-G5-BabooManager,Midfielder,Bryan,Zaragoza
+M32-G5-BabooManager,Defence,Igor,Zubeldia
+M32-G5-BabooManager,Defence,Alejandro,Catena
+M32-G5-BabooManager,Defence,Gastón,Álvarez
+M32-G5-BabooManager,Goalkeeper,Andriy,Lunin
+M32-G5-BabooManager,Goalkeeper,Thibaut,Courtois
+M32-G5-BabooManager,Defence,Éder,Militão
+M32-G5-BabooManager,Defence,José Ángel,Carmona
+M32-G5-BabooManager,Midfielder,Jordi,Martín
+M32-G8 - Los Capys,Forward,Yéremi,Pino
+M32-G8 - Los Capys,Forward,José Luis,Morales
+M32-G8 - Los Capys,Midfielder,Óscar,Valentín
+M32-G8 - Los Capys,Midfielder,Gonzalo,Villar
+M32-G8 - Los Capys,Midfielder,Unai,López
+M32-G8 - Los Capys,Midfielder,Amath,Ndiaye
+M32-G8 - Los Capys,Defence,Juan,Foyth
+M32-G8 - Los Capys,Defence,Cristhian,Mosquera
+M32-G8 - Los Capys,Defence,Rafa,Marín
+M32-G8 - Los Capys,Defence,Momo,Mbaye
+M32-G8 - Los Capys,Goalkeeper,Vicente,Guaita
+M32-G8 - Los Capys,Goalkeeper,Jesús,Owono
+M32-G8 - Los Capys,Midfielder,Fede San,Emeterio
+M32-G8 - Los Capys,Midfielder,Urko,González
+M32-G8 - Los Capys,Forward,Marciano,Sanca
+M32-G6_Jammin&#039;,Forward,Cyle,Larin
+M32-G6_Jammin&#039;,Forward,Jonathan,Bamba
+M32-G6_Jammin&#039;,Forward,Abde,Ezzalzouli
+M32-G6_Jammin&#039;,Midfielder,Pathé,Ciss
+M32-G6_Jammin&#039;,Midfielder,Pablo,Barrios
+M32-G6_Jammin&#039;,Midfielder,Ander,Barrenetxea
+M32-G6_Jammin&#039;,Defence,Damián,Suárez
+M32-G6_Jammin&#039;,Defence,Aritz,Elustondo
+M32-G6_Jammin&#039;,Defence,David,García
+M32-G6_Jammin&#039;,Defence,Álvaro,Lemos
+M32-G6_Jammin&#039;,Goalkeeper,Rui,Silva
+M32-G6_Jammin&#039;,Midfielder,Abde,Rebbach
+M32-G6_Jammin&#039;,Midfielder,André,Almeida
+M32-G6_Jammin&#039;,Midfielder,Carlos,Benavídez
+M32-G6_Jammin&#039;,Forward,Famara,Diédhiou
+M32-G2-dreamx1,Forward,Lucas,Boyé
+M32-G2-dreamx1,Forward,Asier,Villalibre
+M32-G2-dreamx1,Midfielder,Enzo,Loiodice
+M32-G2-dreamx1,Midfielder,Iker,Muñoz
+M32-G2-dreamx1,Midfielder,Oihan,Sancet
+M32-G2-dreamx1,Midfielder,Santi,Comesaña
+M32-G2-dreamx1,Defence,Florian,Lejeune
+M32-G2-dreamx1,Defence,Sergi,Cardona
+M32-G2-dreamx1,Defence,Çağlar,Söyüncü
+M32-G2-dreamx1,Defence,Martín,Pascual
+M32-G2-dreamx1,Goalkeeper,André,Ferreira
+M32-G2-dreamx1,Goalkeeper,Daniel,Fuzato
+M32-G2-dreamx1,Midfielder,Hugo,Sotelo
+M32-G2-dreamx1,Midfielder,Manu,Bueno
+M32-G2-dreamx1,Forward,Enes,Ünal
+M31-G4-DLA,Forward,Dodi,Lukébakio
+M31-G4-DLA,Forward,Ángel,Correa
+M31-G4-DLA,Midfielder,Yangel,Herrera
+M31-G4-DLA,Midfielder,Erik,Lamela
+M31-G4-DLA,Midfielder,,Fernando
+M31-G4-DLA,Midfielder,Boubakary,Soumaré
+M31-G4-DLA,Defence,Hamari,Traoré
+M31-G4-DLA,Defence,Juan,Cruz
+M31-G4-DLA,Defence,,Juanpe
+M31-G4-DLA,Defence,Unai,Núñez
+M31-G4-DLA,Goalkeeper,Antonio,Sivera
+M31-G4-DLA,Goalkeeper,Julen,Agirrezabala
+M31-G4-DLA,Defence,Joseph,Aidoo
+M31-G4-DLA,Midfielder,Darko,Brašanac
+M31-G4-DLA,Midfielder,,Vitolo
+M31-G4-DLA,Forward,Miguel,Rodríguez
+M31-G7-DraftKings,Forward,Borja,Mayoral
+M31-G7-DraftKings,Forward,Mason,Greenwood
+M31-G7-DraftKings,Midfielder,Aleix,García
+M31-G7-DraftKings,Midfielder,Martín,Zubimendi
+M31-G7-DraftKings,Midfielder,Iván,Martín
+M31-G7-DraftKings,Midfielder,Assane,Diao
+M31-G7-DraftKings,Midfielder,Beñat,Prados
+M31-G7-DraftKings,Defence,João,Cancelo
+M31-G7-DraftKings,Defence,Íñigo,Lekue
+M31-G7-DraftKings,Defence,Abdul,Mumin
+M31-G7-DraftKings,Goalkeeper,Marko,Dmitrović
+M31-G7-DraftKings,Defence,Chadi,Riad
+M31-G7-DraftKings,Defence,Dimitri,Foulquier
+M31-G7-DraftKings,Defence,Saúl,Coco
+M31-G7-DraftKings,Defence,Youssouf,Sabaly
+M31-G7-DraftKings,Midfielder,Hugo,Guillamón
+M31-G7-DraftKings,Forward,Iñaki,Williams
+M32-G2-xGarcii,Forward,Raúl García de,Haro
+M32-G2-xGarcii,Forward,Raúl,García
+M32-G2-xGarcii,Midfielder,Nemanja,Maksimović
+M32-G2-xGarcii,Midfielder,Antonio,Sánchez
+M32-G2-xGarcii,Midfielder,Rubén,Sobrino
+M32-G2-xGarcii,Midfielder,Joan,Jordan
+M32-G2-xGarcii,Defence,Axel,Witsel
+M32-G2-xGarcii,Defence,Dakonam,Djené
+M32-G2-xGarcii,Defence,Aridane,Hernández
+M32-G2-xGarcii,Defence,Peru,Nolaskoain
+M32-G2-xGarcii,Goalkeeper,Dominik,Greif
+M32-G2-xGarcii,Goalkeeper,Pichu,Cuéllar
+M32-G2-xGarcii,Midfielder,Diego,Mendez
+M32-G2-xGarcii,Midfielder,Ilaix,Moriba
+M32-G2-xGarcii,Forward,Gonzalo,García
+M32-G9-PREDITECH INSIGHTS,Forward,Gerard,Moreno
+M32-G9-PREDITECH INSIGHTS,Forward,Ezequiel,Ávila
+M32-G9-PREDITECH INSIGHTS,Forward,Lucas,Ocampos
+M32-G9-PREDITECH INSIGHTS,Midfielder,Luka,Modrić
+M32-G9-PREDITECH INSIGHTS,Midfielder,Kike,Barja
+M32-G9-PREDITECH INSIGHTS,Midfielder,Samuel,Costa
+M32-G9-PREDITECH INSIGHTS,Defence,Stefan,Savić
+M32-G9-PREDITECH INSIGHTS,Defence,Ferland,Mendy
+M32-G9-PREDITECH INSIGHTS,Defence,Jon,Pacheco
+M32-G9-PREDITECH INSIGHTS,Defence,Alejandro,Balde
+M32-G9-PREDITECH INSIGHTS,Goalkeeper,Álvaro,Valles
+jluzon,Forward,Willian,José
+jluzon,Forward,Samu,Omorodion
+jluzon,Forward,Antoine,Griezmann
+jluzon,Midfielder,Iñigo Ruiz De,Galarreta
+jluzon,Midfielder,Dani,Rodríguez
+jluzon,Midfielder,Kike,Pérez
+jluzon,Midfielder,Rodrigo,Riquelme
+jluzon,Defence,Raúl,Torrente
+jluzon,Defence,Carlos,Neva
+jluzon,Defence,César,Azpilicueta
+jluzon,Goalkeeper,David,Soria
+jluzon,Goalkeeper,David,Gil
+jluzon,Goalkeeper,Iván,Villar
+jluzon,Defence,Jorge,Meré
+jluzon,Defence,Reinildo,Mandava
+jluzon,Midfielder,Valery,Fernández

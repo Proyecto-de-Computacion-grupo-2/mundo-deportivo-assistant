@@ -10,3 +10,5 @@ scrape-market-section/config.json
 .idea/misc.xml
 /scrape-players-fantasy/config.json
 /config.json
+github.sh
+helper.py
