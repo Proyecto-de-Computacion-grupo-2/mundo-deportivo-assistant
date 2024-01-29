@@ -5,36 +5,17 @@
 
 #
 
-import helper
-import http.client
-import glob
-
-
-# So it didn't show any warning of variable may be undefined.
-logger = "Defined"
-
-# For debugging, this sets up a formatting for a logfile, and where it is.
-if helper.lorca != "Windows":
-    try:
-        if not helper.os.path.exists(helper.r_folder + "api_scrape.log"):
-            helper.logging.basicConfig(filename = helper.r_folder + "api_scrape.log", level = helper.logging.ERROR,
-                                       format = "%(asctime)s %(levelname)s %(name)s %(message)s")
-            logger = helper.logging.getLogger(__name__)
-        else:
-            helper.logging.basicConfig(filename = helper.r_folder + "api_scrape.log", level = helper.logging.ERROR,
-                                       format = "%(asctime)s %(levelname)s %(name)s %(message)s")
-            logger = helper.logging.getLogger(__name__)
-    except Exception as error:
-        logger.exception(error)
+import Utils.routes as route
+import Utils.helper as helper
 
 
 def call_sofascore_instructions(y):
     data = fetch_data(y)
-    save_to_csv(data, y, filename = helper.sofascore_data + str(y) + ".csv")
+    save_to_csv(data, y, filename = route.sofascore_data + str(y) + ".csv")
 
 
 def scrape_la_liga_standings(api_key):
-    conn = http.client.HTTPSConnection("v3.football.api-sports.io")
+    conn = helper.http.client.HTTPSConnection("v3.football.api-sports.io")
 
     headers = {"x-rapidapi-host": "v3.football.api-sports.io", "x-rapidapi-key": api_key}
 
@@ -79,16 +60,16 @@ def scrape_la_liga_standings(api_key):
         # Append values to the team_data_list
         team_data_list.append(values)
 
-    helper.os.makedirs(helper.os.path.dirname(helper.standings_file), exist_ok = True)
+    helper.makedirs(helper.path.dirname(route.standings_file), exist_ok = True)
     # Writing data to CSV file
-    with open(helper.standings_file, "w", encoding = "utf-8", newline = "") as csv_file:
+    with open(route.standings_file, "w", encoding = "utf-8", newline = "") as csv_file:
         writer = helper.csv.writer(csv_file)
         writer.writerow(header)
         writer.writerows(team_data_list)
 
 
 def fetch_data(year_get = 23):
-    conn = http.client.HTTPSConnection("api.sofascore.com")
+    conn = helper.http.client.HTTPSConnection("api.sofascore.com")
     headers = {}
     payload = ""
 
@@ -147,7 +128,7 @@ def fetch_data(year_get = 23):
     return consolidated_data
 
 
-def save_to_csv(d, year_data, filename = helper.sofascore_data):
+def save_to_csv(d, year_data, filename = route.sofascore_data):
     # Check if data is not empty
     if not d:
         print("No data to save to CSV")
@@ -187,35 +168,43 @@ def save_to_csv(d, year_data, filename = helper.sofascore_data):
 
 
 def consolidate_all_csv():
-    helper.os.chdir(helper.sofascore_folder)
-    all_filenames = [f for f in glob.glob("*.{}".format("csv"))]
+    helper.chdir(route.sofascore_folder)
+    all_filenames = [f for f in helper.glob.glob("*.{}".format("csv"))]
     if not all_filenames:
         print("No CSV files found in the current project folder.")
         return
     combined_csv = helper.pandas.concat([helper.pandas.read_csv(f) for f in all_filenames])
     combined_csv = combined_csv.sort_values(by = ["season"])
-    combined_csv.to_csv(helper.players_s_data, index = False, encoding = "utf-8-sig")
+    combined_csv.to_csv(route.players_s_data, index = False, encoding = "utf-8-sig")
 
 
 if __name__ == "__main__":
     with open("config.json", "r", encoding = "utf-8") as config_file:
         config = helper.json.load(config_file)
 
+    logger = helper.define_logger(route.api_log)
+
     api_football = config["api-football"]
 
-    # it = datetime.now()
     scrape_la_liga_standings(api_football)
 
     yearlist = [15, 16, 17, 18, 19, 20, 21, 22]
     for i in yearlist:
-        if not helper.os.path.exists(
-                helper.os.path.join(helper.sofascore_data + str(i) + ".csv")) and \
-                helper.os.path.getsize(helper.os.path.join(helper.sofascore_data + str(i) + ".csv")) > 110000:
+        try:
+            if not helper.path.exists(
+                    helper.path.join(route.sofascore_data + str(i) + ".csv")) and \
+                    helper.path.exists(helper.path.getsize(helper.path.join(route.sofascore_data + str(i) + ".csv"))
+                                       > 110000):
+                call_sofascore_instructions(i)
+        except FileNotFoundError:
             call_sofascore_instructions(i)
+            pass
     call_sofascore_instructions(23)
+    try:
+        helper.remove(route.players_s_route)
+    except FileNotFoundError:
+        pass
     consolidate_all_csv()
-    helper.delete_profile()
-    for folder in helper.all_folders:
-        helper.scrape_backup(folder, helper.backup_folder)
-    helper.automated_commit("API.")
-    # print(str(helper.datetime.now() - it))
+    for folder in route.all_folders:
+        helper.scrape_backup(folder, route.backup_folder)
+    # helper.automated_commit("API.")

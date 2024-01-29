@@ -5,15 +5,13 @@
 
 #
 
-import helper
-import math
-import requests
+import Utils.helper as helper
+import Utils.routes as route
 
 # Gameweek headers.
-players_meta_data_header = ["ID", "Player full name", "Current Value", "Points", "Average", "Matches", "Goals", "Cards",
-                            "Time Stamp"]
-fix_format_header = ["ID", "Name", "Value", "Date"]
-spanish_map_list = ["id", "player full name", "posición", "equipo", "contrincante", "game week", "mixto", "as score",
+players_meta_data_header = ["ID", "Player full name", "Position", "Current Value", "Points", "Average", "Matches",
+                            "Goals", "Cards", "Time Stamp"]
+spanish_map_list = ["id", "player full name", "posición", "game week", "equipo", "contrincante", "mixto", "as score",
                     "marca score", "mundo deportivo score", "sofa score", "valor actual", "puntos", "media", "partidos",
                     "goles metadata", "tarjetas", "pases totales", "pases precisos", "balones en largo totales",
                     "balones en largo precisos", "centros totales", "centros precisos", "despejes totales",
@@ -41,7 +39,7 @@ spanish_checklist = ["pases totales", "pases precisos", "balones en largo totale
                      "intercepciones", "salidas totales", "salidas precisas", "entradas totales", "faltas recibidas",
                      "faltas cometidas", "fueras de juego", "minutos jugados", "toques", "entradas como último hombre",
                      "posesiones perdidas", "goles esperados", "pases clave", "match_stat_expectedassists"]
-english_list = ["ID", "Player full name", "Position", "Team", "Opposing Team", "Game Week", "Mixed", "AS Score",
+english_list = ["ID", "Player full name", "Position", "Game Week", "Team", "Opposing Team", "Mixed", "AS Score",
                 "Marca Score", "Mundo Deportivo Score", "Sofa Score", "Current Value", "Points", "Average", "Matches",
                 "Goals Metadata", "Cards", "Total Passes", "Accurate Passes", "Total Long Balls", "Accurate Long Balls",
                 "Total Crosses", "Accurate Crosses", "Total clearances", "Clearances on goal line", "Aerial Duels Lost",
@@ -56,27 +54,6 @@ english_list = ["ID", "Player full name", "Position", "Team", "Opposing Team", "
                 "Expected Goals", "Key Passes", "Expected Assists", "Average Season 15/16", "Average Season 16/17",
                 "Average Season 17/18", "Average Season 18/19", "Average Season 19/20", "Average Season 20/21",
                 "Average Season 21/22", "Average Season 22/23", "Average Season 23/24", "Timestamp"]
-url_lock = helper.threading.Lock()
-lock = helper.threading.Lock()
-
-# So it didn't show any warning of variable may be undefined.
-logger = "Defined"
-
-# For debugging, this sets up a formatting for a logfile, and where it is.
-if helper.lorca != "Windows":
-    try:
-        if not helper.os.path.exists(helper.r_folder + "player_stats.log"):
-            helper.logging.basicConfig(filename = helper.r_folder + "player_stats.log",
-                                       level = helper.logging.ERROR,
-                                       format = "%(asctime)s %(levelname)s %(name)s %(message)s")
-            logger = helper.logging.getLogger(__name__)
-        else:
-            helper.logging.basicConfig(filename = helper.r_folder + "player_stats.log",
-                                       level = helper.logging.ERROR,
-                                       format = "%(asctime)s %(levelname)s %(name)s %(message)s")
-            logger = helper.logging.getLogger(__name__)
-    except Exception as error:
-        logger.exception(error)
 
 
 def scrape_fantasy_players_meta_data(driver, u):
@@ -96,10 +73,10 @@ def scrape_fantasy_players_meta_data(driver, u):
     players_surname = players_info.find_element(helper.By.CLASS_NAME, "surname").text
     player_complete_name = players_name + players_surname
     player_image = driver.find_element(helper.By.CSS_SELECTOR, ".player-pic img").get_attribute("src").split("?version")
-    response = requests.get(player_image[0])
+    response = helper.requests.get(player_image[0])
     data_id = u.split("/")[-2]
-    img_file = helper.image_folder + data_id + "_" + player_complete_name + ".png"
-    helper.os.makedirs(helper.os.path.dirname(img_file), exist_ok = True)
+    img_file = helper.path.join(route.image_folder, data_id + "_" + player_complete_name + ".png")
+    helper.makedirs(helper.path.dirname(img_file), exist_ok = True)
     with open(img_file, "wb") as img:
         img.write(response.content)
 
@@ -114,22 +91,11 @@ def scrape_fantasy_players_meta_data(driver, u):
     tarjetas = player_wrapper[5].text
     time_stamp = str(helper.datetime.now())
 
-    return [data_id, player_complete_name, valor_actual, puntos, media, partidos, goles, tarjetas,
+    return [data_id, player_complete_name, position, valor_actual, puntos, media, partidos, goles, tarjetas,
             time_stamp], position, player_complete_name
 
 
 def scrape_fantasy_players_value_table(driver, player_complete_name, data_id):
-    def player_exists(tl, pcn):
-        ex = False
-        for p in tl[1:]:
-            if p[1] == pcn:
-                ex = True
-                break
-            else:
-                if p[1] == tl[-1][1] and not ex:
-                    ex = False
-        return ex
-
     def extract_date(extract):
         meses = {"ene": "jan", "abr": "apr", "ago": "aug", "sept": "sep", "dic": "dec"}
         parts = extract["date"].split()
@@ -137,26 +103,19 @@ def scrape_fantasy_players_value_table(driver, player_complete_name, data_id):
         parts[1] = meses.get(parts[1].lower(), parts[1])
         return " ".join(parts)
 
-    def add_data():
-        values = ["0"] * len(dates)
-        values[0] = data_id
-        values[1] = player_complete_name
-        for point in points:
-            date_to_find = helper.datetime.strptime(extract_date(point), "%d %b %Y").strftime("%d/%m/%Y")
-            for date in dates:
-                if date == date_to_find:
-                    values[dates.index(date)] = point["value"]
-                    break
-        return values
-
+    found, i, value_content = False, 0, None
     helper.sleep(helper.uniform(0.4, 0.6))
-    script_element = driver.find_element(helper.By.XPATH, "/html/body/script[14]")
-    script_content = script_element.get_attribute("text")
-    try:
-        value_content = script_content.split("playerVideoOffset")[0].split(";")[1].strip()
-    except IndexError as err:
-        value_content = None
-        logger.exception(player_complete_name, err)
+    scripts = driver.find_elements(helper.By.TAG_NAME, "script")
+    while not found:
+        if "valuesChart" in scripts[i].get_attribute("text"):
+            script_content = scripts[i].get_attribute("text")
+            found = True
+            try:
+                value_content = script_content.split("playerVideoOffset")[0].split(";")[1].strip()
+            except IndexError as err:
+                value_content = None
+                logger.exception(player_complete_name, err)
+        i += 1
 
     helper.sleep(helper.uniform(0.4, 0.6))
     # Transform the "Valor" table into a JSON so that it can be later store into a CSV.
@@ -168,45 +127,29 @@ def scrape_fantasy_players_value_table(driver, player_complete_name, data_id):
         except ValueError as err:
             points = None
             logger.exception(player_complete_name, err)
-        reset = False
-        dates = ["Nombre"]
-        vals = [player_complete_name]
 
         helper.sleep(helper.uniform(0.4, 0.6))
-        with lock:
-            try:
-                if points:
-                    with open(helper.players_market_temp_info_file, "r", encoding = "utf-8") as f:
-                        temp_file = helper.csv.reader(f)
-                        temp_list = list(temp_file)
-                    corrected = extract_date(points[-1])
-                    new_date = helper.datetime.strptime(corrected, "%d %b %Y").strftime("%d/%m/%Y")
-                    if temp_list[0][-1] != new_date:
-                        temp_list[0].append(new_date)
-                    dates = temp_list[0]
-                    if player_exists(temp_list, player_complete_name):
-                        for i in temp_list[1:]:
-                            if i[1] == player_complete_name:
-                                if len(i) != len(temp_list[0]):
-                                    i.append(points[-1]["value"])
-                                break
-                    else:
-                        temp_vals = add_data()
-                        temp_list.append(temp_vals)
-                    vals = [i for i in temp_list[1:] if i[1] == player_complete_name][0]
-            except FileNotFoundError:
-                reset = True
 
-            if reset:
-                corrected = extract_date(points[-1])
-                date_today = helper.datetime.strptime(corrected, "%d %b %Y").strftime("%m/%d/%Y")
-                date_year = (helper.datetime.strptime(corrected, "%d %b %Y") - helper.timedelta(days = 365)).strftime(
-                    "%m/%d/%Y")
-                date_range = helper.pandas.date_range(start = date_year, end = date_today, freq = "D")
-                dates = ["Nombre"] + date_range.strftime("%d/%m/%Y").to_list()
-                vals = add_data()
+        corrected = extract_date(points[-1])
+        date_today = helper.datetime.strptime(corrected, "%d %b %Y").strftime("%m/%d/%Y")
+        date_year = (helper.datetime.strptime(corrected, "%d %b %Y") - helper.timedelta(days = 365)).strftime(
+            "%m/%d/%Y")
+        date_range = helper.pandas.date_range(start = date_year, end = date_today, freq = "D")
+        dates = ["ID", "Name"] + date_range.strftime("%d/%m/%Y").to_list()
+        values = ["0"] * len(dates)
+        values[0] = data_id
+        values[1] = player_complete_name
+        for point in points:
+            date_to_find = helper.datetime.strptime(extract_date(point), "%d %b %Y").strftime("%d/%m/%Y")
+            i = 0
+            found = False
+            while not found:
+                if dates[i] == date_to_find:
+                    values[dates.index(dates[i])] = point["value"]
+                    found = True
+                i += 1
 
-    return dates, vals
+        return dates, values
 
 
 def process_row(fila):
@@ -215,7 +158,7 @@ def process_row(fila):
     datos_procesados = ["0"] * (len(english_list))
 
     aplicar_mapeo, i = False, 0
-    for valor in fila:
+    for valor in fila[:-1]:
         if " ".join(str(valor).split(" ")[:-1]).lower() in spanish_checklist and not \
                 all(ext in str(valor) for ext in ["2023", ":"]):
             aplicar_mapeo = True
@@ -272,6 +215,12 @@ def scrape_fantasy_players_game_week(driver, player_complete_name, position, val
         # Get the data of which game week has the statics happened.
         game_week = player_game_week.find_element(helper.By.CLASS_NAME, "gw")
 
+        # Append the game week to the data array.
+        if "j" in game_week.text.lower():
+            player_game_week_data.append(game_week.text[1:])
+        elif "gw" in game_week.text.lower():
+            player_game_week_data.append(game_week.text[2:])
+
         played = True
         player_gw = None
         try:
@@ -279,17 +228,18 @@ def scrape_fantasy_players_game_week(driver, player_complete_name, position, val
         except helper.NoSuchElementException:
             played = False
             pass
-        helper.sleep(helper.uniform(0.4, 0.6))
-        if played:
+        helper.sleep(helper.uniform(0.2, 0.4))
+        if played and player_gw.text.isdigit():
             intercept = True
             while intercept:
                 try:
                     gw_button = helper.wait_click(driver, player_gw, 6)
+                    helper.sleep(helper.uniform(0.2, 0.4))
                     gw_button.click()
                     intercept = False
                 except helper.TimeoutException as err:
                     print("Timeout: ", player_game_week_data)
-                    helper.write_to_csv(helper.timeout_file, False, [player_url], "a")
+                    helper.write_to_csv(route.timeout_file, False, [player_url], "a")
                     logger.exception(err)
                 except helper.ElementClickInterceptedException as err:
                     print("Intercepted: ", player_game_week_data)
@@ -297,168 +247,142 @@ def scrape_fantasy_players_game_week(driver, player_complete_name, position, val
                     intercept = True
                     logger.exception(err)
 
-            helper.sleep(helper.uniform(0.4, 0.6))
             team_id = {
                 1: "Athletic Club", 2: "Atlético", 3: "Barcelona", 4: "Betis", 5: "Celta", 9: "Getafe",
                 10: "Granada", 11: "Las Palmas", 14: "Rayo Vallecano", 15: "Real Madrid", 16: "Real Sociedad",
                 17: "Sevilla", 19: "Valencia", 20: "Villareal", 21: "Almería", 48: "Alavés", 50: "Osasuna",
                 222: "Girona", 408: "Mallorca", 499: "Cádiz"
             }
+            helper.sleep(helper.uniform(0.4, 0.6))
+            sub_player = None
             try:
-                sub_player = driver.find_element(helper.By.CLASS_NAME, "sub-player")
+                overlay = driver.find_element(helper.By.ID, "overlay")
+                popup = overlay.find_element(helper.By.ID, "popup")
+                sub_player = popup.find_element(helper.By.CLASS_NAME, "sub-player")
             except helper.NoSuchElementException as err:
-                logger.exception(player_complete_name + " ".join(temp_list), err)
-            get_team = sub_player.find_element(
-                helper.By.CLASS_NAME, "team-logo").get_attribute("src").split(".png")[0].split("/")[-1]
-            player_match = driver.find_element(helper.By.CLASS_NAME, "player-match")
-            left = player_match.find_element(helper.By.CLASS_NAME, "left")
-            right = player_match.find_element(helper.By.CLASS_NAME, "right")
-            left_team = left.find_element(
-                helper.By.CLASS_NAME, "team-logo").get_attribute("src").split(".png")[0].split("/")[-1]
-            right_team = right.find_element(
-                helper.By.CLASS_NAME, "team-logo").get_attribute("src").split(".png")[0].split("/")[-1]
-            if get_team == left_team:
-                opposing_team = team_id.get(int(right_team))
+                print(player_complete_name + " ".join(player_game_week_data), err)
+                # logger.exception(player_complete_name + " ".join(player_game_week_data), err)
+            if sub_player:
+                get_team = sub_player.find_element(
+                    helper.By.CLASS_NAME, "team-logo").get_attribute("src").split(".png")[0].split("/")[-1]
+                player_match = driver.find_element(helper.By.CLASS_NAME, "player-match")
+                left = player_match.find_element(helper.By.CLASS_NAME, "left")
+                right = player_match.find_element(helper.By.CLASS_NAME, "right")
+                left_team = left.find_element(
+                    helper.By.CLASS_NAME, "team-logo").get_attribute("src").split(".png")[0].split("/")[-1]
+                right_team = right.find_element(
+                    helper.By.CLASS_NAME, "team-logo").get_attribute("src").split(".png")[0].split("/")[-1]
+                if get_team == left_team:
+                    opposing_team = team_id.get(int(right_team))
+                else:
+                    opposing_team = team_id.get(int(left_team))
+                own_team = team_id.get(int(get_team))
             else:
-                opposing_team = team_id.get(int(left_team))
-            own_team = team_id.get(int(get_team))
+                own_team = "N/A"
+                opposing_team = "N/A"
             player_game_week_data.append(own_team)
             player_game_week_data.append(opposing_team)
-            # Append the game week to the data array.
-            if "j" in game_week.text.lower():
-                player_game_week_data.append(game_week.text[1:])
-            elif "gw" in game_week.text.lower():
-                player_game_week_data.append(game_week.text[2:])
-            stats_sports_providers_div = driver.find_element(helper.By.CLASS_NAME, "providers")
-            stats_sports_providers = stats_sports_providers_div.find_elements(helper.By.CLASS_NAME, "points")
+            if sub_player:
+                stats_sports_providers_div = driver.find_element(helper.By.CLASS_NAME, "providers")
+                stats_sports_providers = stats_sports_providers_div.find_elements(helper.By.CLASS_NAME, "points")
 
-            suma = 0
-            for stats in stats_sports_providers:
-                stats_filtered = stats.text.replace(",", ".")
-                suma += int(stats_filtered)
-            player_game_week_data.append(suma // 4)
-            for stats in stats_sports_providers:
-                stats_filtered = stats.text.replace(",", ".")
-                player_game_week_data.append(stats_filtered)
+                suma = 0
+                for stats in stats_sports_providers:
+                    stats_filtered = stats.text.replace(",", ".")
+                    suma += int(stats_filtered)
+                player_game_week_data.append(suma // 4)
+                for stats in stats_sports_providers:
+                    stats_filtered = stats.text.replace(",", ".")
+                    player_game_week_data.append(stats_filtered)
 
-            player_game_week_data.extend([value, points, average, matches, goals, cards])
+                player_game_week_data.extend([value, points, average, matches, goals, cards])
 
-            # Click on player "View more stats" button.
-            player_view_more_stats = helper.wait_click(
-                driver, (helper.By.XPATH, '//*[@id="popup-content"]/div[4]/div/button'), 5)
-            player_view_more_stats.click()
+                # Click on player "View more stats" button.
+                player_view_more_stats = helper.wait_click(
+                    driver, (helper.By.XPATH, '//*[@id="popup-content"]/div[4]/div/button'), 5)
+                player_view_more_stats.click()
 
-            helper.sleep(0.2)
+                helper.sleep(0.2)
 
-            player_stats = driver.find_element(helper.By.XPATH, "/html/body/div[4]/div[1]/div/div[2]/table")
-            player_stats_breakdown = player_stats.find_elements(helper.By.TAG_NAME, "tr")
+                player_stats = driver.find_element(helper.By.XPATH, "/html/body/div[4]/div[1]/div/div[2]/table")
+                player_stats_breakdown = player_stats.find_elements(helper.By.TAG_NAME, "tr")
 
-            for player in player_stats_breakdown:
-                player_filter = player.text.replace(",", ".")
-                player_game_week_data.append(player_filter)
+                for player in player_stats_breakdown:
+                    player_filter = player.text.replace(",", ".")
+                    player_game_week_data.append(player_filter)
 
-            for i in temporal_averages:
-                player_game_week_data.append(i)
+                for i in temporal_averages:
+                    player_game_week_data.append(i)
 
-            # Add a timestamp to the data array.
-            formatted_date_time = helper.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
-            player_game_week_data.append(formatted_date_time)
-            processed_data = process_row(player_game_week_data)
+                # Add a timestamp to the data array.
+                formatted_date_time = helper.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+                player_game_week_data.append(formatted_date_time)
+                processed_data = process_row(player_game_week_data)
+
+                helper.sleep(0.2)
+                close_player_game_week = helper.wait_click(driver, (helper.By.XPATH, '//*[@id="popup"]/button'), 4)
+                close_player_game_week.click()
+            else:
+                player_game_week_data.extend(["0"] * 74)
+                processed_data = player_game_week_data
             temp_list.append(processed_data)
-
-            helper.sleep(0.2)
-            close_player_game_week = helper.wait_click(driver, (helper.By.XPATH, '//*[@id="popup"]/button'), 4)
-            close_player_game_week.click()
 
     return temp_list
 
 
-def process_urls(am, av, aw, header, ucf):
+def process_urls(am, av, aw, header, url):
     driver = helper.login_fantasy_mundo_deportivo()
-    helper.skip_button(driver, (helper.By.CLASS_NAME, "btn-tutorial-skip"))
-    for url in ucf:
-        driver.get(url[0])
+    for u in url:
+        driver.get(u[0])
         # ------ Store players metadata ------
-        meta_data, position, player_complete_name = scrape_fantasy_players_meta_data(driver, url[0])
-        am.append(meta_data)
+        meta, position, player_complete_name = scrape_fantasy_players_meta_data(driver, u[0])
+        am.append(meta)
         # print(player_complete_name)
         # ------ Store players value table ------
-        head, values = scrape_fantasy_players_value_table(driver, player_complete_name, meta_data[0])
+        head, values = scrape_fantasy_players_value_table(driver, player_complete_name, meta[0])
         av.append(values)
         header.append(head)
         # ------ Store players game week ------
-        gw = scrape_fantasy_players_game_week(driver, player_complete_name, position, meta_data[2], meta_data[3],
-                                              meta_data[4], meta_data[5], meta_data[6], meta_data[7], meta_data[0], url)
+        gw = scrape_fantasy_players_game_week(driver, player_complete_name, position, meta[2], meta[3], meta[4],
+                                              meta[5], meta[6], meta[7], meta[0], u[0])
         if gw:
             aw.append(gw)
     driver.quit()
 
 
-def fix_format():
-    with lock:
-        try:
-            with open(helper.players_market_temp_info_file, "r", encoding = "utf-8") as f:
-                temp_file = helper.csv.reader(f)
-                temp_list = list(temp_file)
-                aux = []
-                for player in range(1, len(temp_list)):
-                    for value in range(1, (len(temp_list[player][1:]) + 1)):
-                        aux.append([temp_list[player][0], temp_list[player][1], temp_list[player][value],
-                                    temp_list[0][value]])
-            helper.copy_bak(helper.players_market_temp_info_file, helper.players_market_temp_info_file_bak)
-            helper.write_to_csv(helper.players_market_info_file, fix_format_header, aux, "w")
-        except IndexError as err:
-            logger.exception(err)
-            pass
-
-
 def scrape_players_stats_fantasy():
     url_csv_file = helper.read_player_url()
-    if helper.os.path.exists(helper.timeout_file):
-        helper.os.remove(helper.timeout_file)
-    num_thread = 47
-    segments = [url_csv_file[i:(i + (math.ceil(len(url_csv_file) / (num_thread + 1))))] for i in
-                range(0, len(url_csv_file), (math.ceil(len(url_csv_file) / (num_thread + 1))))]
+    if helper.path.exists(route.timeout_file):
+        helper.remove(route.timeout_file)
 
-    am = [[] for _ in range(num_thread)]
-    av = [[] for _ in range(num_thread)]
-    aw = [[] for _ in range(num_thread)]
-    h = [[] for _ in range(num_thread)]
-    url_lists = [segments[i] for i in range(num_thread)]
+    segments = [url_csv_file[i:(i + (helper.math.ceil(len(url_csv_file) / 6)))] for i in range
+                (0, len(url_csv_file), (helper.math.ceil(len(url_csv_file) / 6)))]
 
-    threads = []
-    for i in range(num_thread):
-        thread = helper.threading.Thread(target = process_urls, args = (am[i], av[i], aw[i], h[i], url_lists[i]))
-        threads.append(thread)
-        helper.sleep(0.1)
-        thread.start()
+    am, av, aw, header = [], [], [], []
+    for _ in segments:
+        process_urls(am, av, aw, header, _)
 
-    for thread in threads:
-        thread.join()
+    if helper.path.exists(route.timeout_file):
+        timeout_url = helper.read_timeout_url()
+        process_urls(am, av, aw, header, timeout_url)
 
-    all_am = [item for sublist in am for item in sublist]
-    all_av = [item for sublist in av for item in sublist]
-    all_aw = [item for sublist in aw for item in sublist]
-    if helper.os.path.exists(helper.timeout_file):
-        process_urls(helper.read_timeout_url(), all_am, all_av, all_aw, h[0])
-    o_all_meta = sorted(all_am, key = lambda x: x[0])
-    o_all_value = sorted(all_av, key = lambda x: x[0])
-    o_all_week = sorted(all_aw, key = lambda x: (x[0][0], x[0][1:]))
-    helper.write_to_csv(helper.players_meta_data_file, players_meta_data_header, o_all_meta, "w")
-    helper.write_to_csv(helper.players_market_temp_info_file, h[0][0], o_all_value, "w")
-    fix_format()
-    helper.write_to_csv(helper.players_game_week_stats_file, english_list, False, "w")
+    o_all_meta = sorted(am, key = lambda x: x[0])
+    o_all_value = sorted(av, key = lambda x: x[1])
+    o_all_week = sorted(aw, key = lambda x: (x[0][0], x[0][1:]))
+    helper.write_to_csv(route.players_meta_data_file, players_meta_data_header, o_all_meta, "w")
+    helper.write_to_csv(route.players_market_temp_info_file_new, header[0], o_all_value, "w")
+    helper.fix_format()
+    helper.write_to_csv(route.players_game_week_stats_file, english_list, False, "w")
     for p in o_all_week:
         p.reverse()
         for week in p:
-            helper.write_to_csv(helper.players_game_week_stats_file, False, [week], "a")
+            helper.write_to_csv(route.players_game_week_stats_file, False, [week], "a")
 
 
 if __name__ == "__main__":
-    # it = helper.datetime.now()
+    logger = helper.define_logger(route.player_log)
     scrape_players_stats_fantasy()
-    helper.delete_profile()
-    for folder in helper.all_folders:
-        helper.scrape_backup(folder, helper.backup_folder)
-    helper.automated_commit("Stats.")
-    # print(str(helper.datetime.now() - it))
+    helper.extract()
+    for folder in route.all_folders:
+        helper.scrape_backup(folder, route.backup_folder)
+    helper.automated_commit("Players.")
