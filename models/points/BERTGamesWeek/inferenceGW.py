@@ -8,9 +8,9 @@ import csv
 
 from sklearn.preprocessing import StandardScaler
 
-from src.model_training import tokenizer  # Replace with your actual tokenizer module
-from transformers import TFBertModel
+from transformers import TFBertModel, BertTokenizer
 
+tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 
 num_features = [
     'Position', 'Game Week', 'Mixed', 'Average', 'Matches', 'Goals Metadata', 'Cards', 'Total Passes',
@@ -76,11 +76,12 @@ def evaluate_model(model, test_features, true_values):
 
     return rmse
 
-# Main script starts here
-if __name__ == "__main__":
+def predict_dataset():
+
     # Load and preprocess the data
     print("Loading and preprocessing data...")
-    df = pd.read_csv('/Users/jorge/Downloads/fantasy-games-week-players-stats.csv')
+    data_path = '../../../scrape/data/players/fantasy-games-week-players-stats.csv'
+    df = pd.read_csv(data_path)
     original_df = df.copy()
     df = preprocess_data(df)
 
@@ -109,7 +110,7 @@ if __name__ == "__main__":
     print("Loading model...")
     # Load the TensorFlow SavedModel
     model = tf.keras.models.load_model(
-        'models/GamesWeekTFDL0108.h5',
+        'models/best_model.h5',
         custom_objects={'TFBertModel': TFBertModel}
     )
     print("Model loaded successfully!")
@@ -139,7 +140,14 @@ if __name__ == "__main__":
         'GameWeek': last_game_week+1
     })
 
+    return results_df
+
+
+# Main script starts here
+if __name__ == "__main__":
+
+    results_df = predict_dataset()
     # Save the DataFrame to a CSV file
-    csv_file_path = f"predictions_mundo_deportivo.csv"
+    csv_file_path = f"predictions/predictions_mundo_deportivo.csv"
     results_df.to_csv(csv_file_path, index=False)
     print(f"Predictions saved to CSV file: {csv_file_path}")

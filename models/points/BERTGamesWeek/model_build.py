@@ -4,9 +4,10 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_squared_error
+from math import sqrt
+import pandas as pd
 
-from src.data_procesing import load_data
-from src.model_evaluation import evaluate_model
 from src.model_training import build_model, tokenizer
 
 num_features = [
@@ -27,6 +28,18 @@ num_features = [
     'Average Season 18/19', 'Average Season 19/20', 'Average Season 20/21',
     'Average Season 21/22', 'Average Season 22/23', 'Average Season 23/24'
 ]
+
+def evaluate_model(model, test_data, true_values):
+    # Generate predictions
+    predictions = model.predict(test_data)
+
+    # Calculate MSE and then RMSE
+    mse = mean_squared_error(true_values, predictions)
+    rmse = sqrt(mse)
+    print(f"Model MSE: {mse}")
+    print(f"Model RMSE: {rmse}")
+    return rmse
+
 
 def preprocess_data(df):
     missing_features = [f for f in num_features if f not in df.columns]
@@ -50,8 +63,8 @@ def get_new_model_input(df, tokenizer, text_columns):
     return [encoded['input_ids'], encoded['attention_mask']]
 
 # Load and preprocess new data (updated for new dataset)
-data_path = '/Users/jorge/Downloads/fantasy-games-week-players-stats.csv'
-data = load_data(data_path)
+data_path = '../../../scrape/data/players/fantasy-games-week-players-stats.csv'
+data = pd.read_csv(data_path)
 
 with open(data_path, 'r', encoding="utf-8-sig") as f:
     column_names = f.readline().strip().split(',')
@@ -62,7 +75,6 @@ data = preprocess_data(data)
 
 
 # Split data into training and test sets (updated feature selection)
-# Assuming 'Mixed' is a target feature
 train_data, test_data = train_test_split(data, test_size=0.2, random_state=42)
 
 

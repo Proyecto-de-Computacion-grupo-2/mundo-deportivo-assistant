@@ -1,14 +1,4 @@
-scrape-market-section/config.json
-/scrape-team-section/config.json
-/laliga-standings/config.json
-<<<<<<< Updated upstream
-.idea
-=======
-/scrape-all-teams-fantasy/config.json
->>>>>>> Stashed changes
-.idea/misc.xml
-.idea/misc.xml
-/scrape-players-fantasy/config.json
-/config.json
-github.sh
-helper.py
+/models/points/BERTGamesWeek/best_model.h5
+/models/points/BERTGamesWeek/models/GamesWeekTFDL0201.h5
+/models/points/BERTGamesWeek/models/model_data_0201.txt
+/models/points/BERTGamesWeek/models/best_model.h5
