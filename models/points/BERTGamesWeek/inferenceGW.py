@@ -8,9 +8,9 @@ import csv
 
 from sklearn.preprocessing import StandardScaler
 
-from src.model_training import tokenizer  # Replace with your actual tokenizer module
-from transformers import TFBertModel
+from transformers import TFBertModel, BertTokenizer
 
+tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 
 num_features = [
     'Position', 'Game Week', 'Mixed', 'Average', 'Matches', 'Goals Metadata', 'Cards', 'Total Passes',
@@ -76,22 +76,20 @@ def evaluate_model(model, test_features, true_values):
 
     return rmse
 
-# Main script starts here
-if __name__ == "__main__":
+def predict_dataset():
+
     # Load and preprocess the data
     print("Loading and preprocessing data...")
-    df = pd.read_csv('/Users/jorge/Downloads/fantasy-games-week-players-stats.csv')
+    data_path = '../../../scrape/data/players/fantasy-games-week-players-stats.csv'
+    df = pd.read_csv(data_path)
     original_df = df.copy()
     df = preprocess_data(df)
 
-    # Extract last game week
-    last_game_week = df['Game Week'].max()
 
-    df = df[df['Game Week'] == last_game_week]
-    original_df = original_df[original_df['Game Week'] == last_game_week]
+    original_df = original_df.drop_duplicates(subset=['ID'])
 
     selected_features = num_features
-    numerical_features = df[selected_features].values
+    numerical_features = original_df[selected_features].values
 
     print(numerical_features)
 
@@ -101,7 +99,9 @@ if __name__ == "__main__":
 
     print(numerical_features)
 
-    model_input = [get_new_model_input(df, tokenizer, num_features), numerical_features]
+
+
+    model_input = [get_new_model_input(original_df, tokenizer, num_features), numerical_features]
     print("Data loaded and preprocessed successfully!")
 
     print(model_input)
@@ -109,7 +109,7 @@ if __name__ == "__main__":
     print("Loading model...")
     # Load the TensorFlow SavedModel
     model = tf.keras.models.load_model(
-        'models/GamesWeekTFDL0108.h5',
+        'models/best_model.h5',
         custom_objects={'TFBertModel': TFBertModel}
     )
     print("Model loaded successfully!")
@@ -125,21 +125,33 @@ if __name__ == "__main__":
     #round predictions
     predictions = [round(x) for x in predictions]
 
-    #remove id rows that appear twice
-    original_df = original_df.drop_duplicates(subset=['ID'])
+
 
     # make negative predictions positive
     predictions = [abs(x) for x in predictions]
+
+    #print all sizes
+    print(len(predictions))
+    print(len(original_df['ID']))
+    print(len(original_df['Position']))
+    print(len(original_df['Game Week']))
 
     # Create a DataFrame with the predictions
     results_df = pd.DataFrame({
         'ID': original_df['ID'],
         'Position': original_df['Position'],
         'PredictedValue': predictions,
-        'GameWeek': last_game_week+1
+        'GameWeek': original_df['Game Week']
     })
 
+    return results_df
+
+
+# Main script starts here
+if __name__ == "__main__":
+
+    results_df = predict_dataset()
     # Save the DataFrame to a CSV file
-    csv_file_path = f"predictions_mundo_deportivo.csv"
+    csv_file_path = f"predictions/predictions_mundo_deportivo.csv"
     results_df.to_csv(csv_file_path, index=False)
     print(f"Predictions saved to CSV file: {csv_file_path}")

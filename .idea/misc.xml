@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Black">
-<<<<<<< Updated upstream
-    <option name="sdkName" value="Python 3.9" />
+    <option name="sdkName" value="Python 3.12 (app1)" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.9" project-jdk-type="Python SDK" />
-=======
-    <option name="sdkName" value="Python 3.9 (mundo-deportivo-scrape)" />
-  </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.9 (mundo-deportivo-scrape)" project-jdk-type="Python SDK" />
->>>>>>> Stashed changes
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.12 (app1)" project-jdk-type="Python SDK" />
 </project>

@@ -46,7 +46,7 @@ def define_logger(file):
             logg = logging.getLogger(__name__)
         return logg
     except Exception as err:
-        logg.exception(err)
+        #logg.exception(err)
         return logg
 
 
