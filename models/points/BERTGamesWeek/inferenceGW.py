@@ -85,14 +85,11 @@ def predict_dataset():
     original_df = df.copy()
     df = preprocess_data(df)
 
-    # Extract last game week
-    last_game_week = df['Game Week'].max()
 
-    df = df[df['Game Week'] == last_game_week]
-    original_df = original_df[original_df['Game Week'] == last_game_week]
+    original_df = original_df.drop_duplicates(subset=['ID'])
 
     selected_features = num_features
-    numerical_features = df[selected_features].values
+    numerical_features = original_df[selected_features].values
 
     print(numerical_features)
 
@@ -102,7 +99,9 @@ def predict_dataset():
 
     print(numerical_features)
 
-    model_input = [get_new_model_input(df, tokenizer, num_features), numerical_features]
+
+
+    model_input = [get_new_model_input(original_df, tokenizer, num_features), numerical_features]
     print("Data loaded and preprocessed successfully!")
 
     print(model_input)
@@ -126,18 +125,23 @@ def predict_dataset():
     #round predictions
     predictions = [round(x) for x in predictions]
 
-    #remove id rows that appear twice
-    original_df = original_df.drop_duplicates(subset=['ID'])
+
 
     # make negative predictions positive
     predictions = [abs(x) for x in predictions]
+
+    #print all sizes
+    print(len(predictions))
+    print(len(original_df['ID']))
+    print(len(original_df['Position']))
+    print(len(original_df['Game Week']))
 
     # Create a DataFrame with the predictions
     results_df = pd.DataFrame({
         'ID': original_df['ID'],
         'Position': original_df['Position'],
         'PredictedValue': predictions,
-        'GameWeek': last_game_week+1
+        'GameWeek': original_df['Game Week']
     })
 
     return results_df
