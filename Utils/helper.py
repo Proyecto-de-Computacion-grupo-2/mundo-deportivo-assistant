@@ -9,9 +9,9 @@
 import Utils.routes as route
 
 import PySimpleGUI as pSG
-import asyncio, base64, csv, glob, hashlib, http.client, io, json, logging, math, pandas, re, requests, shutil, sys, threading
+import asyncio, base64, csv, glob, hashlib, http.client, io, json, logging, math, pandas, re, requests, shutil, sys,\
+    threading
 
-from application.src.Layouts import login_window, main_window
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from random import choice, uniform
@@ -46,7 +46,7 @@ def define_logger(file):
             logg = logging.getLogger(__name__)
         return logg
     except Exception as err:
-        #logg.exception(err)
+        logg.exception(err)
         return logg
 
 
@@ -69,7 +69,7 @@ def automated_commit(who: str):
 
 
 def extract():
-    df = pandas.read_csv(route.players_meta_data_file)
+    df = pandas.read_csv(route.players_game_week_stats_file)
     new_df = df.iloc[:, :2]
     new = new_df.drop_duplicates()
     new.to_csv(route.id_mapping, index = False)
@@ -308,7 +308,7 @@ def extract_player_id(players_info):
     return whole_team_id
 
 
-def scrape_player_info(t_p_i, t_p_ic, team_id):
+def scrape_player_info(typ, t_p_i, t_p_ic, team_id):
     # Create an array to save players info.
     players = []
     positions = []
@@ -325,17 +325,23 @@ def scrape_player_info(t_p_i, t_p_ic, team_id):
             position = "3"
         positions.append(position)
 
+    raw_player_information = None
     for player_info in t_p_i:
         # Split the text to create a list of player information.
-        raw_player_information = player_info.text.split("\n")
+        if typ == "f":
+            raw_player_information = player_info.text.split("\n")[1:]
+        elif typ == "m":
+            raw_player_information = player_info.text.split("\n")
+            del raw_player_information[1]
 
-        # Clean the data.
-        cleaned_player_information = [item.replace("↑", "").replace("↓", "").replace(",", ".").
-                                      replace("-", "0.0").strip() for item in raw_player_information]
-        temp = [team_id[t_p_i.index(player_info)]]
-        temp.extend(cleaned_player_information)
-        temp.extend(positions[t_p_i.index(player_info)])
-        players.append(temp)
+        if raw_player_information:
+            # Clean the data.
+            cleaned_player_information = [item.replace("↑", "").replace("↓", "").replace(",", ".").
+                                          replace("-", "0.0").strip() for item in raw_player_information]
+            temp = [team_id[t_p_i.index(player_info)]]
+            temp.extend(cleaned_player_information)
+            temp.extend(positions[t_p_i.index(player_info)])
+            players.append(temp)
     return players
 
 
@@ -346,13 +352,14 @@ def login_fantasy_mundo_deportivo():
     email_fantasy = c["email"]
     password_fantasy = c["password"]
 
-    # chrome_options = webdriver.ChromeOptions()
-    # chrome_options.add_argument("--headless")
-    # driver = webdriver.Chrome(options = chrome_options)
-
-    firefox_options = webdriver.FirefoxOptions()
-    # firefox_options.add_argument("--headless")
-    driver = webdriver.Firefox(options = firefox_options)
+    if all(system() != ext for ext in ["Linux", "Windows"]):
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument("--headless")
+        driver = webdriver.Chrome(options = chrome_options)
+    else:
+        firefox_options = webdriver.FirefoxOptions()
+        firefox_options.add_argument("--headless")
+        driver = webdriver.Firefox(options = firefox_options)
 
     driver.set_page_load_timeout(30)
 
