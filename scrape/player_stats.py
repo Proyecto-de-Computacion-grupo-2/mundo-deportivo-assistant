@@ -5,8 +5,10 @@
 
 #
 
+
 import Utils.helper as helper
 import Utils.routes as route
+
 
 # Gameweek headers.
 spanish_map_list = ["id", "player full name", "posición", "game week", "equipo", "contrincante", "mixto", "as score",
@@ -294,7 +296,7 @@ def scrape_fantasy_players_game_week(driver, data_id, player_url):
 
                 helper.sleep(0.2)
 
-                player_stats = driver.find_element(helper.By.XPATH, "/html/body/div[4]/div[1]/div/div[2]/table")
+                player_stats = driver.find_element(helper.By.CLASS_NAME, "player-breakdown")
                 player_stats_breakdown = player_stats.find_elements(helper.By.TAG_NAME, "tr")
 
                 for player in player_stats_breakdown:
