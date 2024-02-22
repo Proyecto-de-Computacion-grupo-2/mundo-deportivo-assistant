@@ -8,8 +8,7 @@
 
 import Utils.routes as route
 
-import PySimpleGUI as pSG
-import asyncio, base64, csv, glob, hashlib, http.client, io, json, logging, math, pandas, re, requests, shutil, sys,\
+import asyncio, base64, csv, glob, hashlib, http.client, io, json, logging, math, pandas, re, requests, shutil, sys, \
     threading
 
 from bs4 import BeautifulSoup
@@ -18,11 +17,10 @@ from random import choice, uniform
 from os import chdir, getcwd, listdir, makedirs, path, remove, system
 from PIL import Image, ImageDraw, ImageFont
 from PIL.Image import Resampling
-from PySimpleGUI import WIN_CLOSED
 from selenium.webdriver.support import expected_conditions as ec
 from selenium import webdriver
-from selenium.common import ElementClickInterceptedException, NoSuchElementException, StaleElementReferenceException,\
-    TimeoutException
+from selenium.common import ElementClickInterceptedException, NoSuchElementException, StaleElementReferenceException, \
+    TimeoutException, WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from platform import system
@@ -372,6 +370,10 @@ def login_fantasy_mundo_deportivo():
             logger.exception(err)
             sleep(2)
             pass
+        except WebDriverException as err:
+            logger.exception(err)
+            sleep(2)
+            pass
 
     # Wait for the cookies to appear and click the button to accept them.
     sleep(uniform(0.4, 0.6))
@@ -381,6 +383,8 @@ def login_fantasy_mundo_deportivo():
             disagree = wait_click(driver, (By.ID, "didomi-notice-disagree-button"), 4)
             if disagree:
                 disagree.click()
+            driver.get("https://mister.mundodeportivo.com/new-onboarding/auth/email")
+            sleep(uniform(0.4, 0.6))
             intercept = False
         except (ElementClickInterceptedException, StaleElementReferenceException):
             sleep(6)
