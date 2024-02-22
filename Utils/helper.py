@@ -370,6 +370,10 @@ def login_fantasy_mundo_deportivo():
             #logger.exception(err)
             sleep(2)
             pass
+        except WebDriverException as err:
+            logger.exception(err)
+            sleep(2)
+            pass
 
     # Wait for the cookies to appear and click the button to accept them.
     sleep(uniform(0.4, 0.6))
