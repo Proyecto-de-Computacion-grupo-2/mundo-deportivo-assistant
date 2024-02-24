@@ -12,7 +12,9 @@ import asyncio, base64, csv, glob, hashlib, http.client, io, json, logging, math
     threading
 
 from bs4 import BeautifulSoup
-from datetime import datetime, timedelta
+import mysql.connector
+import os
+from datetime import datetime, timedelta,timezone
 from random import choice, uniform
 from os import chdir, getcwd, listdir, makedirs, path, remove, system
 from PIL import Image, ImageDraw, ImageFont
@@ -371,7 +373,7 @@ def login_fantasy_mundo_deportivo():
             sleep(2)
             pass
         except WebDriverException as err:
-            logger.exception(err)
+            #logger.exception(err)
             sleep(2)
             pass
 
@@ -439,5 +441,22 @@ def scrape_backup(folder, backup):
         else:
             shutil.copy(original_path, back_path)
 
+# Database
+def create_database_connection():
+    try:
+        connection = mysql.connector.connect(
+            host=os.getenv('DB_HOST', '127.0.0.1'),
+            port=os.getenv('DB_PORT', '3306'),
+            user=os.getenv('DB_USER', 'root'),
+            password=os.getenv('DB_PASSWORD', 'root'),
+            database=os.getenv('DB_NAME', 'pc2')
+        )
+        print("Database connection successful.")
+        return connection
+    except Exception as e:
+        print(f"Error connecting to MariaDB Platform: {e}")
+        return None
 
-#logger = define_logger(route.helper_log)
+def close_database_connection(conn):
+    if conn is not None:
+        conn.close()

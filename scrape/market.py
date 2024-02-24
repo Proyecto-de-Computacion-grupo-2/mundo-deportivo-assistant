@@ -62,6 +62,6 @@ if __name__ == "__main__":
     logger = helper.define_logger(route.market_log)
     scrape_market_section_fantasy()
     scrape_personal_lineup_fantasy()
-    helper.extract()
+    #helper.extract()
     for folder in route.all_folders:
         helper.scrape_backup(folder, route.backup_folder)
