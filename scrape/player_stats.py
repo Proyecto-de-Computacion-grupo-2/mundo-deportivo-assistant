@@ -56,6 +56,35 @@ english_list = ["ID", "Player full name", "Position", "Game Week", "Team", "Oppo
                 "Average Season 21/22", "Average Season 22/23", "Average Season 23/24", "Timestamp"]
 
 
+def database_insert_price_variation(dates,values):
+    connection = helper.create_database_connection()
+    try:
+        cursor = connection.cursor()
+        sql = """
+        INSERT INTO price_variation (
+            id_player,price,day
+        ) VALUES (%s, %s, %s)
+        """
+
+        # Assume temp_list is defined and populated with your data
+        id_player = int(values[0])
+        for i in range(2,len(dates)):
+            value = int(values[i])
+
+            date = dates[i]
+            date_obj = helper.datetime.strptime(date, '%d/%m/%Y')
+            formatted_date = date_obj.strftime('%Y-%m-%d')
+
+            data = [id_player, value, formatted_date]
+            cursor.execute(sql, data)
+
+        connection.commit()
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
 def scrape_fantasy_players_value_table(driver, data_id):
     def extract_date(extract):
         meses = {"ene": "jan", "abr": "apr", "ago": "aug", "sept": "sep", "dic": "dec"}
@@ -108,7 +137,7 @@ def scrape_fantasy_players_value_table(driver, data_id):
                     values[dates.index(dates[i])] = point["value"]
                     found = True
                 i += 1
-        #database_insert_price_variation(dates, values)
+        database_insert_price_variation(dates, values)
         return dates, values
 
 
@@ -245,36 +274,6 @@ def database_insert_player(player_stats):
                 INSERT INTO play (id_player, id_game) VALUES (%s, %s)
             """
             cursor.execute(sql_play, (id_mundo_deportivo, id_game))
-        connection.commit()
-
-    finally:
-        if connection.is_connected():
-            cursor.close()
-            connection.close()
-
-
-def database_insert_price_variation(dates,values):
-    connection = helper.create_database_connection()
-    try:
-        cursor = connection.cursor()
-        sql = """
-        INSERT INTO price_variation (
-            id_player,price,day
-        ) VALUES (%s, %s, %s)
-        """
-
-        # Assume temp_list is defined and populated with your data
-        id_player = int(values[0])
-        for i in range(2,len(dates)):
-            value = int(values[i])
-
-            date = dates[i]
-            date_obj = helper.datetime.strptime(date, '%d/%m/%Y')
-            formatted_date = date_obj.strftime('%Y-%m-%d')
-
-            data = [id_player, value, formatted_date]
-            cursor.execute(sql, data)
-
         connection.commit()
 
     finally:
