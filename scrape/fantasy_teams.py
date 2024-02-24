@@ -33,30 +33,7 @@ def database_insert_users(teams_data):
             connection.close()
 
 def database_insert_players_users(teams_data):
-    connection = helper.create_database_connection()
-    try:
-        cursor = connection.cursor()
-        sql = """
-        INSERT INTO user (
-            team_name,team_points,team_average,team_value,team_players
-        ) VALUES (%s, %s, %s,%s,%s)
-        """
-
-        for team_data in teams_data:
-            team_data[1] = int(team_data[1])
-            team_data[2] = float(team_data[2])
-            team_data[3] = float(team_data[3].replace("M", ""))
-            team_data[4] = int(team_data[4])
-            cursor.execute(sql, team_data)
-
-        connection.commit()
-
-    finally:
-        if connection.is_connected():
-            cursor.close()
-            connection.close()
-
-
+    pass
 
 
 def scrape_all_players_fantasy():
