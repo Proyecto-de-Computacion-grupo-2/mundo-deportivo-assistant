@@ -8,29 +8,25 @@
 
 import Utils.routes as route
 
-import PySimpleGUI as pSG
-import asyncio, base64, csv, glob, hashlib, http.client, io, json, logging, math, pandas, re, requests, shutil, sys,\
+import asyncio, base64, csv, glob, hashlib, http.client, io, json, logging, math, pandas, re, requests, shutil, sys, \
     threading
 
 from bs4 import BeautifulSoup
-from datetime import datetime, timedelta
+import mysql.connector
+import os
+from datetime import datetime, timedelta,timezone
 from random import choice, uniform
 from os import chdir, getcwd, listdir, makedirs, path, remove, system
 from PIL import Image, ImageDraw, ImageFont
 from PIL.Image import Resampling
-from PySimpleGUI import WIN_CLOSED
 from selenium.webdriver.support import expected_conditions as ec
 from selenium import webdriver
-from selenium.common import ElementClickInterceptedException, NoSuchElementException, StaleElementReferenceException,\
-    TimeoutException
+from selenium.common import ElementClickInterceptedException, NoSuchElementException, StaleElementReferenceException, \
+    TimeoutException, WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from platform import system
 from time import sleep
-from telegram import Bot, error, Update
-from telegram.ext import Application, ApplicationBuilder, CallbackContext, CommandHandler, ContextTypes, filters,\
-    JobQueue, InlineQueryHandler, MessageHandler, Updater
-
 
 # For debugging, this sets up a formatting for a logfile, and where it is.
 def define_logger(file):
@@ -46,7 +42,7 @@ def define_logger(file):
             logg = logging.getLogger(__name__)
         return logg
     except Exception as err:
-        logg.exception(err)
+        #logg.exception(err)
         return logg
 
 
@@ -237,7 +233,7 @@ def fix_format():
             copy_bak(route.players_market_temp_info_file, route.players_market_temp_info_file_bak)
             write_to_csv(route.players_market_info_file, ["ID", "Name", "Value", "Date"], aux, "w")
         except IndexError as err:
-            logger.exception(err)
+            #logger.exception(err)
             pass
 
 
@@ -369,7 +365,15 @@ def login_fantasy_mundo_deportivo():
             driver.get("https://mister.mundodeportivo.com/new-onboarding/auth/email")
             navigation_to = False
         except TimeoutException as err:
-            logger.exception(err)
+            #logger.exception(err)
+            sleep(2)
+            pass
+        except WebDriverException as err:
+            #logger.exception(err)
+            sleep(2)
+            pass
+        except WebDriverException as err:
+            #logger.exception(err)
             sleep(2)
             pass
 
@@ -381,6 +385,8 @@ def login_fantasy_mundo_deportivo():
             disagree = wait_click(driver, (By.ID, "didomi-notice-disagree-button"), 4)
             if disagree:
                 disagree.click()
+            driver.get("https://mister.mundodeportivo.com/new-onboarding/auth/email")
+            sleep(uniform(0.4, 0.6))
             intercept = False
         except (ElementClickInterceptedException, StaleElementReferenceException):
             sleep(6)
@@ -423,7 +429,7 @@ def scrape_backup(folder, backup):
             except FileNotFoundError as err:
                 backup_size, original_size = -1, -1
                 print(f"El archivo original '{original_path}' no existe.")
-                logger.exception(err)
+                #logger.exception(err)
             try:
                 if 0 < original_size > backup_size:
                     shutil.copy(original_path, back_path)
@@ -431,9 +437,26 @@ def scrape_backup(folder, backup):
                     shutil.copy(back_path, original_path)
             except shutil.Error as err:
                 print(f"Error al copiar archivos: {err}")
-                logger.exception(err)
+                #logger.exception(err)
         else:
             shutil.copy(original_path, back_path)
 
+# Database
+def create_database_connection():
+    try:
+        connection = mysql.connector.connect(
+            host=os.getenv('DB_HOST', '127.0.0.1'),
+            port=os.getenv('DB_PORT', '3306'),
+            user=os.getenv('DB_USER', 'root'),
+            password=os.getenv('DB_PASSWORD', 'root'),
+            database=os.getenv('DB_NAME', 'pc2')
+        )
+        print("Database connection successful.")
+        return connection
+    except Exception as e:
+        print(f"Error connecting to MariaDB Platform: {e}")
+        return None
 
-logger = define_logger(route.helper_log)
+def close_database_connection(conn):
+    if conn is not None:
+        conn.close()

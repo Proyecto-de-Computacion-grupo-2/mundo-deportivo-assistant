@@ -5,8 +5,10 @@
 
 #
 
+
 import Utils.helper as helper
 import Utils.routes as route
+
 
 # Gameweek headers.
 spanish_map_list = ["id", "player full name", "posición", "game week", "equipo", "contrincante", "mixto", "as score",
@@ -53,6 +55,35 @@ english_list = ["ID", "Player full name", "Position", "Game Week", "Team", "Oppo
                 "Average Season 17/18", "Average Season 18/19", "Average Season 19/20", "Average Season 20/21",
                 "Average Season 21/22", "Average Season 22/23", "Average Season 23/24", "Timestamp"]
 
+
+def database_insert_price_variation(dates,values):
+    connection = helper.create_database_connection()
+    try:
+        cursor = connection.cursor()
+        sql = """
+        INSERT INTO price_variation (
+            id_player,price,day
+        ) VALUES (%s, %s, %s)
+        """
+
+        # Assume temp_list is defined and populated with your data
+        id_player = int(values[0])
+        for i in range(2,len(dates)):
+            value = int(values[i])
+
+            date = dates[i]
+            date_obj = helper.datetime.strptime(date, '%d/%m/%Y')
+            formatted_date = date_obj.strftime('%Y-%m-%d')
+
+            data = [id_player, value, formatted_date]
+            cursor.execute(sql, data)
+
+        connection.commit()
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
 
 def scrape_fantasy_players_value_table(driver, data_id):
     def extract_date(extract):
@@ -106,7 +137,7 @@ def scrape_fantasy_players_value_table(driver, data_id):
                     values[dates.index(dates[i])] = point["value"]
                     found = True
                 i += 1
-
+        database_insert_price_variation(dates, values)
         return dates, values
 
 
@@ -118,12 +149,12 @@ def process_row(fila):
     aplicar_mapeo, i = False, 0
     for valor in fila[:-1]:
         if " ".join(str(valor).split(" ")[:-1]).lower() in spanish_checklist and not \
-                all(ext in str(valor) for ext in ["2023", ":"]):
+                all(ext in str(valor) for ext in ["2024",":"]):
             aplicar_mapeo = True
-        elif all(ext in str(valor) for ext in ["2023", ":"]):
+        elif all(ext in str(valor) for ext in ["2024", ":"]):
             datos_procesados[int(english_list.index("Timestamp"))] = str(valor)
         if " ".join(str(valor).split(" ")[:-1]).lower() == "valoración" or \
-                str(valor).lower() == "nan" or all(ext in str(valor) for ext in ["2023", ":"]):
+                str(valor).lower() == "nan" or all(ext in str(valor) for ext in ["2024",":"]):
             yeet = True
         else:
             yeet = False
@@ -144,6 +175,111 @@ def process_row(fila):
                 i += 1
 
     return datos_procesados
+
+
+def get_all_players_id_mundo_deportivo():
+    connection = helper.create_database_connection()
+    try:
+        cursor = connection.cursor()
+        sql = "SELECT id_mundo_deportivo FROM player"
+        cursor.execute(sql)
+
+        results = cursor.fetchall()
+
+        player_ids = [result[0] for result in results]
+
+        return player_ids
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+def insert_table_game(player_stats):
+    connection = helper.create_database_connection()
+    inserted_game_ids = []
+    try:
+        cursor = connection.cursor()
+
+        sql_game = """
+        INSERT INTO game (
+            game_week,team, opposing_team, mixed, as_score, 
+            marca_score, mundo_deportivo_score, sofa_score, current_value, points, 
+            average, matches, goals_metadata, cards, total_passes, accurate_passes, 
+            total_long_balls, accurate_long_balls, total_crosses, accurate_crosses, 
+            total_clearances, clearances_on_goal_line, aerial_duels_Lost, aerial_duels_Won, 
+            duels_lost, duels_won, dribbled_past, losses, total_dribbles, completed_dribbles, 
+            high_clearances, fist_clearances, failures_that_lead_to_shot, failures_that_lead_to_goal, 
+            shots_off_target, shots_on_target, shots_blocked_in_attack, shots_blocked_in_defence, 
+            occasions_created, goal_assists, shots_to_the_crossbar, failed_obvious_occasions, 
+            penalties_committed, penalties_caused, failed_penalties, stopped_penalties, goals, 
+            own_goals, stops_from_inside_the_area, stops, goals_avoided, interceptions, 
+            total_outputs, precise_outputs, total_tackles, fouls_received, fouls_committed, 
+            offsides, minutes_played, touches, entries_as_last_man, possessions_lost, 
+            expected_goals, key_passes, expected_assists, average_season_15_16, 
+            average_season_16_17, average_season_17_18, average_season_18_19, 
+            average_season_19_20, average_season_20_21, average_season_21_22, 
+            average_season_22_23, average_season_23_24, timestamp
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+                  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+                  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+                  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        # Prepare your data tuple here based on player_stats and possibly other sources
+        for player_stat in player_stats:
+            timestamp_index = -1
+            unix_timestamp = int(player_stat[timestamp_index])
+            dt_object = helper.datetime.fromtimestamp(unix_timestamp, helper.timezone.utc)
+            player_stat[timestamp_index] = dt_object.strftime('%Y-%m-%d %H:%M:%S')
+
+            player_stat[11] = player_stat[11].replace('.', '')
+            player_stat[11] = int(player_stat[11])
+            player_stat[13] = float(player_stat[13])
+
+            data_to_insert = player_stat[3:]
+
+            cursor.execute(sql_game, data_to_insert)
+            inserted_game_ids.append(cursor.lastrowid)
+
+        connection.commit()
+        return inserted_game_ids
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+def database_insert_player(player_stats):
+    connection = helper.create_database_connection()
+
+    try:
+        cursor = connection.cursor()
+        ids_in_db = get_all_players_id_mundo_deportivo()
+        id_mundo_deportivo = int(player_stats[0][0])
+
+        if id_mundo_deportivo not in ids_in_db:
+            # Insert new player and get id_mundo_deportivo back (if it's generated automatically)
+            sql_player = """
+                INSERT INTO player (id_mundo_deportivo, full_name, position) 
+                VALUES (%s, %s, %s)
+            """
+            player_data = (int(player_stats[0][0]), player_stats[0][1], int(player_stats[0][2]))
+            cursor.execute(sql_player, player_data)
+            connection.commit()
+
+        inserted_game_ids = insert_table_game(player_stats)
+
+        for id_game in inserted_game_ids:
+            sql_play = """
+                INSERT INTO play (id_player, id_game) VALUES (%s, %s)
+            """
+            cursor.execute(sql_play, (id_mundo_deportivo, id_game))
+        connection.commit()
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
 
 
 def scrape_fantasy_players_game_week(driver, data_id, player_url):
@@ -294,7 +430,7 @@ def scrape_fantasy_players_game_week(driver, data_id, player_url):
 
                 helper.sleep(0.2)
 
-                player_stats = driver.find_element(helper.By.XPATH, "/html/body/div[4]/div[1]/div/div[2]/table")
+                player_stats = driver.find_element(helper.By.CLASS_NAME, "player-breakdown")
                 player_stats_breakdown = player_stats.find_elements(helper.By.TAG_NAME, "tr")
 
                 for player in player_stats_breakdown:
@@ -317,6 +453,7 @@ def scrape_fantasy_players_game_week(driver, data_id, player_url):
                 processed_data = player_game_week_data
             temp_list.append(processed_data)
 
+    database_insert_player(temp_list)
     return temp_list
 
 
@@ -356,16 +493,18 @@ def scrape_players_stats_fantasy():
     o_all_week = sorted(aw, key = lambda x: (x[0][0], x[0][1:]))
     helper.write_to_csv(route.players_market_temp_info_file_new, header[0], o_all_value, "w")
     helper.fix_format()
-    helper.write_to_csv(route.players_game_week_stats_file, english_list, False, "w")
+    print(helper.write_to_csv(route.players_game_week_stats_file, english_list, False, "w"))
     for p in o_all_week:
         p.reverse()
         for week in p:
-            helper.write_to_csv(route.players_game_week_stats_file, False, [week], "a")
+            print(helper.write_to_csv(route.players_game_week_stats_file, False, [week], "a"))
 
 
 if __name__ == "__main__":
+    connection = helper.create_database_connection()
     logger = helper.define_logger(route.player_log)
     scrape_players_stats_fantasy()
     helper.extract()
     for folder in route.all_folders:
         helper.scrape_backup(folder, route.backup_folder)
+    helper.close_database_connection(connection)

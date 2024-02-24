@@ -8,6 +8,33 @@
 import Utils.helper as helper
 import Utils.routes as route
 
+def database_insert_users(teams_data):
+    connection = helper.create_database_connection()
+    try:
+        cursor = connection.cursor()
+        sql = """
+        INSERT INTO user (
+            team_name,team_points,team_average,team_value,team_players
+        ) VALUES (%s, %s, %s,%s,%s)
+        """
+
+        for team_data in teams_data:
+            team_data[1] = int(team_data[1])
+            team_data[2] = float(team_data[2])
+            team_data[3] = float(team_data[3].replace("M", ""))
+            team_data[4] = int(team_data[4])
+            cursor.execute(sql, team_data)
+
+        connection.commit()
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+def database_insert_players_users(teams_data):
+    pass
+
 
 def scrape_all_players_fantasy():
     """
@@ -79,21 +106,15 @@ def scrape_teams_information():
     """
     driver = helper.login_fantasy_mundo_deportivo()
 
-    # Select the markets section, wait ten seconds as it usually takes some time to load the page.
     driver.get("https://mister.mundodeportivo.com/standings")
 
-    # Get the table with all the teams' information.
-    # Find all the user elements
     table_elements = driver.find_elements(by = helper.By.CSS_SELECTOR, value = "ul.user-list li a.btn.btn-sw-link.user")
 
-    # Extract the href values from each userTeam element
     user_hrefs = [user.get_attribute("href") for user in table_elements]
-    # Since each player can have different positon, this is so that we can find depending on which pos the player is at
-    position_mapping = {"pos-1": "Goalkeeper", "pos-2": "Defence", "pos-3": "Midfielder", "pos-4": "Forward"}
 
     user_hrefs = list(set(user_hrefs))
 
-    teams_players_header = ["Team Name", "Position", "Name", "Surname"]
+    teams_players_header = ["Team Name", "Player id"]
     original_labels = ["Team Name", "Puntos", "Media", "Valor", "Jugadores"]
     team_data_header = ["Team Name", "Points", "Average", "Value", "Players"]
     label_mapping = dict(zip(original_labels, team_data_header))
@@ -126,24 +147,11 @@ def scrape_teams_information():
 
         # In this for once with all players links we get the name, surname and position
         for player in player_hrefs:
-            driver.get(player)
-            soup = helper.BeautifulSoup(driver.page_source, "html.parser")
+            player_id = helper.re.findall(r'\d+', player)
+            teams_players_data.append([team_name, player_id])
 
-            # Extract class = pos-" text
-            position_class = soup.select_one(".team-position i")["class"][0]
 
-            # Find the "left" div
-            left_div = soup.find("div", class_ = "left")
 
-            # Extract the name from within the "left" div
-            name = left_div.find("div", class_ = "name").text
-            surname = left_div.find("div", class_ = "surname").text
-
-            # Map the position class to the corresponding position
-            position = position_mapping.get(position_class, "Unknown")
-
-            teams_players_data.append([team_name, position, name, surname])
-        driver.get(user_element)
         soup = helper.BeautifulSoup(driver.page_source, "html.parser")
 
         # Select the parent div element with the class "wrapper" to narrow down the search
@@ -170,6 +178,7 @@ def scrape_teams_information():
         # Write the data to the CSV file
         team_data_data.append([team_name, points, average, team_value, players_count])
 
+    database_insert_users(team_data_data)
     helper.write_to_csv(route.team_data_file, team_data_header, sorted(team_data_data, key = lambda x: x[0][0]), "w")
     helper.write_to_csv(route.teams_players_file, teams_players_header,
                         sorted(teams_players_data, key = lambda x: x[0][0]), "w")
@@ -179,8 +188,8 @@ def scrape_teams_information():
 
 if __name__ == "__main__":
     logger = helper.define_logger(route.teams_log)
-    scrape_all_players_fantasy()
-    scrape_personal_team_fantasy()
+    #scrape_all_players_fantasy()
+    #scrape_personal_team_fantasy()
     scrape_teams_information()
     for folder in route.all_folders:
         helper.scrape_backup(folder, route.backup_folder)
