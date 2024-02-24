@@ -350,7 +350,7 @@ def login_fantasy_mundo_deportivo():
 
     if all(system() != ext for ext in ["Linux", "Windows"]):
         chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--headless")
+        #chrome_options.add_argument("--headless")
         driver = webdriver.Chrome(options = chrome_options)
     else:
         firefox_options = webdriver.FirefoxOptions()
