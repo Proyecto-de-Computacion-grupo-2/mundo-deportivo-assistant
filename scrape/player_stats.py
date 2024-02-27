@@ -62,7 +62,7 @@ def database_insert_price_variation(dates,values):
         cursor = connection.cursor()
         sql = """
         INSERT INTO price_variation (
-            id_player,price,day
+            id_mundo_deportivo,price,day
         ) VALUES (%s, %s, %s)
         """
 
@@ -137,7 +137,7 @@ def scrape_fantasy_players_value_table(driver, data_id):
                     values[dates.index(dates[i])] = point["value"]
                     found = True
                 i += 1
-        #database_insert_price_variation(dates, values)
+        database_insert_price_variation(dates, values)
         return dates, values
 
 
