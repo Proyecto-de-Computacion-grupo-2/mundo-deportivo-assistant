@@ -55,8 +55,27 @@ english_list = ["ID", "Player full name", "Position", "Game Week", "Team", "Oppo
                 "Average Season 17/18", "Average Season 18/19", "Average Season 19/20", "Average Season 20/21",
                 "Average Season 21/22", "Average Season 22/23", "Average Season 23/24", "Timestamp"]
 
+def database_get_all_date_by_id(player_id):
+    connection = helper.create_database_connection()
+    data = [player_id] # Need to do this as a list because of cursor.execute parameters.
+    try:
+        cursor = connection.cursor()
+        sql = "SELECT day FROM price_variation WHERE id_mundo_deportivo = %s;"
+        cursor.execute(sql, data)
 
-def database_insert_price_variation(dates,values):
+        results = cursor.fetchall()
+
+        game_weeks = [result[0] for result in results]
+
+        return game_weeks
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+
+def database_insert_price_variation(dates, values):
     connection = helper.create_database_connection()
     try:
         cursor = connection.cursor()

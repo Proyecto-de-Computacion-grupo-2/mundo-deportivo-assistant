@@ -33,6 +33,7 @@ def database_insert_users(teams_data):
             connection.close()
 
 def database_insert_players_users(teams_data):
+    """Once all players have been added to the database, we need to run this code to identify where each player is."""
     pass
 
 
