@@ -509,14 +509,14 @@ def process_urls(av, aw, header, url):
     for u in url:
         driver.get(u[0])
         data_id = u[0].split("/")[-2]
-        # ------ Store players value table ------
-        head, values = scrape_fantasy_players_value_table(driver, data_id)
-        av.append(values)
-        header.append(head)
         # ------ Store players game week ------
         gw = scrape_fantasy_players_game_week(driver, data_id, u[0])
         if gw:
             aw.append(gw)
+        # ------ Store players value table ------
+        head, values = scrape_fantasy_players_value_table(driver, data_id)
+        av.append(values)
+        header.append(head)
     driver.quit()
 
 
