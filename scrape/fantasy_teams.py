@@ -8,33 +8,86 @@
 import Utils.helper as helper
 import Utils.routes as route
 
-def database_insert_users(teams_data):
+# todo PENDNING TO FINISH FUNCTION.
+def database_insert_players_users(teams_data):
+    """Once all players have been added to the database, we need to run this code to identify where each player is."""
+    pass
+
+def database_get_id_by_name(team_name):
     connection = helper.create_database_connection()
+    data = [team_name]
     try:
         cursor = connection.cursor()
-        sql = """
-        INSERT INTO user (
-            team_name,team_points,team_average,team_value,team_players
-        ) VALUES (%s, %s, %s,%s,%s)
-        """
+        sql = "SELECT id_user FROM user WHERE team_name=%s;"
 
-        for team_data in teams_data:
-            team_data[1] = int(team_data[1])
-            team_data[2] = float(team_data[2])
-            team_data[3] = float(team_data[3].replace("M", ""))
-            team_data[4] = int(team_data[4])
-            cursor.execute(sql, team_data)
+        cursor.execute(sql, data)
 
-        connection.commit()
+        result = cursor.fetchone()
+
+        if result:
+            return result[0]
+        else:
+            return None
 
     finally:
         if connection.is_connected():
             cursor.close()
             connection.close()
 
-def database_insert_players_users(teams_data):
-    """Once all players have been added to the database, we need to run this code to identify where each player is."""
-    pass
+def database_get_all_users():
+    connection = helper.create_database_connection()
+    try:
+        cursor = connection.cursor()
+        sql = "SELECT team_name FROM user;"
+        cursor.execute(sql)
+
+        results = cursor.fetchall()
+
+        teams_title = [result[0] for result in results]
+
+        return teams_title
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+
+def database_insert_users(teams_data):
+    connection = helper.create_database_connection()
+    teams_in_db = database_get_all_users()
+    try:
+        cursor = connection.cursor()
+        sql_insert = """
+        INSERT INTO user (
+            team_name,team_points,team_average,team_value,team_players
+        ) VALUES (%s, %s, %s,%s,%s)
+        """
+
+        sql_update = """
+        UPDATE user
+        SET team_points = %s, team_average = %s, team_value = %s, team_players = %s
+        WHERE id_user = %s;
+        """
+        for team_data in teams_data:
+            team_name = team_data[0]
+            team_id = database_get_id_by_name(team_name)
+            team_data[1] = int(team_data[1])
+            team_data[2] = float(team_data[2])
+            team_data[3] = float(team_data[3].replace("M", ""))
+            team_data[4] = int(team_data[4])
+            if team_name not in teams_in_db:
+                cursor.execute(sql_insert, team_data)
+            else:
+                data_update = team_data[1:5]
+                data_update.append(team_id)
+                cursor.execute(sql_update, data_update)
+        connection.commit()
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
 
 
 def scrape_all_players_fantasy():
