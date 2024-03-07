@@ -61,7 +61,7 @@ class Users:
         def to_insert_statements(self):
             return self.to_insert_statement("user")
 
-    def add_user(self, id_user, email, password, team_name, team_points = 0, team_average = 0.0, team_value = 0.0,
+    def add_user(self, id_user, email = "", password = "", team_name = "", team_points = 0, team_average = 0.0, team_value = 0.0,
                  team_players = 0, current_balance = 0, future_balance = 0, maximum_debt = 0):
         user = self.User(id_user, email, password, team_name, team_points, team_average, team_value,
                          team_players, current_balance, future_balance, maximum_debt)
@@ -73,6 +73,9 @@ class Users:
             insert_statements.extend([user.to_insert_statements()])
         return insert_statements
 
+    def get_all_user_ids(self):
+        return [user.id_user for user in self.users]
+
 
 class Players:
     def __init__(self):
@@ -80,11 +83,10 @@ class Players:
 
     class Player(Base):
         def __init__(self, id_mundo_deportivo, id_sofa_score, id_marca, id_user, full_name, position,
-                     is_in_market = False, sell_price = None, is_injured = False, injury_type = None, photo_face = None,
-                     photo_body = None, average_season_15_16 = None, average_season_16_17 = None,
-                     average_season_17_18 = None, average_season_18_19 = None, average_season_19_20 = None,
-                     average_season_20_21 = None, average_season_21_22 = None, average_season_22_23 = None,
-                     average_season_23_24 = None):
+                     is_in_market = False, sell_price = None, photo_face = None, photo_body = None,
+                     average_season_15_16 = None, average_season_16_17 = None, average_season_17_18 = None,
+                     average_season_18_19 = None, average_season_19_20 = None, average_season_20_21 = None,
+                     average_season_21_22 = None, average_season_22_23 = None, average_season_23_24 = None):
             self.id_mundo_deportivo = id_mundo_deportivo
             self.id_sofa_score = id_sofa_score
             self.id_marca = id_marca
@@ -93,8 +95,6 @@ class Players:
             self.position = position
             self.is_in_market = is_in_market
             self.sell_price = sell_price
-            # self.is_injured = is_injured
-            # self.injury_type = injury_type
             self.photo_face = photo_face
             self.photo_body = photo_body
             self.average_season_15_16 = average_season_15_16
@@ -111,16 +111,14 @@ class Players:
             return self.to_insert_statement("player")
 
     def add_player(self, id_mundo_deportivo, id_sofa_score, id_marca, id_user, full_name, position,
-                   is_in_market = False, sell_price = None, is_injured = False, injury_type = None, photo_face = None,
-                   photo_body = None, average_season_15_16 = None, average_season_16_17 = None,
-                   average_season_17_18 = None, average_season_18_19 = None, average_season_19_20 = None,
-                   average_season_20_21 = None, average_season_21_22 = None, average_season_22_23 = None,
-                   average_season_23_24 = None):
+                   is_in_market = False, sell_price = None, photo_face = None, photo_body = None,
+                   average_season_15_16 = None, average_season_16_17 = None, average_season_17_18 = None,
+                   average_season_18_19 = None, average_season_19_20 = None, average_season_20_21 = None,
+                   average_season_21_22 = None, average_season_22_23 = None, average_season_23_24 = None):
         player = self.Player(id_mundo_deportivo, id_sofa_score, id_marca, id_user, full_name, position,
-                             is_in_market, sell_price, is_injured, injury_type, photo_face, photo_body,
-                             average_season_15_16, average_season_16_17, average_season_17_18, average_season_18_19,
-                             average_season_19_20, average_season_20_21, average_season_21_22, average_season_22_23,
-                             average_season_23_24)
+                             is_in_market, sell_price, photo_face, photo_body, average_season_15_16,
+                             average_season_16_17, average_season_17_18, average_season_18_19, average_season_19_20,
+                             average_season_20_21, average_season_21_22, average_season_22_23, average_season_23_24)
         self.players.add(player)
 
     def to_insert_statements(self):
@@ -469,8 +467,7 @@ def extract_all_gw_id_md(h: dict, url: str):
     return None
 
 
-def extract_all_players_id_md(h: dict, url: str):
-    id_list = []
+def extract_all_players_id_md(h: dict, players: Players, users: Users, url: str):
     for _ in range(0, 601, 50):
         payload = {
             "post": "players", "filters[ position ]": 0, "filters[ value ]": 0, "filters[ team ]": 0,
@@ -481,38 +478,33 @@ def extract_all_players_id_md(h: dict, url: str):
         if res.status_code == 200:
             aux = res.json()
             if aux["data"]["players"]:
+                for _ in aux["data"]["owners"]:
+                    if _["id"] not in users.get_all_user_ids():
+                        users.add_user(_["id"], team_name = _["name"])
                 for _ in aux["data"]["players"]:
-                    if _["id"] not in id_list:
-                        id_list.append(_["id"])
-    return id_list
+                    if _["id"] not in players:
+                        players.add_user(_["id"])
 
 
 def find_id_marca_to_md(h: dict, pl: list, url: str):
     faulty = []
+    payload = {"post": "players", "filters[ position ]": 0, "filters[ value ]": 0, "filters[ team ]": 0,
+               "filters[ injured]": 0, "filters[ favs ]": 0, "filters[ owner ]": 0, "filters[ benched ]": 0,
+               "offset": 0, "order": 0, "name": "", "filtered": 0, "parentElement": ".sw-content"}
 
     for p in pl:
-        payload = {
-            "post": "players", "filters[ position ]": 0, "filters[ value ]": 0, "filters[ team ]": 0,
-            "filters[ injured]": 0, "filters[ favs ]": 0, "filters[ owner ]": 0, "filters[ benched ]": 0,
-            "offset": 0, "order": 0, "name": p["full_name"], "filtered": 0, "parentElement": ".sw-content"}
+        payload["name"] = p["full_name"]
         res = requests.post(url, data = payload, headers = h)
         if res.status_code == 200:
             final_player = None
             res_json = res.json()
             if len(res_json["data"]["players"]) != 1:
-                payload = {
-                    "post": "players", "filters[ position ]": 0, "filters[ value ]": 0, "filters[ team ]": 0,
-                    "filters[ injured]": 0, "filters[ favs ]": 0, "filters[ owner ]": 0, "filters[ benched ]": 0,
-                    "offset": 0, "order": 0, "name": p["nickname"], "filtered": 0, "parentElement": ".sw-content"}
+                payload["name"] = p["nickname"]
                 res = requests.post(url, data = payload, headers = h)
                 if res.status_code == 200:
                     res_json = res.json()
                     if len(res_json["data"]["players"]) != 1:
-                        payload = {
-                            "post": "players", "filters[ position ]": 0, "filters[ value ]": 0, "filters[ team ]": 0,
-                            "filters[ injured]": 0, "filters[ favs ]": 0, "filters[ owner ]": 0,
-                            "filters[ benched ]": 0, "offset": 0, "order": 0, "name": p["slug"], "filtered": 0,
-                            "parentElement": ".sw-content"}
+                        payload["name"] = p["slug"]
                         res = requests.post(url, data = payload, headers = h)
                         if res.status_code == 200:
                             res_json = res.json()
@@ -531,6 +523,7 @@ def find_id_marca_to_md(h: dict, pl: list, url: str):
     return faulty, pl
 
 
+@deprecated(action = "ignore")
 def player_movements(h: dict, m: Movements, p_id: list, url: str):
     for p in p_id:
         payload = {"post": "players", "id": p}
@@ -620,10 +613,9 @@ marca_header = {"User-Agent": user_agent, "Origin": "https://fantasy.laliga.com"
 # current_balance = extract_balance(new_header, md_balance_url)
 # y = extract_marca_all_p_id(marca_header, request_timeout)
 # find_id_marca_to_md(new_header, y, md_sw_url)
-players_id_list = extract_all_players_id_md(new_header, md_sw_url)
-movements = Movements()
-player_movements(new_header, movements, players_id_list, md_sw_url)
-movements_inserts = movements.to_insert_statements()
+players_list = Players()
+users_list = Users()
+extract_all_players_id_md(new_header, players_list, users_list, md_sw_url)
 gw_id_list = extract_all_gw_id_md(new_header, md_sw_url)
 if players_id_list and gw_id_list:
     extract_all_gw_data_md(new_header, md_gw_url, players_id_list, gw_id_list)
