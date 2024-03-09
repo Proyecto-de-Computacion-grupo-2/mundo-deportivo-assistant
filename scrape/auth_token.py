@@ -61,10 +61,10 @@ class Users:
         def to_insert_statements(self):
             return self.to_insert_statement("user")
 
-    def add_user(self, id_user, email = "", password = "", team_name = "", team_points = 0, team_average = 0.0, team_value = 0.0,
-                 team_players = 0, current_balance = 0, future_balance = 0, maximum_debt = 0):
-        user = self.User(id_user, email, password, team_name, team_points, team_average, team_value,
-                         team_players, current_balance, future_balance, maximum_debt)
+    def add_user(self, id_user, email = "", password = "", team_name = "", team_points = 0, team_average = 0.0,
+                 team_value = 0.0, team_players = 0, current_balance = 0, future_balance = 0, maximum_debt = 0):
+        user = self.User(id_user, email, password, team_name, team_points, team_average, team_value, team_players,
+                         current_balance, future_balance, maximum_debt)
         self.users.add(user)
 
     def to_insert_statements(self):
@@ -127,6 +127,9 @@ class Players:
             insert_statements.extend([player.to_insert_statements()])
         return insert_statements
 
+    def get_all_player_ids(self):
+        return [player.id_mundo_deportivo for player in self.players]
+
 
 class Recommendations:
     def __init__(self):
@@ -144,7 +147,8 @@ class Recommendations:
         def to_insert_statements(self):
             return self.to_insert_statement("recommendation")
 
-    def add_movement(self, id_user, id_player, recommendation_type, market_team_recommendation, my_team_recommendation):
+    def add_recommendation(self, id_user, id_player, recommendation_type, market_team_recommendation,
+                           my_team_recommendation):
         movement = self.Recommendation(id_user, id_player, recommendation_type, market_team_recommendation,
                                        my_team_recommendation)
         self.recommendations.add(movement)
@@ -161,14 +165,117 @@ class Games:
         self.games = set()
 
     class Game(Base):
-        def __init__(self):
-            self.game = set()
+        def __init__(self, id_game, id_gw, id_player, schedule, game_week, team, opposing_team, mixed, as_score,
+                     marca_score, mundo_deportivo_score, sofa_score, current_value, points, average, matches,
+                     goals_metadata, cards, total_passes, accurate_passes, total_long_balls, accurate_long_balls,
+                     total_crosses, accurate_crosses, total_clearances, clearances_on_goal_line, aerial_duels_lost,
+                     aerial_duels_won, duels_lost, duels_won, dribbled_past, losses, total_dribbles, completed_dribbles,
+                     high_clearances, fist_clearances, failures_that_lead_to_shot, failures_that_lead_to_goal,
+                     shots_off_target, shots_on_target, shots_blocked_in_attack, shots_blocked_in_defence,
+                     occasions_created, goal_assists, shots_to_the_crossbar, failed_obvious_occasions,
+                     penalties_committed, penalties_caused, failed_penalties, stopped_penalties, goals, own_goals,
+                     stops_from_inside_the_area, stops, goals_avoided, interceptions, total_outputs, precise_outputs,
+                     total_tackles, fouls_received, fouls_committed, offsides, minutes_played, touches,
+                     entries_as_last_man, possessions_lost, expected_goals, key_passes, expected_assists, timestamp):
+            self.id_game = id_game
+            self.id_gw = id_gw
+            self.id_player = id_player
+            self.schedule = schedule
+            self.game_week = game_week
+            self.team = team
+            self.opposing_team = opposing_team
+            self.mixed = mixed
+            self.as_score = as_score
+            self.marca_score = marca_score
+            self.mundo_deportivo_score = mundo_deportivo_score
+            self.sofa_score = sofa_score
+            self.current_value = current_value
+            self.points = points
+            self.average = average
+            self.matches = matches
+            self.goals_metadata = goals_metadata
+            self.cards = cards
+            self.total_passes = total_passes
+            self.accurate_passes = accurate_passes
+            self.total_long_balls = total_long_balls
+            self.accurate_long_balls = accurate_long_balls
+            self.total_crosses = total_crosses
+            self.accurate_crosses = accurate_crosses
+            self.total_clearances = total_clearances
+            self.clearances_on_goal_line = clearances_on_goal_line
+            self.aerial_duels_lost = aerial_duels_lost
+            self.aerial_duels_won = aerial_duels_won
+            self.duels_lost = duels_lost
+            self.duels_won = duels_won
+            self.dribbled_past = dribbled_past
+            self.losses = losses
+            self.total_dribbles = total_dribbles
+            self.completed_dribbles = completed_dribbles
+            self.high_clearances = high_clearances
+            self.fist_clearances = fist_clearances
+            self.failures_that_lead_to_shot = failures_that_lead_to_shot
+            self.failures_that_lead_to_goal = failures_that_lead_to_goal
+            self.shots_off_target = shots_off_target
+            self.shots_on_target = shots_on_target
+            self.shots_blocked_in_attack = shots_blocked_in_attack
+            self.shots_blocked_in_defence = shots_blocked_in_defence
+            self.occasions_created = occasions_created
+            self.goal_assists = goal_assists
+            self.shots_to_the_crossbar = shots_to_the_crossbar
+            self.failed_obvious_occasions = failed_obvious_occasions
+            self.penalties_committed = penalties_committed
+            self.penalties_caused = penalties_caused
+            self.failed_penalties = failed_penalties
+            self.stopped_penalties = stopped_penalties
+            self.goals = goals
+            self.own_goals = own_goals
+            self.stops_from_inside_the_area = stops_from_inside_the_area
+            self.stops = stops
+            self.goals_avoided = goals_avoided
+            self.interceptions = interceptions
+            self.total_outputs = total_outputs
+            self.precise_outputs = precise_outputs
+            self.total_tackles = total_tackles
+            self.fouls_received = fouls_received
+            self.fouls_committed = fouls_committed
+            self.offsides = offsides
+            self.minutes_played = minutes_played
+            self.touches = touches
+            self.entries_as_last_man = entries_as_last_man
+            self.possessions_lost = possessions_lost
+            self.expected_goals = expected_goals
+            self.key_passes = key_passes
+            self.expected_assists = expected_assists
+            self.timestamp = timestamp
 
         def to_insert_statements(self):
             return self.to_insert_statement("game")
 
-    def add_movement(self):
-        game = self.Game()
+    def add_game(self, id_game, id_gw, id_player, schedule, game_week, team, opposing_team, mixed, as_score,
+                 marca_score, mundo_deportivo_score, sofa_score, current_value, points, average, matches,
+                 goals_metadata, cards, total_passes, accurate_passes, total_long_balls, accurate_long_balls,
+                 total_crosses, accurate_crosses, total_clearances, clearances_on_goal_line, aerial_duels_lost,
+                 aerial_duels_won, duels_lost, duels_won, dribbled_past, losses, total_dribbles, completed_dribbles,
+                 high_clearances, fist_clearances, failures_that_lead_to_shot, failures_that_lead_to_goal,
+                 shots_off_target, shots_on_target, shots_blocked_in_attack, shots_blocked_in_defence,
+                 occasions_created, goal_assists, shots_to_the_crossbar, failed_obvious_occasions, penalties_committed,
+                 penalties_caused, failed_penalties, stopped_penalties, goals, own_goals, stops_from_inside_the_area,
+                 stops, goals_avoided, interceptions, total_outputs, precise_outputs, total_tackles, fouls_received,
+                 fouls_committed, offsides, minutes_played, touches, entries_as_last_man, possessions_lost,
+                 expected_goals, key_passes, expected_assists, timestamp):
+        game = self.Game(id_game, id_gw, id_player, schedule, game_week, team, opposing_team, mixed, as_score,
+                         marca_score, mundo_deportivo_score, sofa_score, current_value, points, average, matches,
+                         goals_metadata, cards, total_passes, accurate_passes, total_long_balls, accurate_long_balls,
+                         total_crosses, accurate_crosses, total_clearances, clearances_on_goal_line, aerial_duels_lost,
+                         aerial_duels_won, duels_lost, duels_won, dribbled_past, losses, total_dribbles,
+                         completed_dribbles, high_clearances, fist_clearances, failures_that_lead_to_shot,
+                         failures_that_lead_to_goal, shots_off_target, shots_on_target, shots_blocked_in_attack,
+                         shots_blocked_in_defence, occasions_created, goal_assists, shots_to_the_crossbar,
+                         failed_obvious_occasions, penalties_committed, penalties_caused, failed_penalties,
+                         stopped_penalties, goals, own_goals, stops_from_inside_the_area, stops, goals_avoided,
+                         interceptions, total_outputs, precise_outputs, total_tackles, fouls_received, fouls_committed,
+                         offsides, minutes_played, touches, entries_as_last_man, possessions_lost, expected_goals,
+                         key_passes, expected_assists, timestamp)
         self.games.add(game)
 
     def to_insert_statements(self):
@@ -177,20 +284,34 @@ class Games:
             insert_statements.extend([game.to_insert_statements()])
         return insert_statements
 
+    def get_all_games_ids(self):
+        return [game.id_gw for game in self.games]
+
+    def get_max_id(self):
+        if self.games:
+            return max(game.id_gw for game in self.games)
+        else:
+            return None
+
 
 class Absences:
     def __init__(self):
         self.absences = set()
 
     class Absence(Base):
-        def __init__(self):
-            self.absence = set()
+        def __init__(self, id_absence, id_mundo_deportivo, type_absence, since, until, description_absence):
+            self.id_absence = id_absence
+            self.id_mundo_deportivo = id_mundo_deportivo
+            self.type_absence = type_absence
+            self.since = since
+            self.until = until
+            self.description_absence = description_absence
 
         def to_insert_statements(self):
             return self.to_insert_statement("absence")
 
-    def add_movement(self):
-        absence = self.Absence()
+    def add_absence(self, id_absence, id_mundo_deportivo, type_absence, since, until, description_absence):
+        absence = self.Absence(id_absence, id_mundo_deportivo, type_absence, since, until, description_absence)
         self.absences.add(absence)
 
     def to_insert_statements(self):
@@ -205,14 +326,16 @@ class PlayerGames:
         self.player_games = set()
 
     class PlayerGame(Base):
-        def __init__(self):
-            self.player_game = set()
+        def __init__(self, id_play, id_mundo_deportivo, id_game):
+            self.id_play = id_play
+            self.id_mundo_deportivo = id_mundo_deportivo
+            self.id_game = id_game
 
         def to_insert_statements(self):
             return self.to_insert_statement("player_game")
 
-    def add_movement(self):
-        player_game = self.PlayerGame()
+    def add_player_game(self, id_play, id_mundo_deportivo, id_game):
+        player_game = self.PlayerGame(id_play, id_mundo_deportivo, id_game)
         self.player_games.add(player_game)
 
     def to_insert_statements(self):
@@ -262,7 +385,7 @@ class PlayerMovements:
         def to_insert_statements(self):
             return self.to_insert_statement("player_movement")
 
-    def add_movement(self):
+    def add_player_movement(self):
         player_movement = self.PlayerMovement()
         self.player_movements.add(player_movement)
 
@@ -278,14 +401,22 @@ class Predictions:
         self.predictions = set()
 
     class Prediction(Base):
-        def __init__(self):
-            self.prediction = set()
+        def __init__(self, id_prediction, id_mundo_deportivo, gameweek, point_prediction, price_prediction,
+                     date_prediction):
+            self.id_prediction = id_prediction
+            self.id_mundo_deportivo = id_mundo_deportivo
+            self.gameweek = gameweek
+            self.point_prediction = point_prediction
+            self.price_prediction = price_prediction
+            self.date_prediction = date_prediction
 
         def to_insert_statements(self):
             return self.to_insert_statement("prediction")
 
-    def add_movement(self):
-        prediction = self.Prediction()
+    def add_prediction(self, id_prediction, id_mundo_deportivo, gameweek, point_prediction, price_prediction,
+                       date_prediction):
+        prediction = self.Prediction(id_prediction, id_mundo_deportivo, gameweek, point_prediction, price_prediction,
+                                     date_prediction)
         self.predictions.add(prediction)
 
     def to_insert_statements(self):
@@ -300,14 +431,19 @@ class PriceVariations:
         self.price_variations = set()
 
     class PriceVariation(Base):
-        def __init__(self):
-            self.price_variation = set()
+        def __init__(self, id_player_price_variation, id_mundo_deportivo, price_variation, price, day):
+            self.id_player_price_variation = id_player_price_variation
+            self.id_mundo_deportivo = id_mundo_deportivo
+            self.price_variation = price_variation
+            self.price = price
+            self.day = day
 
         def to_insert_statements(self):
             return self.to_insert_statement("price_variation")
 
-    def add_movement(self):
-        price_variation = self.PriceVariation()
+    def add_price_variation(self, id_player_price_variation, id_mundo_deportivo, price_variation, price, day):
+        price_variation = self.PriceVariation(id_player_price_variation, id_mundo_deportivo, price_variation, price,
+                                              day)
         self.price_variations.add(price_variation)
 
     def to_insert_statements(self):
@@ -473,7 +609,6 @@ def extract_all_players_id_md(h: dict, players: Players, users: Users, url: str)
             "post": "players", "filters[ position ]": 0, "filters[ value ]": 0, "filters[ team ]": 0,
             "filters[ injured ]": 0, "filters[ favs ]": 0, "filters[ owner ]": 0, "filters[ benched ]": 0, "offset": _,
             "order": 0, "name": "", "filtered": 0, "parentElement": ".sw-content"}
-
         res = requests.post(url, data = payload, headers = h)
         if res.status_code == 200:
             aux = res.json()
@@ -482,8 +617,9 @@ def extract_all_players_id_md(h: dict, players: Players, users: Users, url: str)
                     if _["id"] not in users.get_all_user_ids():
                         users.add_user(_["id"], team_name = _["name"])
                 for _ in aux["data"]["players"]:
-                    if _["id"] not in players:
-                        players.add_user(_["id"])
+                    if _["id"] not in players.get_all_player_ids():
+                        players.add_player(_["id"], 0, 0, _["uc_name"], _["name"], _["position"], True
+                                           if _["id_market"] is not None else False)
 
 
 def find_id_marca_to_md(h: dict, pl: list, url: str):
@@ -560,9 +696,9 @@ def extract_market(h: dict):
     helper.write_to_csv("test-api-player-in-market", market_structure_header, players, "w")
 
 
-def extract_all_gw_data_md(h: dict, url: str, p: list, g: list):
+def extract_all_gw_data_md(h: dict, url: str, p: Players, gw: Games, g: list):
     gw_data, gw_stats = [], []
-    for i in p:
+    for i in p.get_all_player_ids():
         for j in g:
             sleep(uniform(10, 20))
             print(i, j)
@@ -570,6 +706,7 @@ def extract_all_gw_data_md(h: dict, url: str, p: list, g: list):
             response = requests.post(url, data = payload, headers = h)
             if response.status_code == 200:
                 x = response.json()["data"]
+                gw.add_game(gw.get_max_id, j, i, x["as_graded_date"])
                 test = x["marca_stats_rating_detailed"]
                 data_str = test.replace("'", "\"")
 
@@ -615,9 +752,10 @@ marca_header = {"User-Agent": user_agent, "Origin": "https://fantasy.laliga.com"
 # find_id_marca_to_md(new_header, y, md_sw_url)
 players_list = Players()
 users_list = Users()
+gw_list = Games()
 extract_all_players_id_md(new_header, players_list, users_list, md_sw_url)
 gw_id_list = extract_all_gw_id_md(new_header, md_sw_url)
-if players_id_list and gw_id_list:
-    extract_all_gw_data_md(new_header, md_gw_url, players_id_list, gw_id_list)
+if len(players_list.players) > 0 and len(gw_id_list) > 0:
+    extract_all_gw_data_md(new_header, md_gw_url, players_list, gw_list, gw_id_list)
 
 # print(failed_img)
