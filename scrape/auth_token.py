@@ -966,14 +966,14 @@ def extract_all_players_value_and_gw_md(h: dict, ai: AIModel, ab: Absences, gw: 
                                     pv.add_price_variation(aux_players["id"], date_formatting(value["date"]),
                                                            value["value"])
                                 for injury in res_json_p_injuries:
-                                    if injury["since"] is None:
-                                        since = "None"
-                                    else:
+                                    if injury["since"] is not None:
                                         since = injury["since"]
-                                    if injury["until"] is None:
-                                        until = "None"
                                     else:
+                                        since = "None"
+                                    if injury["until"] is not None:
                                         until = injury["until"]
+                                    else:
+                                        until = "None"
                                     ab.add_absence(aux_players["id"], injury["category"], injury["description"],
                                                    since, until)
                                 res_json_player = res_json_2["player"]
