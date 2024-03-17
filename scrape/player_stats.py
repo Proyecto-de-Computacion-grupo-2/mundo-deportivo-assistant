@@ -55,14 +55,34 @@ english_list = ["ID", "Player full name", "Position", "Game Week", "Team", "Oppo
                 "Average Season 17/18", "Average Season 18/19", "Average Season 19/20", "Average Season 20/21",
                 "Average Season 21/22", "Average Season 22/23", "Average Season 23/24", "Timestamp"]
 
+# todo PENDNING TO FINISH FUNCTION.
+def database_get_all_date_by_id(player_id):
+    connection = helper.create_database_connection()
+    data = [player_id] # Need to do this as a list because of cursor.execute parameters.
+    try:
+        cursor = connection.cursor()
+        sql = "SELECT day FROM price_variation WHERE id_mundo_deportivo = %s;"
+        cursor.execute(sql, data)
 
-def database_insert_price_variation(dates,values):
+        results = cursor.fetchall()
+
+        game_weeks = [result[0] for result in results]
+
+        return game_weeks
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+
+def database_insert_price_variation(dates, values):
     connection = helper.create_database_connection()
     try:
         cursor = connection.cursor()
         sql = """
         INSERT INTO price_variation (
-            id_player,price,day
+            id_mundo_deportivo,price,day
         ) VALUES (%s, %s, %s)
         """
 
@@ -177,7 +197,7 @@ def process_row(fila):
     return datos_procesados
 
 
-def get_all_players_id_mundo_deportivo():
+def database_get_all_players_id_mundo_deportivo():
     connection = helper.create_database_connection()
     try:
         cursor = connection.cursor()
@@ -195,83 +215,111 @@ def get_all_players_id_mundo_deportivo():
             cursor.close()
             connection.close()
 
-def insert_table_game(player_stats):
+
+def database_get_played_gw_by_player_id(player_id):
     connection = helper.create_database_connection()
-    inserted_game_ids = []
+    data = [player_id]
     try:
         cursor = connection.cursor()
+        sql = " SELECT game_week FROM game WHERE id_game IN (SELECT id_game FROM player_game WHERE id_mundo_deportivo = %s);"
+        cursor.execute(sql, data)
 
-        sql_game = """
-        INSERT INTO game (
-            game_week,team, opposing_team, mixed, as_score, 
-            marca_score, mundo_deportivo_score, sofa_score, current_value, points, 
-            average, matches, goals_metadata, cards, total_passes, accurate_passes, 
-            total_long_balls, accurate_long_balls, total_crosses, accurate_crosses, 
-            total_clearances, clearances_on_goal_line, aerial_duels_Lost, aerial_duels_Won, 
-            duels_lost, duels_won, dribbled_past, losses, total_dribbles, completed_dribbles, 
-            high_clearances, fist_clearances, failures_that_lead_to_shot, failures_that_lead_to_goal, 
-            shots_off_target, shots_on_target, shots_blocked_in_attack, shots_blocked_in_defence, 
-            occasions_created, goal_assists, shots_to_the_crossbar, failed_obvious_occasions, 
-            penalties_committed, penalties_caused, failed_penalties, stopped_penalties, goals, 
-            own_goals, stops_from_inside_the_area, stops, goals_avoided, interceptions, 
-            total_outputs, precise_outputs, total_tackles, fouls_received, fouls_committed, 
-            offsides, minutes_played, touches, entries_as_last_man, possessions_lost, 
-            expected_goals, key_passes, expected_assists, average_season_15_16, 
-            average_season_16_17, average_season_17_18, average_season_18_19, 
-            average_season_19_20, average_season_20_21, average_season_21_22, 
-            average_season_22_23, average_season_23_24, timestamp
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
-                  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
-                  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
-                  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """
-        # Prepare your data tuple here based on player_stats and possibly other sources
-        for player_stat in player_stats:
-            timestamp_index = -1
-            unix_timestamp = int(player_stat[timestamp_index])
-            dt_object = helper.datetime.fromtimestamp(unix_timestamp, helper.timezone.utc)
-            player_stat[timestamp_index] = dt_object.strftime('%Y-%m-%d %H:%M:%S')
+        results = cursor.fetchall()
 
-            player_stat[11] = player_stat[11].replace('.', '')
-            player_stat[11] = int(player_stat[11])
-            player_stat[13] = float(player_stat[13])
+        game_weeks = [result[0] for result in results]
 
-            data_to_insert = player_stat[3:]
-
-            cursor.execute(sql_game, data_to_insert)
-            inserted_game_ids.append(cursor.lastrowid)
-
-        connection.commit()
-        return inserted_game_ids
+        return game_weeks
 
     finally:
         if connection.is_connected():
             cursor.close()
             connection.close()
 
+
+def database_insert_table_game(id_mundo_deportivo,player_stats):
+    connection = helper.create_database_connection()
+    played_gw_by_player_id = database_get_played_gw_by_player_id(id_mundo_deportivo)
+    try:
+        cursor = connection.cursor()
+        sql_game = """
+            INSERT INTO game (game_week, team, opposing_team, mixed, as_score, 
+        marca_score, mundo_deportivo_score, sofa_score, current_value, points, 
+        average, matches, goals_metadata, cards, total_passes, accurate_passes, 
+        total_long_balls, accurate_long_balls, total_crosses, accurate_crosses, 
+        total_clearances, clearances_on_goal_line, aerial_duels_Lost, aerial_duels_Won, 
+        duels_lost, duels_won, dribbled_past, losses, total_dribbles, completed_dribbles, 
+        high_clearances, fist_clearances, failures_that_lead_to_shot, failures_that_lead_to_goal, 
+        shots_off_target, shots_on_target, shots_blocked_in_attack, shots_blocked_in_defence, 
+        occasions_created, goal_assists, shots_to_the_crossbar, failed_obvious_occasions, 
+        penalties_committed, penalties_caused, failed_penalties, stopped_penalties, goals, 
+        own_goals, stops_from_inside_the_area, stops, goals_avoided, interceptions, 
+        total_outputs, precise_outputs, total_tackles, fouls_received, fouls_committed, 
+        offsides, minutes_played, touches, entries_as_last_man, possessions_lost, 
+        expected_goals, key_passes, expected_assists, timestamp
+        ) VALUES (
+        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+        %s, %s, %s, %s, %s, %s)
+        """
+
+        # Prepare your data tuple here based on player_stats and possibly other sources
+        inserted_game_ids = []
+        for player_stat in player_stats:
+            gameeek = int(player_stat[3])
+            if gameeek not in played_gw_by_player_id:
+                dt_object = helper.datetime.fromtimestamp(int(player_stat[-1]), helper.timezone.utc)
+                date = dt_object.strftime('%Y-%m-%d %H:%M:%S')
+
+                player_stat[11] = int(player_stat[11].replace('.', ''))
+                player_stat[13] = float(player_stat[13])
+
+                data_to_insert = player_stat[3:68]
+                data_to_insert.append(date)
+
+                cursor.execute(sql_game, data_to_insert)
+                inserted_game_ids.append(cursor.lastrowid)
+
+        connection.commit()
+        return inserted_game_ids
+    finally:
+        connection.close()
+
+
 def database_insert_player(player_stats):
     connection = helper.create_database_connection()
 
     try:
         cursor = connection.cursor()
-        ids_in_db = get_all_players_id_mundo_deportivo()
+        ids_in_db = database_get_all_players_id_mundo_deportivo()
         id_mundo_deportivo = int(player_stats[0][0])
 
         if id_mundo_deportivo not in ids_in_db:
             # Insert new player and get id_mundo_deportivo back (if it's generated automatically)
             sql_player = """
-                INSERT INTO player (id_mundo_deportivo, full_name, position) 
-                VALUES (%s, %s, %s)
+                INSERT INTO player (
+                id_mundo_deportivo, full_name, position, 
+                average_season_15_16, average_season_16_17, average_season_17_18, 
+                average_season_18_19, average_season_19_20, average_season_20_21, 
+                average_season_21_22, average_season_22_23, average_season_23_24) 
+                VALUES (%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s)
             """
-            player_data = (int(player_stats[0][0]), player_stats[0][1], int(player_stats[0][2]))
+            player_data = [
+                int(player_stats[0][0]), player_stats[0][1], int(player_stats[0][2]), player_stats[0][-10],
+                player_stats[0][-9], player_stats[0][-8], player_stats[0][-7], player_stats[0][-6],
+                player_stats[0][-5], player_stats[0][-4], player_stats[0][-3], player_stats[0][-2]
+            ]
             cursor.execute(sql_player, player_data)
             connection.commit()
 
-        inserted_game_ids = insert_table_game(player_stats)
+        inserted_game_ids = database_insert_table_game(id_mundo_deportivo,player_stats)
 
         for id_game in inserted_game_ids:
             sql_play = """
-                INSERT INTO play (id_player, id_game) VALUES (%s, %s)
+                INSERT INTO player_game (id_mundo_deportivo, id_game) VALUES (%s, %s)
             """
             cursor.execute(sql_play, (id_mundo_deportivo, id_game))
         connection.commit()
@@ -462,14 +510,14 @@ def process_urls(av, aw, header, url):
     for u in url:
         driver.get(u[0])
         data_id = u[0].split("/")[-2]
-        # ------ Store players value table ------
-        head, values = scrape_fantasy_players_value_table(driver, data_id)
-        av.append(values)
-        header.append(head)
         # ------ Store players game week ------
         gw = scrape_fantasy_players_game_week(driver, data_id, u[0])
         if gw:
             aw.append(gw)
+        # ------ Store players value table ------
+        head, values = scrape_fantasy_players_value_table(driver, data_id)
+        av.append(values)
+        header.append(head)
     driver.quit()
 
 
@@ -501,10 +549,8 @@ def scrape_players_stats_fantasy():
 
 
 if __name__ == "__main__":
-    connection = helper.create_database_connection()
     logger = helper.define_logger(route.player_log)
     scrape_players_stats_fantasy()
     helper.extract()
     for folder in route.all_folders:
         helper.scrape_backup(folder, route.backup_folder)
-    helper.close_database_connection(connection)
