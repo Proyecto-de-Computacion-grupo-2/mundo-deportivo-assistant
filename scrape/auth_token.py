@@ -6,8 +6,6 @@ import mysql.connector
 import requests
 from json import loads
 from os import makedirs, path, remove
-from random import uniform
-from time import sleep
 from tqdm import tqdm
 
 from bs4 import BeautifulSoup
@@ -680,28 +678,25 @@ def multi_stmt_insert(name: str, create: bool, file: bool, cur: mysql.connector.
                 else:
                     print("Number of rows affected by statement '{}': {}".format(result.statement, result.rowcount))
 
-            cursor.close()
+            cur.close()
         except Exception as e:
             print(e)
-        finally:
-            cursor.close()
     elif not create and file:
         progress_bar = None
         try:
             with open(name, "r", encoding = "utf-8") as file:
                 sql_script = file.readlines()
 
-            # progress_bar = tqdm(total = len(sql_script), desc = "Inserting")
+            progress_bar = tqdm(total = len(sql_script), desc = "Inserting")
 
             for ins in sql_script:
                 cur.execute(ins)
-                print(f"{cur.rowcount} details inserted")
-                # progress_bar.update(1)
+                progress_bar.update(1)
         except Exception as e:
             print(e)
-        # finally:
-        #     progress_bar.close()
-        #     cursor.close()
+        finally:
+            progress_bar.close()
+            cur.close()
 
 
 def extract_login_token(h: dict, u: str, p: str):
@@ -1364,7 +1359,7 @@ try:
 except helper.mysql.connector.Error as err:
     if "doesn\'t exist" in err.msg and err.errno == 1146:
         try:
-            multi_stmt_insert("pc2-database.sql", True, True, cursor)
+            multi_stmt_insert("pc2-database.sql", True, True, mariadb)
             mariadb.commit()
         except Exception as err:
             print(err)
@@ -1420,6 +1415,7 @@ mariadb = helper.create_database_connection()
 cursor = mariadb.cursor(buffered = True)
 try:
     multi_stmt_insert("insert_statements.sql", False, True, cursor)
+    mariadb.commit()
 except Exception as err:
     print(err)
 finally:
