@@ -898,23 +898,50 @@ def extract_all_players_value_and_gw_md(h: dict, ai: AIModel, ab: Absences, gw: 
                                 for history in res_json_h_points:
                                     if "season" in json.dumps(history).split(":")[0]:
                                         if history["season"] == "15/16":
-                                            s56 = history["points"]
+                                            if history["points"] is not None:
+                                                s56 = history["points"]
+                                            else:
+                                                s56 = 0
                                         elif history["season"] == "16/17":
-                                            s67 = history["points"]
+                                            if history["points"] is not None:
+                                                s67 = history["points"]
+                                            else:
+                                                s67 = 0
                                         elif history["season"] == "17/18":
-                                            s78 = history["points"]
+                                            if history["points"] is not None:
+                                                s78 = history["points"]
+                                            else:
+                                                s78 = 0
                                         elif history["season"] == "18/19":
-                                            s89 = history["points"]
+                                            if history["points"] is not None:
+                                                s89 = history["points"]
+                                            else:
+                                                s89 = 0
                                         elif history["season"] == "19/20":
-                                            s1920 = history["points"]
+                                            if history["points"] is not None:
+                                                s1920 = history["points"]
+                                            else:
+                                                s1920 = 0
                                         elif history["season"] == "20/21":
-                                            s2021 = history["points"]
+                                            if history["points"] is not None:
+                                                s2021 = history["points"]
+                                            else:
+                                                s2021 = 0
                                         elif history["season"] == "21/22":
-                                            s2122 = history["points"]
+                                            if history["points"] is not None:
+                                                s2122 = history["points"]
+                                            else:
+                                                s2122 = 0
                                         elif history["season"] == "22/23":
-                                            s2223 = history["points"]
+                                            if history["points"] is not None:
+                                                s2223 = history["points"]
+                                            else:
+                                                s2223 = 0
                                         elif history["season"] == "23/24":
-                                            s2324 = history["points"]
+                                            if history["points"] is not None:
+                                                s2324 = history["points"]
+                                            else:
+                                                s2324 = 0
                                 res = requests.get(res_2.json()["data"]["player"]["photoUrl"])
                                 img_file = helper.path.join(route.image_folder, str(aux_players["id"]) + "_" +
                                                             aux_players["name"].replace(" ", "_") + ".png")
@@ -935,7 +962,6 @@ def extract_all_players_value_and_gw_md(h: dict, ai: AIModel, ab: Absences, gw: 
                                                    s2122, s2223, s2324)
                                 # aux_players["is_mine"] Para usuarios y balance.
                                 # current_balance = extract_balance(new_header, md_balance_url)
-                                remove(img_file)
                                 for value in res_json_values:
                                     pv.add_price_variation(aux_players["id"], date_formatting(value["date"]),
                                                            value["value"])
@@ -1070,23 +1096,23 @@ def extract_all_players_value_and_gw_md(h: dict, ai: AIModel, ab: Absences, gw: 
                                                 gw_schedule = res_json_3["as_graded_date"]
                                             else:
                                                 gw_schedule = "None"
-                                            if res_json_3["points_mix"] is None:
+                                            if res_json_3["points_mix"] is not None:
                                                 points_mix = res_json_3["points_mix"]
                                             else:
                                                 points_mix = 0
-                                            if res_json_3["points_as"] is None:
+                                            if res_json_3["points_as"] is not None:
                                                 points_as = res_json_3["points_as"]
                                             else:
                                                 points_as = 0
-                                            if res_json_3["points_marca"] is None:
+                                            if res_json_3["points_marca"] is not None:
                                                 points_marca = res_json_3["points_marca"]
                                             else:
                                                 points_marca = 0
-                                            if res_json_3["points_md"] is None:
+                                            if res_json_3["points_md"] is not None:
                                                 points_md = res_json_3["points_md"]
                                             else:
                                                 points_md = 0
-                                            if res_json_3["points_mr"] is None:
+                                            if res_json_3["points_mr"] is not None:
                                                 points_mr = res_json_3["points_mr"]
                                             else:
                                                 points_mr = 0
