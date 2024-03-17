@@ -11,11 +11,56 @@ import pandas as pd
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from matplotlib import ticker
-# from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error
 from statsmodels.tsa.arima.model import ARIMA
 from Utils import helper as helper, routes as route
 
 warnings.filterwarnings("ignore")
+
+
+class Base:
+    def to_insert_statement(self, table_name):
+        columns = []
+        values = []
+
+        for attr_name, attr_value in self.__dict__.items():
+            columns.append(attr_name)
+            if isinstance(attr_value, str):
+                values.append(f'"{attr_value}"')
+            else:
+                values.append(str(attr_value))
+
+        insert_statement = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({', '.join(values)});"
+        return insert_statement
+
+
+class PriceVariations:
+    def __init__(self):
+        self.price_variations = []
+
+    def __getitem__(self, index):
+        return self.price_variations[index]
+
+    class PriceVariation(Base):
+        def __init__(self, id_mundo_deportivo: int, price_day: helper.datetime, price: int, is_prediction = False):
+            self.id_mundo_deportivo = id_mundo_deportivo
+            self.price_day = price_day
+            self.price = price
+            self.is_prediction = is_prediction
+
+        def to_insert_statements(self):
+            return self.to_insert_statement("price_variation")
+
+    def add_price_variation(self, id_mundo_deportivo: int, price: int, price_day: helper.datetime,
+                            is_prediction = False):
+        price_variation = self.PriceVariation(id_mundo_deportivo, price, price_day, is_prediction)
+        self.price_variations.append(price_variation)
+
+    def to_insert_statements(self):
+        insert_statements = []
+        for price_variation in self.price_variations:
+            insert_statements.extend([price_variation.to_insert_statements()])
+        return insert_statements
 
 
 def save_prediction(player_id, date, value):
@@ -50,13 +95,13 @@ def evaluate_arima_model(data, arima_order):
         return arima_order, float("inf")
 
 
-def plot_arima_predictions(data, order, player_id, forecast_days):
+def plot_arima_predictions(data, order, player_id, forecast_days, pv: PriceVariations):
     try:
         model = ARIMA(data, order=order)
         model_fit = model.fit()
 
         # In-sample prediction
-        in_sample_pred = model_fit.predict(start = data.index[0], end= data.index[-1])
+        # in_sample_pred = model_fit.predict(start = data.index[0], end= data.index[-1])
 
         # Out-of-sample forecast
         forecast = model_fit.get_forecast(steps = forecast_days)
@@ -92,13 +137,13 @@ def plot_arima_predictions(data, order, player_id, forecast_days):
             save_prediction_database_array.append(int(value))
             save_prediction_database_array.append(True)
 
-            save_prediction(player_id, date, value)  # todo Save this into the database.
+            pv.add_price_variation(player_id, date, value)  # todo Save this into the database.
 
     except Exception as err:
         print(f"Error in plotting for {player_id}: {err}")
 
 
-def arima_grid_search(data, p_values_1, d_values_1, q_values_1, player_id):
+def arima_grid_search(data, p_values_1, d_values_1, q_values_1, player_id, price_v: PriceVariations):
     # Initialize the best score to infinity and the best ARIMA order to None
     best_score, best_order = float("inf"), None
 
@@ -120,13 +165,13 @@ def arima_grid_search(data, p_values_1, d_values_1, q_values_1, player_id):
     # Once the best ARIMA parameters are found, plot the predictions
     # The function 'plot_arima_predictions' plots the actual data, in-sample prediction,
     # and out-of-sample forecast using the best ARIMA model
-    plot_arima_predictions(data, best_order, player_id, 7)
+    plot_arima_predictions(data, best_order, player_id, 7, price_v)
 
     # Return the best ARIMA model order found for the data
     return best_order
 
 
-def process_batch(batch_id_1, players_id_1, df_1, p_values_1, d_values_1, q_values_1):
+def process_batch(batch_id_1, players_id_1, df_1, p_values_1, d_values_1, q_values_1, p_var: PriceVariations):
     # Initialize a dictionary to store results for each player
     results_1 = {}
 
@@ -153,7 +198,7 @@ def process_batch(batch_id_1, players_id_1, df_1, p_values_1, d_values_1, q_valu
         # Perform the ARIMA grid search for the current player's data
         # 'arima_grid_search' is a function that finds the best ARIMA model parameters
         # It takes the player's data and the specified ranges of ARIMA parameters (p, d, q)
-        best_order = arima_grid_search(player_data, p_values_1, d_values_1, q_values_1, player_1)
+        best_order = arima_grid_search(player_data, p_values_1, d_values_1, q_values_1, player_1, p_var)
 
         # Store the best ARIMA model parameters found for this player in the results dictionary
         results_1[player_1] = best_order
@@ -176,36 +221,38 @@ if __name__ == "__main__":
         sql = "SELECT * FROM price_variation"
         cursor.execute(sql)
 
-        results = cursor.fetchall()
-
-        prices = [result[0] for result in results]
+        prices_columns = cursor.column_names
+        prices = cursor.fetchall()
 
     finally:
         if mariadb.is_connected():
             cursor.close()
             mariadb.close()
     # Read CSV with Pandas and import it.
-    df = pd.read_csv("../../scrape/data/players/fantasy-market-variation.csv")
+    df = pd.DataFrame(prices, columns = prices_columns)
+    df = df.drop(["id_price_variation", "is_prediction"], axis = 1)
 
     # Prepare the data frame.
     # Convert column into a datetime format.
-    df["Date"] = pd.to_datetime(df["Date"], dayfirst = True)
+    df["price_day"] = pd.to_datetime(df["price_day"], dayfirst = True)
 
     # Convert 'Value' column to numeric, setting non-numeric values to NaN
-    df["Value"] = pd.to_numeric(df["Value"], errors = "coerce")
+    df["price"] = pd.to_numeric(df["price"], errors = "coerce")
 
     # Drop rows where "Value" is NaN
-    df = df.dropna(subset = ["Value"])
+    df = df.dropna(subset = ["price"])
 
     # Set the column 'Date' as an index.
     # By setting the 'Date' column as the index, each row can be efficiently accessed or referenced by its date.
-    df.set_index("Date", inplace = True)
+    df.set_index("price_day", inplace = True)
 
     # Extracts all the unique values from the 'ID' column of df and assigns them to the variable players
-    players_id = df["ID"].unique()
+    players_id = df["id_mundo_deportivo"].unique()
 
     # Extracts all the unique values from the 'name' column of df and assigns them to the variable players
-    players_name = df["Name"].unique()
+    # players_name = df["Name"].unique()
+
+    price_variations_list = PriceVariations()
 
     # Define ML hyper parameters for ARIMA model to use.
     p_values = range(0, 3)
@@ -265,10 +312,15 @@ if __name__ == "__main__":
         print(f"Error in parallel processing: {e}")
         print("Reverting to sequential processing...")
         for i, batch in enumerate(player_batches):
-            results = process_batch(i, batch, df, p_values, d_values, q_values)
+            results = process_batch(i, batch, df, p_values, d_values, q_values, price_variations_list)
             player_best_params.update(results)
             all_params.extend(results.values())
 
+    if helper.path.exists("prediction_inserts.sql"):
+        helper.remove("prediction_inserts.sql")
+    with open("prediction_inserts.sql", mode = "w", newline = "", encoding = "utf-8") as f:
+        for row in price_variations_list.to_insert_statements():
+            f.write(row + "\n")
     elapsed_time = time.time() - start_time
     print(f"\nCompleted ARIMA grid search for all players in {elapsed_time:.2f} seconds.")
 
