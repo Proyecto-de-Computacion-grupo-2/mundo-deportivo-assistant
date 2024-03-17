@@ -13,7 +13,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from matplotlib import ticker
 from sklearn.metrics import mean_squared_error
 from statsmodels.tsa.arima.model import ARIMA
-from Utils import helper as helper, routes as route
+from Utils import helper as helper
 
 warnings.filterwarnings("ignore")
 
@@ -66,8 +66,8 @@ class PriceVariations:
 def save_prediction(player_id, date, value):
     # Create a DataFrame from the provided data
     df_1 = pd.DataFrame({
-        'ID': [player_id],
-        'Date': [date],
+        "id_mundo_deportivo": [player_id],
+        "price_day": [date],
         'PredictedValue': [int(value)]
     })
 
@@ -86,7 +86,7 @@ def save_prediction(player_id, date, value):
 def evaluate_arima_model(data, arima_order):
     try:
         print(f"Evaluating ARIMA model with order {arima_order} on data:\n{data.head()}")
-        model = ARIMA(data, order=arima_order)
+        model = ARIMA(data, order = arima_order)
         model_fit = model.fit()
         error = mean_squared_error(data, model_fit.fittedvalues)
         return arima_order, error
@@ -115,8 +115,8 @@ def plot_arima_predictions(data, order, player_id, forecast_days, pv: PriceVaria
         plt.plot(forecast_index, forecast_values, label = f'{forecast_days}-day Forecast', alpha = 0.7,
                  color = 'orange')
         plt.title(f'Predición Arima para {player_id} en los siguientes {forecast_days} días')
-        plt.xlabel('Date')
-        plt.ylabel('Value')
+        plt.xlabel("price_day")
+        plt.ylabel("price")
 
         # Format y-axis to avoid scientific notation
         ax = plt.gca()
@@ -143,7 +143,7 @@ def plot_arima_predictions(data, order, player_id, forecast_days, pv: PriceVaria
         print(f"Error in plotting for {player_id}: {err}")
 
 
-def arima_grid_search(data, p_values_1, d_values_1, q_values_1, player_id, price_v: PriceVariations):
+def arima_grid_search(data, p_values_1, d_values_1, q_values_1, player_id, pv: PriceVariations):
     # Initialize the best score to infinity and the best ARIMA order to None
     best_score, best_order = float("inf"), None
 
@@ -165,13 +165,13 @@ def arima_grid_search(data, p_values_1, d_values_1, q_values_1, player_id, price
     # Once the best ARIMA parameters are found, plot the predictions
     # The function 'plot_arima_predictions' plots the actual data, in-sample prediction,
     # and out-of-sample forecast using the best ARIMA model
-    plot_arima_predictions(data, best_order, player_id, 7, price_v)
+    plot_arima_predictions(data, best_order, player_id, 7, pv)
 
     # Return the best ARIMA model order found for the data
     return best_order
 
 
-def process_batch(batch_id_1, players_id_1, df_1, p_values_1, d_values_1, q_values_1, p_var: PriceVariations):
+def process_batch(batch_id_1, players_id_1, df_1, p_values_1, d_values_1, q_values_1, pv: PriceVariations):
     # Initialize a dictionary to store results for each player
     results_1 = {}
 
@@ -184,9 +184,9 @@ def process_batch(batch_id_1, players_id_1, df_1, p_values_1, d_values_1, q_valu
         print(f"\nStarting ARIMA grid search for {player_1}...")
 
         # Extract the data related to the current player from the DataFrame
-        # 'ID' is assumed to be a column in 'df' that contains player IDs
-        # 'Value' is assumed to be the column containing the data to be analyzed
-        player_data = df_1[df_1['ID'] == player_1]['Value']
+        # "id_mundo_deportivo" is assumed to be a column in 'df' that contains player IDs
+        # "price" is assumed to be the column containing the data to be analyzed
+        player_data = df_1[df_1["id_mundo_deportivo"] == player_1]["price"]
 
         # Check if the player has enough data points for analysis
         # In this case, 30 data points are required for a valid analysis
@@ -198,7 +198,7 @@ def process_batch(batch_id_1, players_id_1, df_1, p_values_1, d_values_1, q_valu
         # Perform the ARIMA grid search for the current player's data
         # 'arima_grid_search' is a function that finds the best ARIMA model parameters
         # It takes the player's data and the specified ranges of ARIMA parameters (p, d, q)
-        best_order = arima_grid_search(player_data, p_values_1, d_values_1, q_values_1, player_1, p_var)
+        best_order = arima_grid_search(player_data, p_values_1, d_values_1, q_values_1, player_1, pv)
 
         # Store the best ARIMA model parameters found for this player in the results dictionary
         results_1[player_1] = best_order
@@ -236,17 +236,17 @@ if __name__ == "__main__":
     # Convert column into a datetime format.
     df["price_day"] = pd.to_datetime(df["price_day"], dayfirst = True)
 
-    # Convert 'Value' column to numeric, setting non-numeric values to NaN
+    # Convert "price" column to numeric, setting non-numeric values to NaN
     df["price"] = pd.to_numeric(df["price"], errors = "coerce")
 
-    # Drop rows where "Value" is NaN
+    # Drop rows where "price" is NaN
     df = df.dropna(subset = ["price"])
 
-    # Set the column 'Date' as an index.
-    # By setting the 'Date' column as the index, each row can be efficiently accessed or referenced by its date.
+    # Set the column "price_day" as an index.
+    # By setting the "price_day" column as the index, each row can be efficiently accessed or referenced by its date.
     df.set_index("price_day", inplace = True)
 
-    # Extracts all the unique values from the 'ID' column of df and assigns them to the variable players
+    # Extracts all the unique values from the "id_mundo_deportivo" column of df and assigns them to the variable players
     players_id = df["id_mundo_deportivo"].unique()
 
     # Extracts all the unique values from the 'name' column of df and assigns them to the variable players
@@ -269,7 +269,8 @@ if __name__ == "__main__":
         num_cores = 1
     else:
         print("Running on Mac")
-        num_cores = os.cpu_count() - 2
+        # num_cores = os.cpu_count() - 2
+        num_cores = 1
 
     # Calculate batch size for parallel processing
     batch_size = int(np.ceil(len(players_id) / num_cores))
@@ -290,34 +291,38 @@ if __name__ == "__main__":
     print("Starting parallel ARIMA grid search across batches...")
     start_time = time.time()
 
-    try:
-        # Start with Parallel processing with the Process Pool Executor.
-        with ProcessPoolExecutor(max_workers = num_cores) as executor:
-            # Submit the process_batch function to the executor for parallel execution.
-            futures = {}
-            for batch_id, players_batch in enumerate(player_batches):
-                # Call the process_batch function with all it's parameters.
-                future = executor.submit(process_batch, batch_id, players_batch, df, p_values, d_values, q_values)
-                futures[future] = batch_id
+    # try:
+    #     # Start with Parallel processing with the Process Pool Executor.
+    #     with ProcessPoolExecutor(max_workers = num_cores) as executor:
+    #         # Submit the process_batch function to the executor for parallel execution.
+    #         futures = {}
+    #         for batch_id, players_batch in enumerate(player_batches):
+    #             # Call the process_batch function with all it's parameters.
+    #             future = executor.submit(process_batch, batch_id, players_batch, df, p_values, d_values, q_values)
+    #             futures[future] = batch_id
+    #
+    #         for future in as_completed(futures):
+    #             batch_id = futures[future]
+    #             batch_results = future.result()
+    #             player_best_params.update(batch_results)
+    #             all_params.extend(batch_results.values())
+    #             print(
+    #                 f"\nCompleted processing for batch {batch_id}. Total progress: "
+    #                 f"{len(player_best_params)}/{len(players_id)} players.")
+    # except Exception as e:
+    #     print(f"Error in parallel processing: {e}")
+    #     print("Reverting to sequential processing...")
+    #     for i, batch in enumerate(player_batches):
+    #         results = process_batch(i, batch, df, p_values, d_values, q_values, price_variations_list)
+    #         player_best_params.update(results)
+    #         all_params.extend(results.values())
+    for i, batch in enumerate(player_batches):
+        results = process_batch(i, batch, df, p_values, d_values, q_values, price_variations_list)
+        player_best_params.update(results)
+        all_params.extend(results.values())
 
-            for future in as_completed(futures):
-                batch_id = futures[future]
-                batch_results = future.result()
-                player_best_params.update(batch_results)
-                all_params.extend(batch_results.values())
-                print(
-                    f"\nCompleted processing for batch {batch_id}. Total progress: "
-                    f"{len(player_best_params)}/{len(players_id)} players.")
-    except Exception as e:
-        print(f"Error in parallel processing: {e}")
-        print("Reverting to sequential processing...")
-        for i, batch in enumerate(player_batches):
-            results = process_batch(i, batch, df, p_values, d_values, q_values, price_variations_list)
-            player_best_params.update(results)
-            all_params.extend(results.values())
-
-    if helper.path.exists("prediction_inserts.sql"):
-        helper.remove("prediction_inserts.sql")
+    # if helper.path.exists("prediction_inserts.sql"):
+    #     helper.remove("prediction_inserts.sql")
     with open("prediction_inserts.sql", mode = "w", newline = "", encoding = "utf-8") as f:
         for row in price_variations_list.to_insert_statements():
             f.write(row + "\n")
