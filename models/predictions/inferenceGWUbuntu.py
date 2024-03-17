@@ -80,7 +80,7 @@ def predict_dataset():
 
     # Load and preprocess the data
     print("Loading and preprocessing data...")
-    data_path = '../../../scrape/data/players/fantasy-games-week-players-stats.csv'
+    data_path = './data/fantasy-games-week-players-stats.csv'
     df = pd.read_csv(data_path)
     original_df = df.copy()
     df = preprocess_data(df)
@@ -152,6 +152,6 @@ if __name__ == "__main__":
 
     results_df = predict_dataset()
     # Save the DataFrame to a CSV file
-    csv_file_path = f"predictions/predictions_mundo_deportivo.csv"
+    csv_file_path = f"./predictions/predictions_mundo_deportivo.csv"
     results_df.to_csv(csv_file_path, index=False)
     print(f"Predictions saved to CSV file: {csv_file_path}")
