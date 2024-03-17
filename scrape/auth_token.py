@@ -60,15 +60,15 @@ class AIModel:
                      won_contest = 0, good_high_claim = 0, punches = 0, error_lead_to_a_shot = 0,
                      error_lead_to_a_goal = 0, shot_off_target = 0, on_target_scoring_attempt = 0, hit_woodwork = 0,
                      blocked_scoring_attempt = 0, outfielder_block = 0, big_chance_created = 0, big_chance_missed = 0,
-                     goal_assist = 0, penalty_conceded = 0, penalty_won = 0, penalty_miss = 0, penalty_save = 0,
-                     goals = 0, own_goals = 0, saved_shots_from_inside_the_box = 0, saves = 0, goals_against = 0,
-                     interception_won = 0, total_nterceptions = 0, total_keeper_sweeper = 0,
+                     penalty_conceded = 0, penalty_won = 0, penalty_miss = 0, penalty_save = 0, goals = 0,
+                     own_goals = 0, saved_shots_from_inside_the_box = 0, saves = 0, goal_assist = 0, goals_against = 0,
+                     goals_avoided = 0, interception_won = 0, total_interceptions = 0, total_keeper_sweeper = 0,
                      accurate_keeper_sweeper = 0, total_tackle = 0, was_fouled = 0, fouls = 0, total_offside = 0,
                      minutes_played = 0, touches = 0, last_man_tackle = 0, possession_lost_control = 0,
                      expected_goals = 0, goals_prevented = 0, key_pass = 0, expected_assists = 0,
                      total_season_15_16 = 0, total_season_16_17 = 0, total_season_17_18 = 0, total_season_18_19 = 0,
                      total_season_19_20 = 0, total_season_20_21 = 0, total_season_21_22 = 0, total_season_22_23 = 0,
-                     total_season_23_24 = 0, timestamp = 0):
+                     total_season_23_24 = 0, ts = 0):
             self.player_id = player_id
             self.full_name = full_name
             self.position = position
@@ -116,7 +116,6 @@ class AIModel:
             self.outfielder_block = outfielder_block
             self.big_chance_created = big_chance_created
             self.big_chance_missed = big_chance_missed
-            self.goal_assist = goal_assist
             self.penalty_conceded = penalty_conceded
             self.penalty_won = penalty_won
             self.penalty_miss = penalty_miss
@@ -125,9 +124,11 @@ class AIModel:
             self.own_goals = own_goals
             self.saved_shots_from_inside_the_box = saved_shots_from_inside_the_box
             self.saves = saves
+            self.goal_assist = goal_assist
             self.goals_against = goals_against
+            self.goals_avoided = goals_avoided
             self.interception_won = interception_won
-            self.total_nterceptions = total_nterceptions
+            self.total_interceptions = total_interceptions
             self.total_keeper_sweeper = total_keeper_sweeper
             self.accurate_keeper_sweeper = accurate_keeper_sweeper
             self.total_tackle = total_tackle
@@ -151,7 +152,7 @@ class AIModel:
             self.total_season_21_22 = total_season_21_22
             self.total_season_22_23 = total_season_22_23
             self.total_season_23_24 = total_season_23_24
-            self.timestamp = timestamp
+            self.ts = ts
 
     def add_player(self, player_id, full_name, position, game_week, team, opposing_team, mixed, as_score,
                    marca_score, mundo_deportivo_score, sofa_score, current_value, points, average, matches,
@@ -162,14 +163,15 @@ class AIModel:
                    won_contest = 0, good_high_claim = 0, punches = 0, error_lead_to_a_shot = 0,
                    error_lead_to_a_goal = 0, shot_off_target = 0, on_target_scoring_attempt = 0, hit_woodwork = 0,
                    blocked_scoring_attempt = 0, outfielder_block = 0, big_chance_created = 0, big_chance_missed = 0,
-                   goal_assist = 0, penalty_conceded = 0, penalty_won = 0, penalty_miss = 0, penalty_save = 0,
-                   goals = 0, own_goals = 0, saved_shots_from_inside_the_box = 0, saves = 0, goals_against = 0,
-                   interception_won = 0, total_nterceptions = 0, total_keeper_sweeper = 0, accurate_keeper_sweeper = 0,
-                   total_tackle = 0, was_fouled = 0, fouls = 0, total_offside = 0, minutes_played = 0, touches = 0,
-                   last_man_tackle = 0, possession_lost_control = 0, expected_goals = 0, goals_prevented = 0,
-                   key_pass = 0, expected_assists = 0, total_season_15_16 = 0, total_season_16_17 = 0,
-                   total_season_17_18 = 0, total_season_18_19 = 0, total_season_19_20 = 0, total_season_20_21 = 0,
-                   total_season_21_22 = 0, total_season_22_23 = 0, total_season_23_24 = 0, timestamp = 0):
+                   penalty_conceded = 0, penalty_won = 0, penalty_miss = 0, penalty_save = 0, goals = 0, own_goals = 0,
+                   saved_shots_from_inside_the_box = 0, saves = 0, goal_assist = 0, goals_against = 0,
+                   goals_avoided = 0, interception_won = 0, total_interceptions = 0, total_keeper_sweeper = 0,
+                   accurate_keeper_sweeper = 0, total_tackle = 0, was_fouled = 0, fouls = 0, total_offside = 0,
+                   minutes_played = 0, touches = 0, last_man_tackle = 0, possession_lost_control = 0,
+                   expected_goals = 0, goals_prevented = 0, key_pass = 0, expected_assists = 0, total_season_15_16 = 0,
+                   total_season_16_17 = 0, total_season_17_18 = 0, total_season_18_19 = 0, total_season_19_20 = 0,
+                   total_season_20_21 = 0, total_season_21_22 = 0, total_season_22_23 = 0, total_season_23_24 = 0,
+                   ts = 0):
         player = self.Player(player_id, full_name, position, game_week, team, opposing_team, mixed, as_score,
                              marca_score, mundo_deportivo_score, sofa_score, current_value, points, average, matches,
                              goals_metadata, cards, yellow_card, double_yellow_card, red_card, total_passes,
@@ -178,14 +180,14 @@ class AIModel:
                              challenge_lost, dispossessed, total_contest, won_contest, good_high_claim, punches,
                              error_lead_to_a_shot, error_lead_to_a_goal, shot_off_target, on_target_scoring_attempt,
                              hit_woodwork, blocked_scoring_attempt, outfielder_block, big_chance_created,
-                             big_chance_missed, goal_assist, penalty_conceded, penalty_won, penalty_miss, penalty_save,
-                             goals, own_goals, saved_shots_from_inside_the_box, saves, goals_against, interception_won,
-                             total_nterceptions, total_keeper_sweeper, accurate_keeper_sweeper, total_tackle,
-                             was_fouled, fouls, total_offside, minutes_played, touches, last_man_tackle,
-                             possession_lost_control, expected_goals, goals_prevented, key_pass, expected_assists,
-                             total_season_15_16, total_season_16_17, total_season_17_18, total_season_18_19,
-                             total_season_19_20, total_season_20_21, total_season_21_22, total_season_22_23,
-                             total_season_23_24, timestamp)
+                             big_chance_missed, penalty_conceded, penalty_won, penalty_miss, penalty_save,
+                             goals, own_goals, saved_shots_from_inside_the_box, saves, goal_assist, goals_against,
+                             goals_avoided, interception_won, total_interceptions, total_keeper_sweeper,
+                             accurate_keeper_sweeper, total_tackle, was_fouled, fouls, total_offside, minutes_played,
+                             touches, last_man_tackle, possession_lost_control, expected_goals, goals_prevented,
+                             key_pass, expected_assists, total_season_15_16, total_season_16_17, total_season_17_18,
+                             total_season_18_19, total_season_19_20, total_season_20_21, total_season_21_22,
+                             total_season_22_23, total_season_23_24, ts)
         self.player_model.append(player)
 
     def save_to_csv(self, filename):
@@ -205,8 +207,8 @@ class Users:
         return self.users[index]
 
     class User(Base):
-        def __init__(self, id_user, email = "", password = "", team_name = "", team_points = 0, team_average = 0.0,
-                     team_value = 0.0, team_players = 0, current_balance = 0, future_balance = 0, maximum_debt = 0):
+        def __init__(self, id_user: int, email = "", password = "", team_name = "", team_points = 0, team_average = 0.0,
+                     team_value = 0, team_players = 0, current_balance = 0, future_balance = 0, maximum_debt = 0):
             self.id_user = id_user
             self.email = email
             self.password = password
@@ -220,9 +222,9 @@ class Users:
             self.maximum_debt = maximum_debt
 
         def to_insert_statements(self):
-            return self.to_insert_statement("user")
+            return self.to_insert_statement("league_user")
 
-    def add_user(self, id_user, email = "", password = "", team_name = "", team_points = 0, team_average = 0.0,
+    def add_user(self, id_user: int, email = "", password = "", team_name = "", team_points = 0, team_average = 0.0,
                  team_value = 0.0, team_players = 0, current_balance = 0, future_balance = 0, maximum_debt = 0):
         user = self.User(id_user, email, password, team_name, team_points, team_average, team_value, team_players,
                          current_balance, future_balance, maximum_debt)
@@ -246,17 +248,17 @@ class Players:
         return self.players[index]
 
     class Player(Base):
-        def __init__(self, id_mundo_deportivo, id_sofa_score, id_marca, id_user, full_name, position, value,
-                     is_in_market = False, sell_price = "", photo_face = "", photo_body = "", season_15_16 = "",
-                     season_16_17 = "", season_17_18 = "", season_18_19 = "", season_19_20 = "", season_20_21 = "",
-                     season_21_22 = "", season_22_23 = "", season_23_24 = ""):
+        def __init__(self, id_mundo_deportivo: int, id_sofa_score: int, id_marca: int, id_user: int, full_name: str,
+                     position: int, player_value: int, is_in_market = False, sell_price = 0.0, photo_face = "",
+                     photo_body = 0, season_15_16 = 0, season_16_17 = 0, season_17_18 = 0, season_18_19 = 0,
+                     season_19_20 = 0, season_20_21 = 0, season_21_22 = 0, season_22_23 = 0, season_23_24 = 0):
             self.id_mundo_deportivo = id_mundo_deportivo
             self.id_sofa_score = id_sofa_score
             self.id_marca = id_marca
             self.id_user = id_user
             self.full_name = full_name
             self.position = position
-            self.value = value
+            self.player_value = player_value
             self.is_in_market = is_in_market
             self.sell_price = sell_price
             self.photo_face = photo_face
@@ -274,11 +276,11 @@ class Players:
         def to_insert_statements(self):
             return self.to_insert_statement("player")
 
-    def add_player(self, id_mundo_deportivo, id_sofa_score, id_marca, id_user, full_name, position, value,
-                   is_in_market = False, sell_price = "", photo_face = "", photo_body = "", season_15_16 = "",
-                   season_16_17 = "", season_17_18 = "", season_18_19 = "", season_19_20 = "", season_20_21 = "",
-                   season_21_22 = "", season_22_23 = "", season_23_24 = ""):
-        player = self.Player(id_mundo_deportivo, id_sofa_score, id_marca, id_user, full_name, position, value,
+    def add_player(self, id_mundo_deportivo: int, id_sofa_score: int, id_marca: int, id_user: int, full_name: str,
+                   position: int, player_value: int, is_in_market = False, sell_price = 0.0, photo_face = "",
+                   photo_body = "", season_15_16 = 0, season_16_17 = 0, season_17_18 = 0, season_18_19 = 0,
+                   season_19_20 = 0, season_20_21 = 0, season_21_22 = 0, season_22_23 = 0, season_23_24 = 0):
+        player = self.Player(id_mundo_deportivo, id_sofa_score, id_marca, id_user, full_name, position, player_value,
                              is_in_market, sell_price, photo_face, photo_body, season_15_16, season_16_17,
                              season_17_18, season_18_19, season_19_20, season_20_21, season_21_22, season_22_23,
                              season_23_24)
@@ -315,23 +317,24 @@ class Games:
         return self.games[index]
 
     class Game(Base):
-        def __init__(self, id_gw, id_player, schedule, game_week, team, opposing_team, mixed, as_score,
-                     marca_score, mundo_deportivo_score, sofa_score, current_value, points, average, matches,
-                     goals_metadata, cards, yellow_card, double_yellow_card = 0, red_card = 0, total_passes = 0,
+        def __init__(self, id_gw: int, id_mundo_deportivo: int, schedule: int, game_week: int, team: int,
+                     opposing_team: int, mixed = 0, as_score = 0, marca_score = 0, mundo_deportivo_score = 0,
+                     sofa_score = 0, current_value = 0, points = 0, average = 0, matches = 0, goals_metadata = 0,
+                     cards = 0, yellow_card = 0, double_yellow_card = 0, red_card = 0, total_passes = 0,
                      accurate_passes = 0, total_long_balls = 0, accurate_long_balls = 0, total_cross = 0,
                      accurate_cross = 0, total_clearance = 0, clearance_off_line = 0, aerial_lost = 0, aerial_won = 0,
                      duel_lost = 0, duel_won = 0, challenge_lost = 0, dispossessed = 0, total_contest = 0,
                      won_contest = 0, good_high_claim = 0, punches = 0, error_lead_to_a_shot = 0,
-                     error_lead_to_a_goal = 0, shot_off_target = 0, on_target_scoring_attempt = 0,
-                     hit_woodwork = 0, blocked_scoring_attempt = 0, outfielder_block = 0, big_chance_created = 0,
-                     big_chance_missed = 0, goal_assist = 0, penalty_conceded = 0, penalty_won = 0, penalty_miss = 0,
-                     penalty_save = 0, goals = 0, own_goals = 0, saved_shots_from_inside_the_box = 0, saves = 0,
-                     goals_against = 0, interception_won = 0, total_nterceptions = 0, total_keeper_sweeper = 0,
+                     error_lead_to_a_goal = 0, shot_off_target = 0, on_target_scoring_attempt = 0, hit_woodwork = 0,
+                     blocked_scoring_attempt = 0, outfielder_block = 0, big_chance_created = 0, big_chance_missed = 0,
+                     penalty_conceded = 0, penalty_won = 0, penalty_miss = 0, penalty_save = 0, goals = 0,
+                     own_goals = 0, saved_shots_from_inside_the_box = 0, saves = 0, goal_assist = 0, goals_against = 0,
+                     goals_avoided = 0, interception_won = 0, total_interceptions = 0, total_keeper_sweeper = 0,
                      accurate_keeper_sweeper = 0, total_tackle = 0, was_fouled = 0, fouls = 0, total_offside = 0,
                      minutes_played = 0, touches = 0, last_man_tackle = 0, possession_lost_control = 0,
-                     expected_goals = 0, goals_prevented = 0, key_pass = 0, expected_assists = 0, timestamp = 0):
+                     expected_goals = 0, goals_prevented = 0, key_pass = 0, expected_assists = 0, ts = 0):
             self.id_gw = id_gw
-            self.id_player = id_player
+            self.id_mundo_deportivo = id_mundo_deportivo
             self.schedule = schedule
             self.game_week = game_week
             self.team = team
@@ -377,7 +380,6 @@ class Games:
             self.outfielder_block = outfielder_block
             self.big_chance_created = big_chance_created
             self.big_chance_missed = big_chance_missed
-            self.goal_assist = goal_assist
             self.penalty_conceded = penalty_conceded
             self.penalty_won = penalty_won
             self.penalty_miss = penalty_miss
@@ -386,9 +388,11 @@ class Games:
             self.own_goals = own_goals
             self.saved_shots_from_inside_the_box = saved_shots_from_inside_the_box
             self.saves = saves
+            self.goal_assist = goal_assist
             self.goals_against = goals_against
+            self.goals_avoided = goals_avoided
             self.interception_won = interception_won
-            self.total_nterceptions = total_nterceptions
+            self.total_interceptions = total_interceptions
             self.total_keeper_sweeper = total_keeper_sweeper
             self.accurate_keeper_sweeper = accurate_keeper_sweeper
             self.total_tackle = total_tackle
@@ -403,39 +407,39 @@ class Games:
             self.goals_prevented = goals_prevented
             self.key_pass = key_pass
             self.expected_assists = expected_assists
-            self.timestamp = timestamp
+            self.ts = ts
 
         def to_insert_statements(self):
             return self.to_insert_statement("game")
 
-    def add_game(self, id_gw, id_player, schedule, game_week, team, opposing_team, mixed, as_score,
-                 marca_score, mundo_deportivo_score, sofa_score, current_value, points, average, matches,
-                 goals_metadata, cards, yellow_card, double_yellow_card = 0, red_card = 0, total_passes = 0,
-                 accurate_passes = 0, total_long_balls = 0, accurate_long_balls = 0, total_cross = 0,
-                 accurate_cross = 0, total_clearance = 0, clearance_off_line = 0, aerial_lost = 0, aerial_won = 0,
-                 duel_lost = 0, duel_won = 0, challenge_lost = 0, dispossessed = 0, total_contest = 0,
-                 won_contest = 0, good_high_claim = 0, punches = 0, error_lead_to_a_shot = 0,
-                 error_lead_to_a_goal = 0, shot_off_target = 0, on_target_scoring_attempt = 0, hit_woodwork = 0,
-                 blocked_scoring_attempt = 0, outfielder_block = 0, big_chance_created = 0, big_chance_missed = 0,
-                 goal_assist = 0, penalty_conceded = 0, penalty_won = 0, penalty_miss = 0, penalty_save = 0,
-                 goals = 0, own_goals = 0, saved_shots_from_inside_the_box = 0, saves = 0, goals_against = 0,
-                 interception_won = 0, total_nterceptions = 0, total_keeper_sweeper = 0,
-                 accurate_keeper_sweeper = 0, total_tackle = 0, was_fouled = 0, fouls = 0, total_offside = 0,
-                 minutes_played = 0, touches = 0, last_man_tackle = 0, possession_lost_control = 0, expected_goals = 0,
-                 goals_prevented = 0, key_pass = 0, expected_assists = 0, timestamp = 0):
-        game = self.Game(id_gw, id_player, schedule, game_week, team, opposing_team, mixed, as_score, marca_score,
-                         mundo_deportivo_score, sofa_score, current_value, points, average, matches, goals_metadata,
-                         cards, yellow_card, double_yellow_card, red_card, total_passes, accurate_passes,
-                         total_long_balls, accurate_long_balls, total_cross, accurate_cross, total_clearance,
-                         clearance_off_line, aerial_lost, aerial_won, duel_lost, duel_won, dispossessed, challenge_lost,
-                         total_contest, won_contest, good_high_claim, punches, error_lead_to_a_shot,
-                         error_lead_to_a_goal, shot_off_target, on_target_scoring_attempt, hit_woodwork,
-                         blocked_scoring_attempt, outfielder_block, big_chance_created, big_chance_missed, goal_assist,
-                         penalty_conceded, penalty_won, penalty_miss, penalty_save, goals, own_goals,
-                         saved_shots_from_inside_the_box, saves, goals_against, interception_won, total_nterceptions,
-                         total_keeper_sweeper, accurate_keeper_sweeper, total_tackle, was_fouled, fouls,
-                         total_offside, minutes_played, touches, last_man_tackle, possession_lost_control,
-                         expected_goals, goals_prevented, key_pass, expected_assists, timestamp)
+    def add_game(self, id_gw: int, id_mundo_deportivo: int, schedule: int, game_week: int, team: int,
+                 opposing_team: int, mixed = 0, as_score = 0, marca_score = 0, mundo_deportivo_score = 0,
+                 sofa_score = 0, current_value = 0, points = 0, average = 0, matches = 0, goals_metadata = 0, cards = 0,
+                 yellow_card = 0, double_yellow_card = 0, red_card = 0, total_passes = 0, accurate_passes = 0,
+                 total_long_balls = 0, accurate_long_balls = 0, total_cross = 0, accurate_cross = 0, total_clearance
+                 = 0, clearance_off_line = 0, aerial_lost = 0, aerial_won = 0, duel_lost = 0, duel_won = 0,
+                 challenge_lost = 0, dispossessed = 0, total_contest = 0, won_contest = 0, good_high_claim = 0,
+                 punches = 0, error_lead_to_a_shot = 0, error_lead_to_a_goal = 0, shot_off_target = 0,
+                 on_target_scoring_attempt = 0, hit_woodwork = 0, blocked_scoring_attempt = 0, outfielder_block = 0,
+                 big_chance_created = 0, big_chance_missed = 0, penalty_conceded = 0, penalty_won = 0, penalty_miss = 0,
+                 penalty_save = 0, goals = 0, own_goals = 0, saved_shots_from_inside_the_box = 0, saves = 0,
+                 goal_assist = 0, goals_against = 0, goals_avoided = 0, interception_won = 0, total_interceptions = 0,
+                 total_keeper_sweeper = 0, accurate_keeper_sweeper = 0, total_tackle = 0, was_fouled = 0, fouls = 0,
+                 total_offside = 0, minutes_played = 0, touches = 0, last_man_tackle = 0, possession_lost_control = 0,
+                 expected_goals = 0, goals_prevented = 0, key_pass = 0, expected_assists = 0, ts = 0):
+        game = self.Game(id_gw, id_mundo_deportivo, schedule, game_week, team, opposing_team, mixed, as_score,
+                         marca_score, mundo_deportivo_score, sofa_score, current_value, points, average, matches,
+                         goals_metadata, cards, yellow_card, double_yellow_card, red_card, total_passes,
+                         accurate_passes, total_long_balls, accurate_long_balls, total_cross, accurate_cross,
+                         total_clearance, clearance_off_line, aerial_lost, aerial_won, duel_lost, duel_won,
+                         dispossessed, challenge_lost, total_contest, won_contest, good_high_claim, punches,
+                         error_lead_to_a_shot, error_lead_to_a_goal, shot_off_target, on_target_scoring_attempt,
+                         hit_woodwork, blocked_scoring_attempt, outfielder_block, big_chance_created,
+                         big_chance_missed, penalty_conceded, penalty_won, penalty_miss, penalty_save, goals,
+                         own_goals, saved_shots_from_inside_the_box, saves, goal_assist, goals_against, goals_avoided,
+                         interception_won, total_interceptions, total_keeper_sweeper, accurate_keeper_sweeper,
+                         total_tackle, was_fouled, fouls, total_offside, minutes_played, touches, last_man_tackle,
+                         possession_lost_control, expected_goals, goals_prevented, key_pass, expected_assists, ts)
         self.games.append(game)
 
     def to_insert_statements(self):
@@ -462,18 +466,20 @@ class Absences:
         return self.absences[index]
 
     class Absence(Base):
-        def __init__(self, id_mundo_deportivo, type_absence, since, until, description_absence):
+        def __init__(self, id_mundo_deportivo: int, type_absence: str, description_absence: str,
+                     since: helper.datetime, until: helper.datetime):
             self.id_mundo_deportivo = id_mundo_deportivo
             self.type_absence = type_absence
+            self.description_absence = description_absence
             self.since = since
             self.until = until
-            self.description_absence = description_absence
 
         def to_insert_statements(self):
             return self.to_insert_statement("absence")
 
-    def add_absence(self, id_mundo_deportivo, type_absence, since, until, description_absence):
-        absence = self.Absence(id_mundo_deportivo, type_absence, since, until, description_absence)
+    def add_absence(self, id_mundo_deportivo: int, type_absence: str, description_absence: str,
+                    since: helper.datetime, until: helper.datetime):
+        absence = self.Absence(id_mundo_deportivo, type_absence, description_absence, since, until)
         self.absences.append(absence)
 
     def to_insert_statements(self):
@@ -491,17 +497,18 @@ class PriceVariations:
         return self.price_variations[index]
 
     class PriceVariation(Base):
-        def __init__(self, id_mundo_deportivo, price, day, is_prediction):
+        def __init__(self, id_mundo_deportivo: int, price_day: helper.datetime, price: int, is_prediction = False):
             self.id_mundo_deportivo = id_mundo_deportivo
+            self.price_day = price_day
             self.price = price
-            self.day = day
             self.is_prediction = is_prediction
 
         def to_insert_statements(self):
             return self.to_insert_statement("price_variation")
 
-    def add_price_variation(self, id_mundo_deportivo, price, day, is_prediction = False):
-        price_variation = self.PriceVariation(id_mundo_deportivo, price, day, is_prediction)
+    def add_price_variation(self, id_mundo_deportivo: int, price: int, price_day: helper.datetime,
+                            is_prediction = False):
+        price_variation = self.PriceVariation(id_mundo_deportivo, price, price_day, is_prediction)
         self.price_variations.append(price_variation)
 
     def to_insert_statements(self):
@@ -519,21 +526,20 @@ class Predictions:
         return self.predictions[index]
 
     class Prediction(Base):
-        def __init__(self, id_prediction, id_mundo_deportivo, gameweek, point_prediction, price_prediction,
-                     date_prediction):
-            self.id_prediction = id_prediction
+        def __init__(self, id_mundo_deportivo: int, gameweek: int, point_prediction: int, price_prediction: int,
+                     date_prediction: helper.datetime):
             self.id_mundo_deportivo = id_mundo_deportivo
             self.gameweek = gameweek
+            self.date_prediction = date_prediction
             self.point_prediction = point_prediction
             self.price_prediction = price_prediction
-            self.date_prediction = date_prediction
 
         def to_insert_statements(self):
             return self.to_insert_statement("prediction")
 
-    def add_prediction(self, id_prediction, id_mundo_deportivo, gameweek, point_prediction, price_prediction,
-                       date_prediction):
-        prediction = self.Prediction(id_prediction, id_mundo_deportivo, gameweek, point_prediction, price_prediction,
+    def add_prediction(self, id_mundo_deportivo: int, gameweek: int, point_prediction: int, price_prediction: int,
+                       date_prediction: helper.datetime):
+        prediction = self.Prediction(id_mundo_deportivo, gameweek, point_prediction, price_prediction,
                                      date_prediction)
         self.predictions.append(prediction)
 
@@ -552,10 +558,10 @@ class Recommendations:
         return self.recommendations[index]
 
     class Recommendation(Base):
-        def __init__(self, id_user, id_player, recommendation_type, market_team_recommendation, my_team_recommendation):
-            self.id_recommendation = None  # Este atributo se autoincrementará en la base de datos
+        def __init__(self, id_user: int, id_mundo_deportivo: int, recommendation_type: str,
+                     market_team_recommendation: bool, my_team_recommendation: bool):
             self.id_user = id_user
-            self.id_player = id_player
+            self.id_mundo_deportivo = id_mundo_deportivo
             self.recommendation_type = recommendation_type
             self.market_team_recommendation = market_team_recommendation
             self.my_team_recommendation = my_team_recommendation
@@ -563,9 +569,9 @@ class Recommendations:
         def to_insert_statements(self):
             return self.to_insert_statement("recommendation")
 
-    def add_recommendation(self, id_user, id_player, recommendation_type, market_team_recommendation,
-                           my_team_recommendation):
-        movement = self.Recommendation(id_user, id_player, recommendation_type, market_team_recommendation,
+    def add_recommendation(self, id_user: int, id_mundo_deportivo: int, recommendation_type: str,
+                           market_team_recommendation: bool, my_team_recommendation: bool):
+        movement = self.Recommendation(id_user, id_mundo_deportivo, recommendation_type, market_team_recommendation,
                                        my_team_recommendation)
         self.recommendations.append(movement)
 
@@ -661,7 +667,7 @@ class PlayerMovements:
         return insert_statements
 
 
-def multi_stmt_insert(name: str, create: bool, file: bool,  cur: mysql.connector.connection.MySQLCursorBuffered):
+def multi_stmt_insert(name: str, create: bool, file: bool, cur: mysql.connector.connection.MySQLCursorBuffered):
     if create and file:
         try:
             with open(name, "r", encoding = "utf-8") as file:
@@ -685,16 +691,17 @@ def multi_stmt_insert(name: str, create: bool, file: bool,  cur: mysql.connector
             with open(name, "r", encoding = "utf-8") as file:
                 sql_script = file.readlines()
 
-            progress_bar = tqdm(total = len(sql_script), desc = "Inserting")
+            # progress_bar = tqdm(total = len(sql_script), desc = "Inserting")
 
             for ins in sql_script:
-                cur.execute(ins.replace("\"", "").strip())
-                progress_bar.update(1)
+                cur.execute(ins)
+                print(f"{cur.rowcount} details inserted")
+                # progress_bar.update(1)
         except Exception as e:
             print(e)
-        finally:
-            progress_bar.close()
-            cursor.close()
+        # finally:
+        #     progress_bar.close()
+        #     cursor.close()
 
 
 def extract_login_token(h: dict, u: str, p: str):
@@ -850,23 +857,35 @@ def extracmd(h: dict, url: str):
 
 def extract_all_players_value_and_gw_md(h: dict, ai: AIModel, ab: Absences, gw: Games, players: Players,
                                         pv: PriceVariations, users: Users, url: str, url2: str):
-    for _ in range(0, 601, 50):
-        sleep(uniform(10, 20))
+    def date_formatting(date: str):
+        date_mapping = {
+            # Meses en inglés
+            "jan": "01", "feb": "02", "mar": "03", "apr": "04", "may": "05", "jun": "06", "jul": "07", "aug": "08",
+            "sep": "09", "oct": "10", "nov": "11", "dec": "12",
+            # Meses en español sin repetir anteriores.
+            "ene": "01", "abr": "04", "ago": "08", "sept": "09", "dic": "12"
+        }
+        month = date.split(" ")[1]
+        return "-".join([date.split(" ")[-1]] + [date_mapping[month]] + [date.split(" ")[0]])
+    progress_bar_1 = tqdm(total = 600, desc = "Scraping")
+    for num in range(0, 601, 50):
+        # sleep(uniform(6, 14))
         payload = {
             "post": "players", "filters[ position ]": 0, "filters[ value ]": 0, "filters[ team ]": 0,
-            "filters[ injured ]": 0, "filters[ favs ]": 0, "filters[ owner ]": 0, "filters[ benched ]": 0, "offset": _,
-            "order": 0, "name": "", "filtered": 0, "parentElement": ".sw-content"}
+            "filters[ injured ]": 0, "filters[ favs ]": 0, "filters[ owner ]": 0, "filters[ benched ]": 0,
+            "offset": num, "order": 0, "name": "", "filtered": 0, "parentElement": ".sw-content"}
         res = requests.post(url, data = payload, headers = h)
         if res.status_code == 200:
             aux = res.json()
             if aux["data"]["players"]:
-                for _ in aux["data"]["owners"]:
-                    if _["id"] not in users.get_all_user_ids():
-                        users.add_user(_["id"], team_name = _["name"])
-                for _ in aux["data"]["players"]:
-                    if _["id"] not in players.get_all_player_ids():
-                        payload_2 = {"post": "players", "id": _["id"]}
-                        sleep(uniform(10, 20))
+                for aux_owner in aux["data"]["owners"]:
+                    if aux_owner["id"] not in users.get_all_user_ids():
+                        users.add_user(aux_owner["id"], team_name = aux_owner["name"])
+                progress_bar_2 = tqdm(total = len(aux["data"]["players"]), desc = "Segment " + str((num // 50) + 1))
+                for aux_players in aux["data"]["players"]:
+                    if aux_players["id"] not in players.get_all_player_ids():
+                        payload_2 = {"post": "players", "id": aux_players["id"]}
+                        # sleep(uniform(6, 14))
                         res_2 = requests.post(url, data = payload_2, headers = h)
                         if res_2.status_code == 200:
                             res_json_2 = res_2.json()["data"]
@@ -876,59 +895,76 @@ def extract_all_players_value_and_gw_md(h: dict, ai: AIModel, ab: Absences, gw: 
                                 res_json_p_injuries = res_json_p_repo["injuries"]
                                 res_json_values = res_json_2["values_chart"]["points"]
                                 s56, s67, s78, s89, s1920, s2021, s2122, s2223, s2324 = 0, 0, 0, 0, 0, 0, 0, 0, 0
-                                for i in res_json_h_points:
-                                    if i["season"] == "15/16":
-                                        s56 = i["points"]
-                                    elif i["season"] == "16/17":
-                                        s67 = i["points"]
-                                    elif i["season"] == "17/18":
-                                        s78 = i["points"]
-                                    elif i["season"] == "18/19":
-                                        s89 = i["points"]
-                                    elif i["season"] == "19/20":
-                                        s1920 = i["points"]
-                                    elif i["season"] == "20/21":
-                                        s2021 = i["points"]
-                                    elif i["season"] == "21/22":
-                                        s2122 = i["points"]
-                                    elif i["season"] == "22/23":
-                                        s2223 = i["points"]
-                                    elif i["season"] == "23/24":
-                                        s2324 = i["points"]
+                                for history in res_json_h_points:
+                                    if "season" in json.dumps(history).split(":")[0]:
+                                        if history["season"] == "15/16":
+                                            s56 = history["points"]
+                                        elif history["season"] == "16/17":
+                                            s67 = history["points"]
+                                        elif history["season"] == "17/18":
+                                            s78 = history["points"]
+                                        elif history["season"] == "18/19":
+                                            s89 = history["points"]
+                                        elif history["season"] == "19/20":
+                                            s1920 = history["points"]
+                                        elif history["season"] == "20/21":
+                                            s2021 = history["points"]
+                                        elif history["season"] == "21/22":
+                                            s2122 = history["points"]
+                                        elif history["season"] == "22/23":
+                                            s2223 = history["points"]
+                                        elif history["season"] == "23/24":
+                                            s2324 = history["points"]
                                 res = requests.get(res_2.json()["data"]["player"]["photoUrl"])
-                                img_file = helper.path.join(route.image_folder, str(_["id"]) + "_" + _["name"].
-                                                            replace(" ", "_") + ".png")
+                                img_file = helper.path.join(route.image_folder, str(aux_players["id"]) + "_" +
+                                                            aux_players["name"].replace(" ", "_") + ".png")
                                 helper.makedirs(helper.path.dirname(img_file), exist_ok = True)
                                 with open(img_file, "wb") as img:
                                     img.write(res.content)
                                 # Insertar imágenes:
                                 with open(img_file, "rb") as file:
-                                    binary_data = file.read()
-                                players.add_player(_["id"], res_json_p_repo["sofaScoreId"], 0, _["id_uc"], _["name"],
-                                                   _["position"], _["value"], True if _["id_market"] is not None else
-                                                   False, 0, binary_data, 0, s56, s67, s78, s89, s1920, s2021, s2122,
-                                                   s2223, s2324)
-                                # _["is_mine"] Para usuarios y balance.
+                                    b64_image = helper.base64.b64encode(file.read()).decode("utf-8")
+                                if aux_players["id_uc"] is None:
+                                    team_id = 1010
+                                else:
+                                    team_id = aux_players["id_uc"]
+                                players.add_player(aux_players["id"], res_json_p_repo["sofaScoreId"], 0,
+                                                   team_id, aux_players["name"], aux_players["position"],
+                                                   aux_players["value"], True if aux_players["id_market"] is not
+                                                   None else False, 0, 0, 0, s56, s67, s78, s89, s1920, s2021,
+                                                   s2122, s2223, s2324)
+                                # aux_players["is_mine"] Para usuarios y balance.
                                 # current_balance = extract_balance(new_header, md_balance_url)
                                 remove(img_file)
                                 for value in res_json_values:
-                                    pv.add_price_variation(_["id"], value["value"], value["date"])
+                                    pv.add_price_variation(aux_players["id"], date_formatting(value["date"]),
+                                                           value["value"])
                                 for injury in res_json_p_injuries:
-                                    ab.add_absence(_["id"], injury["category"], injury["since"], injury["until"],
-                                                   injury["description"])
+                                    if injury["since"] is None:
+                                        since = "None"
+                                    else:
+                                        since = injury["since"]
+                                    if injury["until"] is None:
+                                        until = "None"
+                                    else:
+                                        until = injury["until"]
+                                    ab.add_absence(aux_players["id"], injury["category"], injury["description"],
+                                                   since, until)
                                 res_json_player = res_json_2["player"]
                                 gameweeks = res_json_2["points"]
                                 gameweeks.reverse()
                                 for gameweek in gameweeks:
                                     gw_number = gameweek["gameweek"]
-                                    payload_3 = {"id_gameweek": gameweek["id_gameweek"], "id_player": _["id"]}
+                                    payload_3 = {"id_gameweek": gameweek["id_gameweek"], "id_player": aux_players["id"]}
                                     res_3 = requests.post(url2, data = payload_3, headers = h)
                                     res_json_3 = None
                                     if res_3.status_code == 200:
                                         res_json_3 = res_3.json()["data"]
                                     if res_json_3 is not None:
-                                        print(res_json_2["player"]["name"], gameweek["id_gameweek"],
-                                              gameweek["gameweek"])
+                                        # print(res_json_2["player"]["name"], gameweek["id_gameweek"],
+                                        #       gameweek["gameweek"])
+                                        special = False
+                                        test = None
                                         own_team = res_json_3["id_team"]
                                         if res_json_3["id_home"] == own_team:
                                             opposing_team = res_json_3["id_away"]
@@ -937,222 +973,256 @@ def extract_all_players_value_and_gw_md(h: dict, ai: AIModel, ab: Absences, gw: 
                                         if res_json_3["marca_stats_rating_detailed"]:
                                             test = res_json_3["marca_stats_rating_detailed"]
                                             special = False
-                                        else:
+                                        elif res_json_3["stats"] is not None:
                                             test = res_json_3["stats"]
                                             special = True
-                                        data_str = test.replace("'", "\"")
-                                        exclude = ["rating", "marca"]
-                                        include = ["goals"]
-                                        original_data_dict = {
-                                            "yellowCard": {"value": 0, "rating": 0},
-                                            "doubleYellowCard": {"value": 0, "rating": 0},
-                                            "redCard": {"value": 0, "rating": 0},
-                                            "totalPass": {"value": 0, "rating": 0},
-                                            "accuratePass": {"value": 0, "rating": 0},
-                                            "totalLongBalls": {"value": 0, "rating": 0},
-                                            "accurateLongBalls": {"value": 0, "rating": 0},
-                                            "totalCross": {"value": 0, "rating": 0},
-                                            "accurateCross": {"value": 0, "rating": 0},
-                                            "totalClearance": {"value": 0, "rating": 0},
-                                            "clearanceOffLine": {"value": 0, "rating": 0},
-                                            "aerialLost": {"value": 0, "rating": 0},
-                                            "aerialWon": {"value": 0, "rating": 0},
-                                            "duelLost": {"value": 0, "rating": 0},
-                                            "duelWon": {"value": 0, "rating": 0},
-                                            "dispossessed": {"value": 0, "rating": 0},
-                                            "challengeLost": {"value": 0, "rating": 0},
-                                            "totalContest": {"value": 0, "rating": 0},
-                                            "wonContest": {"value": 0, "rating": 0},
-                                            "goodHighClaim": {"value": 0, "rating": 0},
-                                            "punches": {"value": 0, "rating": 0},
-                                            "errorLeadToAShot": {"value": 0, "rating": 0},
-                                            "errorLeadToAGoal": {"value": 0, "rating": 0},
-                                            "shotOffTarget": {"value": 0, "rating": 0},
-                                            "onTargetScoringAttempt": {"value": 0, "rating": 0},
-                                            "blockedScoringAttempt": {"value": 0, "rating": 0},
-                                            "outfielderBlock": {"value": 0, "rating": 0},
-                                            "bigChanceCreated": {"value": 0, "rating": 0},
-                                            "goalAssist": {"value": 0, "rating": 0},
-                                            "hitWoodwork": {"value": 0, "rating": 0},
-                                            "bigChanceMissed": {"value": 0, "rating": 0},
-                                            "penaltyConceded": {"value": 0, "rating": 0},
-                                            "penaltyWon": {"value": 0, "rating": 0},
-                                            "penaltyMiss": {"value": 0, "rating": 0},
-                                            "penaltySave": {"value": 0, "rating": 0},
-                                            "goals": {"value": 0, "rating": 0}, "ownGoals": {"value": 0, "rating": 0},
-                                            "savedShotsFromInsideTheBox": {"value": 0, "rating": 0},
-                                            "saves": {"value": 0, "rating": 0},
-                                            "goalsAvoided": {"value": 0, "rating": 0},
-                                            "interceptionWon": {"value": 0, "rating": 0},
-                                            "totalInterceptions": {"value": 0, "rating": 0},
-                                            "goalsAgainst": {"value": 0, "rating": 0},
-                                            "totalKeeperSweeper": {"value": 0, "rating": 0},
-                                            "accurateKeeperSweeper": {"value": 0, "rating": 0},
-                                            "totalTackle": {"value": 0, "rating": 0},
-                                            "wasFouled": {"value": 0, "rating": 0}, "fouls": {"value": 0, "rating": 0},
-                                            "totalOffside": {"value": 0, "rating": 0},
-                                            "minutesPlayed": {"value": 0, "rating": 0},
-                                            "touches": {"value": 0, "rating": 0},
-                                            "lastManTackle": {"value": 0,  "rating": 0},
-                                            "possessionLostCtrl": {"value": 0, "rating": 0},
-                                            "expectedGoals": {"value": 0, "rating": 0},
-                                            "goalsPrevented": {"value": 0, "rating": 0},
-                                            "keyPass": {"value": 0, "rating": 0},
-                                            "expectedAssists": {"value": 0, "rating": 0},
-                                            "timestamp": {"value": 0, "rating": 0}
-                                        }
+                                        if test is not None:
+                                            data_str = test.replace("'", "\"")
+                                            exclude = ["rating", "marca", "ratingVersions"]
+                                            include = ["goalsAgainst", "goalsAssist", "goalsAvoided", "goalAvoided"]
+                                            original_data_dict = {
+                                                "yellowCard": {"value": 0, "rating": 0},
+                                                "doubleYellowCard": {"value": 0, "rating": 0},
+                                                "redCard": {"value": 0, "rating": 0},
+                                                "totalPass": {"value": 0, "rating": 0},
+                                                "accuratePass": {"value": 0, "rating": 0},
+                                                "totalLongBalls": {"value": 0, "rating": 0},
+                                                "accurateLongBalls": {"value": 0, "rating": 0},
+                                                "totalCross": {"value": 0, "rating": 0},
+                                                "accurateCross": {"value": 0, "rating": 0},
+                                                "totalClearance": {"value": 0, "rating": 0},
+                                                "clearanceOffLine": {"value": 0, "rating": 0},
+                                                "aerialLost": {"value": 0, "rating": 0},
+                                                "aerialWon": {"value": 0, "rating": 0},
+                                                "duelLost": {"value": 0, "rating": 0},
+                                                "duelWon": {"value": 0, "rating": 0},
+                                                "dispossessed": {"value": 0, "rating": 0},
+                                                "challengeLost": {"value": 0, "rating": 0},
+                                                "totalContest": {"value": 0, "rating": 0},
+                                                "wonContest": {"value": 0, "rating": 0},
+                                                "goodHighClaim": {"value": 0, "rating": 0},
+                                                "punches": {"value": 0, "rating": 0},
+                                                "errorLeadToAShot": {"value": 0, "rating": 0},
+                                                "errorLeadToAGoal": {"value": 0, "rating": 0},
+                                                "shotOffTarget": {"value": 0, "rating": 0},
+                                                "onTargetScoringAttempt": {"value": 0, "rating": 0},
+                                                "blockedScoringAttempt": {"value": 0, "rating": 0},
+                                                "outfielderBlock": {"value": 0, "rating": 0},
+                                                "bigChanceCreated": {"value": 0, "rating": 0},
+                                                "hitWoodwork": {"value": 0, "rating": 0},
+                                                "bigChanceMissed": {"value": 0, "rating": 0},
+                                                "penaltyConceded": {"value": 0, "rating": 0},
+                                                "penaltyWon": {"value": 0, "rating": 0},
+                                                "penaltyMiss": {"value": 0, "rating": 0},
+                                                "penaltySave": {"value": 0, "rating": 0},
+                                                "goals": {"value": 0, "rating": 0},
+                                                "ownGoals": {"value": 0, "rating": 0},
+                                                "savedShotsFromInsideTheBox": {"value": 0, "rating": 0},
+                                                "saves": {"value": 0, "rating": 0},
+                                                "interceptionWon": {"value": 0, "rating": 0},
+                                                "totalInterceptions": {"value": 0, "rating": 0},
+                                                "goalAssist": {"value": 0, "rating": 0},
+                                                "goalsAvoided": {"value": 0, "rating": 0},
+                                                "goalsAgainst": {"value": 0, "rating": 0},
+                                                "totalKeeperSweeper": {"value": 0, "rating": 0},
+                                                "accurateKeeperSweeper": {"value": 0, "rating": 0},
+                                                "totalTackle": {"value": 0, "rating": 0},
+                                                "wasFouled": {"value": 0, "rating": 0},
+                                                "fouls": {"value": 0, "rating": 0},
+                                                "totalOffside": {"value": 0, "rating": 0},
+                                                "minutesPlayed": {"value": 0, "rating": 0},
+                                                "touches": {"value": 0, "rating": 0},
+                                                "lastManTackle": {"value": 0,  "rating": 0},
+                                                "possessionLostCtrl": {"value": 0, "rating": 0},
+                                                "expectedGoals": {"value": 0, "rating": 0},
+                                                "goalsPrevented": {"value": 0, "rating": 0},
+                                                "keyPass": {"value": 0, "rating": 0},
+                                                "expectedAssists": {"value": 0, "rating": 0}
+                                            }
 
-                                        # Convert to dictionary
-                                        data_dict = json.loads(data_str)
-                                        for key, value in data_dict.items():
-                                            if not special:
-                                                if key in original_data_dict:
-                                                    original_data_dict[key].update(data_dict[key])
-                                                if (any(ext in res_json_3["stats"] for ext in include) or
-                                                        "goals" in data_str) and all(key != ext for ext in exclude):
-                                                    print(key + " in MD.")
-                                                elif key not in original_data_dict and \
-                                                        all(key != ext for ext in exclude):
-                                                    print(key)
-                                            if special:
-                                                if key in original_data_dict:
-                                                    original_data_dict[key] = {"value": data_dict[key], "rating": 0}
-                                        player_value = players.find_player(_["id"])
-                                        game_count = sum(1 for game in gameweeks if game["points"] is not None
-                                                         and game["points"] > 0)
-                                        goal_count = sum(game["events"].count("goal") for game in gameweeks
-                                                         if game["events"] is not False)
-                                        card_count = sum(game["events"].count("red") for game in gameweeks
-                                                         if game["events"] is not False) + \
-                                            sum(game["events"].count("yellow") for game in gameweeks
-                                                if game["events"] is not False)
-                                        gw.add_game(gameweek["id_gameweek"], _["id"], res_json_3["as_graded_date"],
-                                                    gw_number, own_team, opposing_team, res_json_3["points_mix"],
-                                                    res_json_3["points_as"], res_json_3["points_marca"],
-                                                    res_json_3["points_md"], res_json_3["points_mr"],
-                                                    player_value.value, res_json_player["points"],
-                                                    res_json_player["avg"], game_count, goal_count, card_count,
-                                                    original_data_dict["yellowCard"]["value"],
-                                                    original_data_dict["doubleYellowCard"]["value"],
-                                                    original_data_dict["redCard"]["value"],
-                                                    original_data_dict["totalPass"]["value"],
-                                                    original_data_dict["accuratePass"]["value"],
-                                                    original_data_dict["totalLongBalls"]["value"],
-                                                    original_data_dict["accurateLongBalls"]["value"],
-                                                    original_data_dict["totalCross"]["value"],
-                                                    original_data_dict["accurateCross"]["value"],
-                                                    original_data_dict["totalClearance"]["value"],
-                                                    original_data_dict["clearanceOffLine"]["value"],
-                                                    original_data_dict["aerialLost"]["value"],
-                                                    original_data_dict["aerialWon"]["value"],
-                                                    original_data_dict["duelLost"]["value"],
-                                                    original_data_dict["duelWon"]["value"],
-                                                    original_data_dict["dispossessed"]["value"],
-                                                    original_data_dict["challengeLost"]["value"],
-                                                    original_data_dict["totalContest"]["value"],
-                                                    original_data_dict["wonContest"]["value"],
-                                                    original_data_dict["goodHighClaim"]["value"],
-                                                    original_data_dict["punches"]["value"],
-                                                    original_data_dict["errorLeadToAShot"]["value"],
-                                                    original_data_dict["errorLeadToAGoal"]["value"],
-                                                    original_data_dict["shotOffTarget"]["value"],
-                                                    original_data_dict["onTargetScoringAttempt"]["value"],
-                                                    original_data_dict["blockedScoringAttempt"]["value"],
-                                                    original_data_dict["outfielderBlock"]["value"],
-                                                    original_data_dict["bigChanceCreated"]["value"],
-                                                    original_data_dict["goalAssist"]["value"],
-                                                    original_data_dict["hitWoodwork"]["value"],
-                                                    original_data_dict["bigChanceMissed"]["value"],
-                                                    original_data_dict["penaltyConceded"]["value"],
-                                                    original_data_dict["penaltyWon"]["value"],
-                                                    original_data_dict["penaltyMiss"]["value"],
-                                                    original_data_dict["penaltySave"]["value"],
-                                                    original_data_dict["goals"]["value"],
-                                                    original_data_dict["ownGoals"]["value"],
-                                                    original_data_dict["savedShotsFromInsideTheBox"]["value"],
-                                                    original_data_dict["saves"]["value"],
-                                                    original_data_dict["goalsAvoided"]["value"],
-                                                    original_data_dict["interceptionWon"]["value"],
-                                                    original_data_dict["totalInterceptions"]["value"],
-                                                    original_data_dict["totalKeeperSweeper"]["value"],
-                                                    original_data_dict["accurateKeeperSweeper"]["value"],
-                                                    original_data_dict["totalTackle"]["value"],
-                                                    original_data_dict["wasFouled"]["value"],
-                                                    original_data_dict["fouls"]["value"],
-                                                    original_data_dict["totalOffside"]["value"],
-                                                    original_data_dict["minutesPlayed"]["value"],
-                                                    original_data_dict["touches"]["value"],
-                                                    original_data_dict["lastManTackle"]["value"],
-                                                    original_data_dict["possessionLostCtrl"]["value"],
-                                                    original_data_dict["expectedGoals"]["value"],
-                                                    original_data_dict["goalsPrevented"]["value"],
-                                                    original_data_dict["keyPass"]["value"],
-                                                    original_data_dict["expectedAssists"]["value"],
-                                                    original_data_dict["timestamp"]["value"])
-                                        ai.add_player(_["id"], _["name"], _["position"], gameweek["id_gameweek"],
-                                                      own_team, opposing_team, res_json_3["points_mix"],
-                                                      res_json_3["points_as"], res_json_3["points_marca"],
-                                                      res_json_3["points_md"], res_json_3["points_mr"],
-                                                      player_value.value, res_json_player["points"],
-                                                      res_json_player["avg"], game_count, goal_count, card_count,
-                                                      original_data_dict["yellowCard"]["value"],
-                                                      original_data_dict["doubleYellowCard"]["value"],
-                                                      original_data_dict["redCard"]["value"],
-                                                      original_data_dict["totalPass"]["value"],
-                                                      original_data_dict["accuratePass"]["value"],
-                                                      original_data_dict["totalLongBalls"]["value"],
-                                                      original_data_dict["accurateLongBalls"]["value"],
-                                                      original_data_dict["totalCross"]["value"],
-                                                      original_data_dict["accurateCross"]["value"],
-                                                      original_data_dict["totalClearance"]["value"],
-                                                      original_data_dict["clearanceOffLine"]["value"],
-                                                      original_data_dict["aerialLost"]["value"],
-                                                      original_data_dict["aerialWon"]["value"],
-                                                      original_data_dict["duelLost"]["value"],
-                                                      original_data_dict["duelWon"]["value"],
-                                                      original_data_dict["dispossessed"]["value"],
-                                                      original_data_dict["challengeLost"]["value"],
-                                                      original_data_dict["totalContest"]["value"],
-                                                      original_data_dict["wonContest"]["value"],
-                                                      original_data_dict["goodHighClaim"]["value"],
-                                                      original_data_dict["punches"]["value"],
-                                                      original_data_dict["errorLeadToAShot"]["value"],
-                                                      original_data_dict["errorLeadToAGoal"]["value"],
-                                                      original_data_dict["shotOffTarget"]["value"],
-                                                      original_data_dict["onTargetScoringAttempt"]["value"],
-                                                      original_data_dict["blockedScoringAttempt"]["value"],
-                                                      original_data_dict["outfielderBlock"]["value"],
-                                                      original_data_dict["bigChanceCreated"]["value"],
-                                                      original_data_dict["goalAssist"]["value"],
-                                                      original_data_dict["hitWoodwork"]["value"],
-                                                      original_data_dict["bigChanceMissed"]["value"],
-                                                      original_data_dict["penaltyConceded"]["value"],
-                                                      original_data_dict["penaltyWon"]["value"],
-                                                      original_data_dict["penaltyMiss"]["value"],
-                                                      original_data_dict["penaltySave"]["value"],
-                                                      original_data_dict["goals"]["value"],
-                                                      original_data_dict["ownGoals"]["value"],
-                                                      original_data_dict["savedShotsFromInsideTheBox"]["value"],
-                                                      original_data_dict["saves"]["value"],
-                                                      original_data_dict["goalsAvoided"]["value"],
-                                                      original_data_dict["interceptionWon"]["value"],
-                                                      original_data_dict["totalInterceptions"]["value"],
-                                                      original_data_dict["totalKeeperSweeper"]["value"],
-                                                      original_data_dict["accurateKeeperSweeper"]["value"],
-                                                      original_data_dict["totalTackle"]["value"],
-                                                      original_data_dict["wasFouled"]["value"],
-                                                      original_data_dict["fouls"]["value"],
-                                                      original_data_dict["totalOffside"]["value"],
-                                                      original_data_dict["minutesPlayed"]["value"],
-                                                      original_data_dict["touches"]["value"],
-                                                      original_data_dict["lastManTackle"]["value"],
-                                                      original_data_dict["possessionLostCtrl"]["value"],
-                                                      original_data_dict["expectedGoals"]["value"],
-                                                      original_data_dict["goalsPrevented"]["value"],
-                                                      original_data_dict["keyPass"]["value"],
-                                                      original_data_dict["expectedAssists"]["value"], s56, s67, s78,
-                                                      s89, s1920, s2021, s2122, s2223, s2324,
-                                                      original_data_dict["timestamp"]["value"])
+                                            # Convert to dictionary
+                                            data_dict = json.loads(data_str)
+                                            for key, value in data_dict.items():
+                                                if not special:
+                                                    if key in original_data_dict:
+                                                        original_data_dict[key].update(data_dict[key])
+                                                    # if any(ext in res_json_3["stats"] for ext in include) and \
+                                                    #         key in include:
+                                                    if any(ext in res_json_3["stats"] for ext in include):  # key in
+                                                        # include or
+                                                        print(key + " in MD.")
+                                                    elif key not in original_data_dict and \
+                                                            all(key != ext for ext in exclude):
+                                                        print(key)
+                                                if special:
+                                                    if key in original_data_dict:
+                                                        original_data_dict[key] = {"value": data_dict[key], "rating": 0}
+                                            player_value = players.find_player(aux_players["id"])
+                                            game_count = sum(1 for game in gameweeks if game["points"] is not None
+                                                             and game["points"] > 0)
+                                            goal_count = sum(game["events"].count("goal") for game in gameweeks
+                                                             if game["events"] is not False)
+                                            card_count = sum(game["events"].count("red") for game in gameweeks
+                                                             if game["events"] is not False) + \
+                                                sum(game["events"].count("yellow") for game in gameweeks
+                                                    if game["events"] is not False)
+                                            if res_json_3["as_graded_date"] is not None:
+                                                gw_schedule = res_json_3["as_graded_date"]
+                                            else:
+                                                gw_schedule = "None"
+                                            if res_json_3["points_mix"] is None:
+                                                points_mix = res_json_3["points_mix"]
+                                            else:
+                                                points_mix = 0
+                                            if res_json_3["points_as"] is None:
+                                                points_as = res_json_3["points_as"]
+                                            else:
+                                                points_as = 0
+                                            if res_json_3["points_marca"] is None:
+                                                points_marca = res_json_3["points_marca"]
+                                            else:
+                                                points_marca = 0
+                                            if res_json_3["points_md"] is None:
+                                                points_md = res_json_3["points_md"]
+                                            else:
+                                                points_md = 0
+                                            if res_json_3["points_mr"] is None:
+                                                points_mr = res_json_3["points_mr"]
+                                            else:
+                                                points_mr = 0
+                                            gw.add_game(gameweek["id_gameweek"], aux_players["id"],
+                                                        gw_schedule, gw_number, own_team, opposing_team,
+                                                        points_mix, points_as, points_marca, points_md,
+                                                        points_mr, player_value.player_value,
+                                                        res_json_player["points"], res_json_player["avg"],
+                                                        game_count, goal_count, card_count,
+                                                        original_data_dict["yellowCard"]["value"],
+                                                        original_data_dict["doubleYellowCard"]["value"],
+                                                        original_data_dict["redCard"]["value"],
+                                                        original_data_dict["totalPass"]["value"],
+                                                        original_data_dict["accuratePass"]["value"],
+                                                        original_data_dict["totalLongBalls"]["value"],
+                                                        original_data_dict["accurateLongBalls"]["value"],
+                                                        original_data_dict["totalCross"]["value"],
+                                                        original_data_dict["accurateCross"]["value"],
+                                                        original_data_dict["totalClearance"]["value"],
+                                                        original_data_dict["clearanceOffLine"]["value"],
+                                                        original_data_dict["aerialLost"]["value"],
+                                                        original_data_dict["aerialWon"]["value"],
+                                                        original_data_dict["duelLost"]["value"],
+                                                        original_data_dict["duelWon"]["value"],
+                                                        original_data_dict["dispossessed"]["value"],
+                                                        original_data_dict["challengeLost"]["value"],
+                                                        original_data_dict["totalContest"]["value"],
+                                                        original_data_dict["wonContest"]["value"],
+                                                        original_data_dict["goodHighClaim"]["value"],
+                                                        original_data_dict["punches"]["value"],
+                                                        original_data_dict["errorLeadToAShot"]["value"],
+                                                        original_data_dict["errorLeadToAGoal"]["value"],
+                                                        original_data_dict["shotOffTarget"]["value"],
+                                                        original_data_dict["onTargetScoringAttempt"]["value"],
+                                                        original_data_dict["blockedScoringAttempt"]["value"],
+                                                        original_data_dict["outfielderBlock"]["value"],
+                                                        original_data_dict["bigChanceCreated"]["value"],
+                                                        original_data_dict["hitWoodwork"]["value"],
+                                                        original_data_dict["bigChanceMissed"]["value"],
+                                                        original_data_dict["penaltyConceded"]["value"],
+                                                        original_data_dict["penaltyWon"]["value"],
+                                                        original_data_dict["penaltyMiss"]["value"],
+                                                        original_data_dict["penaltySave"]["value"],
+                                                        original_data_dict["goals"]["value"],
+                                                        original_data_dict["ownGoals"]["value"],
+                                                        original_data_dict["savedShotsFromInsideTheBox"]["value"],
+                                                        original_data_dict["saves"]["value"],
+                                                        original_data_dict["goalAssist"]["value"],
+                                                        original_data_dict["goalsAgainst"]["value"],
+                                                        original_data_dict["goalsAvoided"]["value"],
+                                                        original_data_dict["interceptionWon"]["value"],
+                                                        original_data_dict["totalInterceptions"]["value"],
+                                                        original_data_dict["totalKeeperSweeper"]["value"],
+                                                        original_data_dict["accurateKeeperSweeper"]["value"],
+                                                        original_data_dict["totalTackle"]["value"],
+                                                        original_data_dict["wasFouled"]["value"],
+                                                        original_data_dict["fouls"]["value"],
+                                                        original_data_dict["totalOffside"]["value"],
+                                                        original_data_dict["minutesPlayed"]["value"],
+                                                        original_data_dict["touches"]["value"],
+                                                        original_data_dict["lastManTackle"]["value"],
+                                                        original_data_dict["possessionLostCtrl"]["value"],
+                                                        original_data_dict["expectedGoals"]["value"],
+                                                        original_data_dict["goalsPrevented"]["value"],
+                                                        original_data_dict["keyPass"]["value"],
+                                                        original_data_dict["expectedAssists"]["value"],
+                                                        helper.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                                            ai.add_player(aux_players["id"], aux_players["name"],
+                                                          aux_players["position"], gameweek["id_gameweek"], own_team,
+                                                          opposing_team, points_mix, points_as, points_marca, points_md,
+                                                          points_mr, player_value.player_value,
+                                                          res_json_player["points"], res_json_player["avg"], game_count,
+                                                          goal_count, card_count,
+                                                          original_data_dict["yellowCard"]["value"],
+                                                          original_data_dict["doubleYellowCard"]["value"],
+                                                          original_data_dict["redCard"]["value"],
+                                                          original_data_dict["totalPass"]["value"],
+                                                          original_data_dict["accuratePass"]["value"],
+                                                          original_data_dict["totalLongBalls"]["value"],
+                                                          original_data_dict["accurateLongBalls"]["value"],
+                                                          original_data_dict["totalCross"]["value"],
+                                                          original_data_dict["accurateCross"]["value"],
+                                                          original_data_dict["totalClearance"]["value"],
+                                                          original_data_dict["clearanceOffLine"]["value"],
+                                                          original_data_dict["aerialLost"]["value"],
+                                                          original_data_dict["aerialWon"]["value"],
+                                                          original_data_dict["duelLost"]["value"],
+                                                          original_data_dict["duelWon"]["value"],
+                                                          original_data_dict["dispossessed"]["value"],
+                                                          original_data_dict["challengeLost"]["value"],
+                                                          original_data_dict["totalContest"]["value"],
+                                                          original_data_dict["wonContest"]["value"],
+                                                          original_data_dict["goodHighClaim"]["value"],
+                                                          original_data_dict["punches"]["value"],
+                                                          original_data_dict["errorLeadToAShot"]["value"],
+                                                          original_data_dict["errorLeadToAGoal"]["value"],
+                                                          original_data_dict["shotOffTarget"]["value"],
+                                                          original_data_dict["onTargetScoringAttempt"]["value"],
+                                                          original_data_dict["blockedScoringAttempt"]["value"],
+                                                          original_data_dict["outfielderBlock"]["value"],
+                                                          original_data_dict["bigChanceCreated"]["value"],
+                                                          original_data_dict["hitWoodwork"]["value"],
+                                                          original_data_dict["bigChanceMissed"]["value"],
+                                                          original_data_dict["penaltyConceded"]["value"],
+                                                          original_data_dict["penaltyWon"]["value"],
+                                                          original_data_dict["penaltyMiss"]["value"],
+                                                          original_data_dict["penaltySave"]["value"],
+                                                          original_data_dict["goals"]["value"],
+                                                          original_data_dict["ownGoals"]["value"],
+                                                          original_data_dict["savedShotsFromInsideTheBox"]["value"],
+                                                          original_data_dict["saves"]["value"],
+                                                          original_data_dict["goalAssist"]["value"],
+                                                          original_data_dict["goalsAvoided"]["value"],
+                                                          original_data_dict["goalsAgainst"]["value"],
+                                                          original_data_dict["interceptionWon"]["value"],
+                                                          original_data_dict["totalInterceptions"]["value"],
+                                                          original_data_dict["totalKeeperSweeper"]["value"],
+                                                          original_data_dict["accurateKeeperSweeper"]["value"],
+                                                          original_data_dict["totalTackle"]["value"],
+                                                          original_data_dict["wasFouled"]["value"],
+                                                          original_data_dict["fouls"]["value"],
+                                                          original_data_dict["totalOffside"]["value"],
+                                                          original_data_dict["minutesPlayed"]["value"],
+                                                          original_data_dict["touches"]["value"],
+                                                          original_data_dict["lastManTackle"]["value"],
+                                                          original_data_dict["possessionLostCtrl"]["value"],
+                                                          original_data_dict["expectedGoals"]["value"],
+                                                          original_data_dict["goalsPrevented"]["value"],
+                                                          original_data_dict["keyPass"]["value"],
+                                                          original_data_dict["expectedAssists"]["value"], s56, s67, s78,
+                                                          s89, s1920, s2021, s2122, s2223, s2324,
+                                                          helper.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                    progress_bar_2.update(1)
+                progress_bar_2.close()
+        progress_bar_1.update(50)
+    progress_bar_1.close()
     print()
 
 
@@ -1255,18 +1325,16 @@ def extract_balance(h: dict, url: str):
     return None
 
 
-def extract_all(ail: AIModel, ul: Users, pl: Players, gwl: Games, al: Absences, pvl: PriceVariations, sw_url: str,
-                gw_url: str):
-    extract_all_players_value_and_gw_md(new_header, ail, al, gwl, pl, pvl, ul, sw_url, gw_url)
-
-
 mariadb = helper.create_database_connection()
 cursor = mariadb.cursor(buffered = True)
+sql = ["SELECT * FROM league_user;", "SELECT * FROM player;", "SELECT * FROM game;", "SELECT * FROM absence;",
+       "SELECT * FROM price_variation;", "SELECT * FROM prediction;", "SELECT * FROM recommendation;"]
+sql_data = []
 try:
-    sql = "SELECT * FROM users;"
-    cursor.execute(sql)
-
-    results = cursor.fetchall()
+    for c in sql:
+        cursor.execute(c)
+        if len(cursor.fetchall()) > 5:
+            sql_data.append(True)
 except helper.mysql.connector.Error as err:
     if "doesn\'t exist" in err.msg and err.errno == 1146:
         try:
@@ -1275,6 +1343,7 @@ except helper.mysql.connector.Error as err:
         except Exception as err:
             print(err)
 finally:
+    cursor.close()
     mariadb.close()
 
 md_balance_url = "https://mister.mundodeportivo.com/ajax/balance"
@@ -1285,28 +1354,30 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 
 headers = {"Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest", "User-Agent": user_agent}
 
-new_header = extract_auth(headers, user_agent, "", "")
+new_header = extract_auth(headers, user_agent, "uem.ua2c@gmail.com", "uruguaychina")
 
 request_timeout = 30
 
 marca_header = {"User-Agent": user_agent, "Origin": "https://fantasy.laliga.com", "Referer":
                 "https://fantasy.laliga.com/", "X-App": "Fantasy-web", "X-Lang": "es"}
 
-failed_img = extract_marca_img(marca_header, request_timeout)
+# failed_img = extract_marca_img(marca_header, request_timeout)
 
 ai_list = AIModel()
 users_list = Users()
+users_list.add_user(1010, team_name = "Mister")
 players_list = Players()
 gameweeks_list = Games()
 absences_list = Absences()
 price_variations_list = PriceVariations()
-# extract_all(ai_list, users_list, players_list, gameweeks_list, absences_list, price_variations_list, md_sw_url,
-            # md_gw_url)
+if sql_data.count(True) != 7:
+    extract_all_players_value_and_gw_md(new_header, ai_list, absences_list, gameweeks_list, players_list,
+                                        price_variations_list, users_list, md_sw_url, md_gw_url)
 
 # extract_market(new_header, md_ajax_url)
 
-y = extract_marca_all_p_id(marca_header, request_timeout)
-unkown, player_list = find_id_marca_to_md(new_header, y, players_list, md_sw_url)
+# y = extract_marca_all_p_id(marca_header, request_timeout)
+# unkown, player_list = find_id_marca_to_md(new_header, y, players_list, md_sw_url)
 
 all_tables = [users_list.to_insert_statements(), players_list.to_insert_statements(),
               gameweeks_list.to_insert_statements(), absences_list.to_insert_statements(),
@@ -1314,11 +1385,10 @@ all_tables = [users_list.to_insert_statements(), players_list.to_insert_statemen
 
 if path.exists("insert_statements.sql"):
     remove("insert_statements.sql")
-with open("insert_statements.sql", mode = "a", newline = "", encoding = "utf-8") as f:
-    f_write = csv.writer(f)
+with open("insert_statements.sql", mode = "w", newline = "", encoding = "utf-8") as f:
     for table in all_tables:
         for row in table:
-            f_write.writerow([row.replace("\"", "")])
+            f.write(row + "\n")
 
 mariadb = helper.create_database_connection()
 cursor = mariadb.cursor(buffered = True)
