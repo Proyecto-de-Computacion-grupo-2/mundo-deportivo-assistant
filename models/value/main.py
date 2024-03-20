@@ -4,13 +4,11 @@ import time
 import warnings
 import os
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from matplotlib import ticker
 from sklearn.metrics import mean_squared_error
 from statsmodels.tsa.arima.model import ARIMA
 import helper as helper
@@ -63,30 +61,8 @@ class PriceVariations:
             insert_statements.extend([price_variation.to_insert_statements()])
         return insert_statements
 
-
-def save_prediction(player_id, date, value):
-    # Create a DataFrame from the provided data
-    df_1 = pd.DataFrame({
-        'ID': [player_id],
-        'Date': [date],
-        'PredictedValue': [int(value)]
-    })
-
-    # Define the file name
-    prediction_csv = "predictions/fantasy_market_value_prediction.csv"
-
-    # Check if the file exists to decide whether to write header
-    #file_exists = os.path.exists(prediction_csv)
-
-    # Save the DataFrame to a CSV file in append mode
-    #df_1.to_csv(prediction_csv, mode = "a", index = False, header = not file_exists)
-
-    print(f"Predictions appended to {prediction_csv}")
-
-
 def evaluate_arima_model(data, arima_order):
     try:
-        print(f"Evaluating ARIMA model with order {arima_order} on data:\n{data.head()}")
         model = ARIMA(data, order=arima_order)
         model_fit = model.fit()
         error = mean_squared_error(data, model_fit.fittedvalues)
@@ -95,116 +71,58 @@ def evaluate_arima_model(data, arima_order):
         print(f"Error in model evaluation for order {arima_order}: {err}")
         return arima_order, float("inf")
 
-
 def plot_arima_predictions(data, order, player_id, forecast_days, pv: PriceVariations):
     try:
         model = ARIMA(data, order=order)
         model_fit = model.fit()
-
-        # In-sample prediction
-        # in_sample_pred = model_fit.predict(start = data.index[0], end= data.index[-1])
 
         # Out-of-sample forecast
         forecast = model_fit.get_forecast(steps = forecast_days)
         forecast_index = pd.date_range(start = data.index[-1], periods = forecast_days + 1, freq = data.index.freq)[1:]
         forecast_values = forecast.predicted_mean
 
-        # Plot actual data, in-sample predictions, and out-of-sample forecast
-        plt.figure(figsize = (12, 6))
-        # plt.plot(data, label = 'Actual Data', color = 'blue')
-        # plt.plot(in_sample_pred, label = 'In-sample Prediction', alpha = 0.7, color = 'green')
-        plt.plot(forecast_index, forecast_values, label = f'{forecast_days}-day Forecast', alpha = 0.7,
-                 color = 'orange')
-        plt.title(f'Predición Arima para {player_id} en los siguientes {forecast_days} días')
-        plt.xlabel('Date')
-        plt.ylabel('Value')
-
-        # Format y-axis to avoid scientific notation
-        ax = plt.gca()
-        ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: '{:,.0f}'.format(x)))
-
-        plt.legend()
-        plt.savefig(f'predictions/plots/{player_id}_market_value_prediction_plot.png')
-        plt.close()
-        print(f"Plot saved for {player_id}")
-
-        # Print the forecast values
-        save_prediction_database_array = []
         print(f"\n{forecast_days}-day Forecast for {player_id}:")
         for date, value in zip(forecast_index, forecast_values):
-            pv.add_price_variation(player_id, date.today().strftime('%Y/%m/%d'), int(value))  # todo Save this into the database.
+            print(forecast_values)
+            pv.add_price_variation(player_id, date.strftime('%Y/%m/%d'), int(value))
 
     except Exception as err:
         print(f"Error in plotting for {player_id}: {err}")
 
 
 def arima_grid_search(data, p_values_1, d_values_1, q_values_1, player_id, price_v: PriceVariations):
-    # Initialize the best score to infinity and the best ARIMA order to None
     best_score, best_order = float("inf"), None
 
-    # Iterate over all combinations of p, d, q values
     for order in itertools.product(p_values_1, d_values_1, q_values_1):
-        # Evaluate the ARIMA model for the current combination of parameters
-        # The function 'evaluate_arima_model' returns an error score for the model
         _, error = evaluate_arima_model(data, order)
 
-        # If the current model's error is lower than the best score found so far,
-        # update the best score and the best model order
         if error < best_score:
             best_score, best_order = error, order
 
-        # Print the progress: player ID, current ARIMA order being evaluated, and the current best order
-        # 'end='\r'' makes sure the output is overwritten each time, showing only the latest status
-        print(f"Processing {player_id}, ARIMA order: {order}, Current Best: {best_order}", end = "\r")
+        #print(f"Processing {player_id}, ARIMA order: {order}, Current Best: {best_order}", end = "\r")
 
-    # Once the best ARIMA parameters are found, plot the predictions
-    # The function 'plot_arima_predictions' plots the actual data, in-sample prediction,
-    # and out-of-sample forecast using the best ARIMA model
     plot_arima_predictions(data, best_order, player_id, 7, price_v)
 
-    # Return the best ARIMA model order found for the data
     return best_order
 
-
 def process_batch(batch_id_1, players_id_1, df_1, p_values_1, d_values_1, q_values_1, p_var: PriceVariations):
-    # Initialize a dictionary to store results for each player
     results_1 = {}
 
-    # Print a message indicating the start of processing for this batch
     print(f"\nStarting batch {batch_id_1} processing with {len(players_id_1)} players.")
 
     # Iterate over each player ID in the batch
     for player_1 in players_id_1:
-        # Print a message indicating the start of ARIMA grid search for the current player
-        print(f"\nStarting ARIMA grid search for {player_1}...")
-
-        # Extract the data related to the current player from the DataFrame
-        # 'ID' is assumed to be a column in 'df' that contains player IDs
-        # 'Value' is assumed to be the column containing the data to be analyzed
         player_data = df_1[df_1['ID'] == player_1]['Value']
 
-        # Check if the player has enough data points for analysis
-        # In this case, 30 data points are required for a valid analysis
         if len(player_data) < 30:
-            # Print a message and skip this player if the data is insufficient
-            print(f"Skipping {player_1} due to insufficient data.")
             continue
 
-        # Perform the ARIMA grid search for the current player's data
-        # 'arima_grid_search' is a function that finds the best ARIMA model parameters
-        # It takes the player's data and the specified ranges of ARIMA parameters (p, d, q)
         best_order = arima_grid_search(player_data, p_values_1, d_values_1, q_values_1, player_1, p_var)
 
-        # Store the best ARIMA model parameters found for this player in the results dictionary
         results_1[player_1] = best_order
 
-        # Print a completion message for the current player with the best ARIMA order
-        print(f"\nCompleted ARIMA grid search for {player_1}. Best order: {best_order}")
-
-    # Print a completion message for the entire batch
     print(f"Completed processing batch {batch_id_1}.")
 
-    # Return the dictionary of results containing the best ARIMA orders for each player
     return results_1
 
 
@@ -234,8 +152,6 @@ if __name__ == "__main__":
         'price': 'Value'
     }, inplace=True)
 
-    print(df)
-
     # Prepare the data frame.
     # Convert column into a datetime format.
     df["Date"] = pd.to_datetime(df["Date"], dayfirst = True)
@@ -254,9 +170,6 @@ if __name__ == "__main__":
     # Extracts all the unique values from the 'ID' column of df and assigns them to the variable players
     players_id = df["ID"].unique()
 
-    # Extracts all the unique values from the 'name' column of df and assigns them to the variable players
-    # players_name = df["Name"].unique()
-
     price_variations_list = PriceVariations()
 
     # Define ML hyper parameters for ARIMA model to use.
@@ -274,13 +187,10 @@ if __name__ == "__main__":
         num_cores = 1
     else:
         print("Running on Mac")
-        num_cores = 1
-        num_cores = os.cpu_count() - 2
+        num_cores = os.cpu_count() - 1
 
-    # Calculate batch size for parallel processing
     batch_size = int(np.ceil(len(players_id) / num_cores))
 
-    # Create batches of players
     player_batches = []
     for start in range(0, len(players_id), batch_size):
         end = start + batch_size
@@ -297,12 +207,9 @@ if __name__ == "__main__":
     start_time = time.time()
 
     try:
-        # Start with Parallel processing with the Process Pool Executor.
         with ProcessPoolExecutor(max_workers = num_cores) as executor:
-            # Submit the process_batch function to the executor for parallel execution.
             futures = {}
             for batch_id, players_batch in enumerate(player_batches):
-                # Call the process_batch function with all it's parameters.
                 future = executor.submit(process_batch, batch_id, players_batch, df, p_values, d_values, q_values)
                 futures[future] = batch_id
 

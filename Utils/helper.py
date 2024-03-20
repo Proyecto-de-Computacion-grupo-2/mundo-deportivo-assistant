@@ -26,9 +26,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from platform import system
 from time import sleep
-from telegram import Bot, error, Update
-from telegram.ext import Application, ApplicationBuilder, CallbackContext, CommandHandler, ContextTypes, filters, \
-    JobQueue, InlineQueryHandler, MessageHandler, Updater
 
 
 # For debugging, this sets up a formatting for a logfile, and where it is.
@@ -45,7 +42,7 @@ def define_logger(file):
             logg = logging.getLogger(__name__)
         return logg
     except Exception as err:
-        logg.exception(err)
+        #logg.exception(err)
         return logg
 
 
@@ -444,10 +441,10 @@ def scrape_backup(folder, backup):
 
 # Database
 def create_database_connection():
-    host = getenv("DB_HOST", "127.0.0.1")
+    host = getenv("DB_HOST", "localhost")
     port = getenv("DB_PORT", "3306")
     user = getenv("DB_USER", "root")
-    password = getenv("DB_PASSWORD", "")
+    password = getenv("DB_PASSWORD", "root")
     database = getenv("DB_NAME", "pc2")
     conn, connection = False, None
     while not conn:
@@ -478,4 +475,4 @@ def close_database_connection(conn):
         conn.close()
 
 
-logger = define_logger(route.helper_log)
+#logger = define_logger(route.helper_log)
