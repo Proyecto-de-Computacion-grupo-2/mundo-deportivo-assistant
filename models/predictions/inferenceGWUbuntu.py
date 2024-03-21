@@ -5,6 +5,7 @@ import tensorflow as tf
 from sklearn.metrics import mean_squared_error
 from math import sqrt
 import csv
+import helper
 
 from sklearn.preprocessing import StandardScaler
 
@@ -59,7 +60,6 @@ def get_new_model_input(df, tokenizer, text_columns):
 def evaluate_model(model, test_features, true_values):
     # Generate predictions
     predictions = model.predict(test_features)
-
     # Calculate MSE and then RMSE
     mse = mean_squared_error(true_values, predictions)
     rmse = sqrt(mse)
@@ -78,13 +78,41 @@ def evaluate_model(model, test_features, true_values):
 
 def predict_dataset():
 
-    # Load and preprocess the data
-    print("Loading and preprocessing data...")
-    data_path = './data/fantasy-games-week-players-stats.csv'
-    df = pd.read_csv(data_path)
-    original_df = df.copy()
-    df = preprocess_data(df)
+    # convert the current structure to pandas dataframes.
+    players_information = helper.get_all_attributes_for_points_predicction()
 
+    column_names = [
+        "ID", "Player full name", "Position", "Game Week", "Team", "Opposing Team",
+        "Mixed", "AS Score", "Marca Score", "Mundo Deportivo Score", "Sofa Score",
+        "Current Value", "Points", "Average", "Matches", "Goals Metadata", "Cards",
+        "Total Passes", "Accurate Passes", "Total Long Balls", "Accurate Long Balls",
+        "Total Crosses", "Accurate Crosses", "Total clearances", "Clearances on goal line",
+        "Aerial Duels Lost", "Aerial Duels Won", "Duels Lost", "Duels Won",
+        "Dribbled Past", "Losses", "Total Dribbles", "Completed dribbles",
+        "High clearances", "Fist clearances", "Failures that lead to shot",
+        "Failures that lead to goal", "Shots Off Target", "Shots on Target",
+        "Shots blocked in attack", "Shots blocked in defence", "Occasions created",
+        "Goal assists", "Shots to the crossbar", "Failed obvious occasions",
+        "Penalties commited", "Penalties caused", "Failed penalties", "Stopped penalties",
+        "Goals", "Own goals", "Stops from inside the area", "Stops", "Goals avoided",
+        "Interceptions", "Total outputs", "Precise outputs", "Total Tackles",
+        "Fouls Received", "Fouls Committed", "Offsides", "Minutes Played", "Touches",
+        "Entries as last man", "Possessions Lost", "Expected Goals", "Key Passes",
+        "Expected Assists", "Average Season 15/16", "Average Season 16/17",
+        "Average Season 17/18", "Average Season 18/19", "Average Season 19/20",
+        "Average Season 20/21", "Average Season 21/22", "Average Season 22/23",
+        "Average Season 23/24", "Timestamp"
+    ]
+
+    df_players_information_database = pd.DataFrame(players_information, columns=column_names)
+
+    original_df = df_players_information_database.copy()
+    df = preprocess_data(df_players_information_database)
+
+    maxgame = df['Game Week'].max()
+    print(maxgame)
+    df = df[df['Game Week'] == maxgame]
+    original_df = original_df[original_df['Game Week'] == maxgame]
 
     original_df = original_df.drop_duplicates(subset=['ID'])
 
@@ -98,8 +126,6 @@ def predict_dataset():
     numerical_features = scaler.fit_transform(numerical_features)
 
     print(numerical_features)
-
-
 
     model_input = [get_new_model_input(original_df, tokenizer, num_features), numerical_features]
     print("Data loaded and preprocessed successfully!")
@@ -125,8 +151,6 @@ def predict_dataset():
     #round predictions
     predictions = [round(x) for x in predictions]
 
-
-
     # make negative predictions positive
     predictions = [abs(x) for x in predictions]
 
@@ -134,24 +158,21 @@ def predict_dataset():
     print(len(predictions))
     print(len(original_df['ID']))
     print(len(original_df['Position']))
-    print(len(original_df['Game Week']))
 
     # Create a DataFrame with the predictions
     results_df = pd.DataFrame({
         'ID': original_df['ID'],
         'Position': original_df['Position'],
-        'PredictedValue': predictions,
-        'GameWeek': original_df['Game Week']
+        'PredictedValue': predictions
     })
+
+    print(results_df)
+
+
+    helper.database_insert_prediction(original_df['ID'],int(maxgame)+1,predictions)
+
 
     return results_df
 
-
-# Main script starts here
 if __name__ == "__main__":
-
     results_df = predict_dataset()
-    # Save the DataFrame to a CSV file
-    csv_file_path = f"./predictions/predictions_mundo_deportivo.csv"
-    results_df.to_csv(csv_file_path, index=False)
-    print(f"Predictions saved to CSV file: {csv_file_path}")

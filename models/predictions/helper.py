@@ -6,13 +6,13 @@
 #
 
 
-import Utils.routes as route
+import routes as route
 
 import asyncio, base64, csv, glob, hashlib, http.client, io, json, logging, math, pandas, re, requests, shutil, sys, \
     threading
 
 from bs4 import BeautifulSoup
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, date
 import mysql.connector
 from random import choice, uniform
 from os import chdir, getcwd, getenv, listdir, makedirs, path, remove, system
@@ -561,6 +561,7 @@ def get_all_attributes_for_points_predicction():
         FROM game
         JOIN player ON game.id_mundo_deportivo = player.id_mundo_deportivo
         """
+
         cursor.execute(sql)
         results = cursor.fetchall()
 
@@ -568,9 +569,36 @@ def get_all_attributes_for_points_predicction():
         for row in results:
             players_information.append(row)
 
+        return players_information
+
     finally:
         if mariadb.is_connected():
             cursor.close()
             mariadb.close()
+
+
+def database_insert_prediction(players_id, gameweek, point_predictions):
+    mariadb = create_database_connection()
+    cursor = mariadb.cursor()
+    print(players_id)
+    print(gameweek)
+    print(point_predictions)
+    try:
+        for player_id, point_prediction in zip(players_id, point_predictions):
+            sql = """INSERT INTO prediction_points(
+            id_mundo_deportivo,
+            gameweek,
+            date_prediction,
+            point_prediction
+            ) VALUES (%s,%s,%s,%s)"""
+            values = (player_id, gameweek, date.today(), point_prediction)
+            cursor.execute(sql, values)
+            mariadb.commit()
+            print(f'Inserted prediction for {player_id} in gameweek {gameweek}')
+    finally:
+        cursor.close()
+        mariadb.close()
+    pass
+
 
 #logger = define_logger(route.helper_log)
