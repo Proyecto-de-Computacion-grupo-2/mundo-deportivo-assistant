@@ -1,5 +1,5 @@
 import random
-from datetime import datetime
+from datetime import datetime, date
 from Utils import helper as helper, routes as route
 
 # ------------ Value -------------
@@ -68,7 +68,7 @@ def get_40_best_players_ids_points_predictions(gameweek):
     cursor = mariadb.cursor()
 
     try:
-        sql = "SELECT id_mundo_deportivo,point_prediction FROM prediction WHERE gameweek = (%s) ORDER BY point_prediction DESC LIMIT 50"
+        sql = "SELECT id_mundo_deportivo,point_prediction FROM prediction_points WHERE gameweek = (%s) ORDER BY point_prediction DESC LIMIT 50"
         cursor.execute(sql, [gameweek])
         results = cursor.fetchall()
 
@@ -160,7 +160,7 @@ def get_player_points_prediction(players_id, gameweek):
 
     try:
         for player_id in players_id:
-            sql = "SELECT point_prediction FROM prediction WHERE id_mundo_deportivo = (%s) AND gameweek = (%s)"
+            sql = "SELECT point_prediction FROM prediction_points WHERE id_mundo_deportivo = (%s) AND gameweek = (%s)"
             cursor.execute(sql, [player_id, gameweek])
             result = cursor.fetchone()
 
@@ -216,30 +216,30 @@ def get_players_position(players_id):
     return players_positions
 
 
-def insert_random_predictions(id_list):
-    mariadb = helper.create_database_connection()
-    cursor = mariadb.cursor()
-
-    gameweek = 30
-    points_range = (0, 20)
-
-    try:
-        for id_mundo_deportivo in id_list:
-            points_prediction = random.randint(*points_range)
-            date_prediction = datetime.now().strftime('%Y-%m-%d')
-
-            sql = """INSERT INTO prediction (id_mundo_deportivo, gameweek, date_prediction, point_prediction) VALUES (%s, %s, %s, %s)"""
-            values = (id_mundo_deportivo, gameweek, date_prediction, points_prediction)
-            cursor.execute(sql, values)
-        mariadb.commit()
-        print(f"{len(id_list)} predictions inserted successfully.")
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        mariadb.rollback()
-    finally:
-        cursor.close()
-        mariadb.close()
+# def insert_random_predictions(id_list):
+#     mariadb = helper.create_database_connection()
+#     cursor = mariadb.cursor()
+#
+#     gameweek = 30
+#     points_range = (0, 20)
+#
+#     try:
+#         for id_mundo_deportivo in id_list:
+#             points_prediction = random.randint(*points_range)
+#             date_prediction = datetime.now().strftime('%Y-%m-%d')
+#
+#             sql = """INSERT INTO prediction_points (id_mundo_deportivo, gameweek, date_prediction, point_prediction) VALUES (%s, %s, %s, %s)"""
+#             values = (id_mundo_deportivo, gameweek, date_prediction, points_prediction)
+#             cursor.execute(sql, values)
+#         mariadb.commit()
+#         print(f"{len(id_list)} predictions inserted successfully.")
+#
+#     except Exception as e:
+#         print(f"An error occurred: {e}")
+#         mariadb.rollback()
+#     finally:
+#         cursor.close()
+#         mariadb.close()
 
 
 def insert_global_recommendation(id_mundo_deportivo, gameweek, lineup):
@@ -256,12 +256,12 @@ def insert_global_recommendation(id_mundo_deportivo, gameweek, lineup):
 
 
 def database_insert_user_recommendation(id_user, id_mundo_deportivo, market_team_recommendation, my_team_recommendation,
-                                        gameweek):
+                                        gameweek, operation_type):
     mariadb = helper.create_database_connection()
     cursor = mariadb.cursor()
     try:
-        sql = """INSERT INTO user_recommendation (id_user,id_mundo_deportivo,market_team_recommendation,my_team_recommendation, gameweek ) VALUES (%s, %s, %s,%s,%s)"""
-        values = (id_user, id_mundo_deportivo, market_team_recommendation, my_team_recommendation, gameweek)
+        sql = """INSERT INTO user_recommendation (id_user,id_mundo_deportivo,recommendation_day,market_team_recommendation,my_team_recommendation, gameweek , operation_type) VALUES (%s, %s,%s, %s,%s,%s,%s)"""
+        values = (id_user, id_mundo_deportivo,date.today() ,market_team_recommendation, my_team_recommendation, gameweek, operation_type)
         cursor.execute(sql, values)
         mariadb.commit()
     finally:

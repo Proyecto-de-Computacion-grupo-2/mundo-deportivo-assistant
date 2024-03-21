@@ -79,7 +79,7 @@ def best_team_user_current_players(user_id, gameweek):
     optimized_team_ids = optimise_user_team(players_id, players_position, players_points_prediction)
 
     for optimized_player_id in optimized_team_ids[0]:
-        recommendations.database_insert_user_recommendation(user_id, optimized_player_id, False, True, gameweek)
+        recommendations.database_insert_user_recommendation(user_id, optimized_player_id, False, True, gameweek, "Titular")
 
 
 def best_team_user_market(user_id, gameweek):
@@ -101,7 +101,7 @@ def best_team_user_market(user_id, gameweek):
     optimized_market_ids = optimise_user_team_market(players_id, positions, predictions, prices, current_money)
 
     for optimized_player_id in optimized_market_ids[0]:
-        recommendations.database_insert_user_recommendation(user_id, optimized_player_id, True, False, gameweek)
+        recommendations.database_insert_user_recommendation(user_id, optimized_player_id, True, False, gameweek,'Titular Mercado')
 
 
 def best_team_league(gameweek):
@@ -126,4 +126,4 @@ def get_recommendations_points(id_user,gameweek):
     best_team_league(gameweek)
 
 if __name__ == '__main__':
-    get_recommendations_points(12705845,30)
+    get_recommendations_points(12705845, 30)
