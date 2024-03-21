@@ -120,8 +120,10 @@ def best_team_league(gameweek):
     for best_player_id in best_players_id:
         recommendations.insert_global_recommendation(best_player_id, gameweek,lineup)
 
+def get_recommendations_points(id_user,gameweek):
+    best_team_user_current_players(id_user, gameweek)
+    best_team_user_market(id_user, gameweek)
+    best_team_league(gameweek)
 
 if __name__ == '__main__':
-    best_team_user_current_players(12705845, 30)
-    best_team_user_market(12705845, 30)
-    best_team_league(30)
+    get_recommendations_points(12705845,30)

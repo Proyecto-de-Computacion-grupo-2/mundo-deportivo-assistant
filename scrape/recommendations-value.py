@@ -90,5 +90,4 @@ def get_recommendations(id_user):
 
 
 if __name__ == '__main__':
-    user_id = 12705845
-    get_recommendations(user_id)
+    get_recommendations(12705845)
