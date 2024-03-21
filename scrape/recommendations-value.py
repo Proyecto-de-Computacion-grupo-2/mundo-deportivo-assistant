@@ -82,9 +82,6 @@ def get_recommendations(id_user):
     suggestions_sell = value_recommendations_team(id_user)
     suggestions_buy = value_recommendations_market(id_user)
 
-    print(suggestions_sell)
-    print(suggestions_buy)
-
     process_suggestions(id_user,suggestions_sell, True)
     process_suggestions(id_user,suggestions_buy, False)
 
