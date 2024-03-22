@@ -15,7 +15,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 
-from Utils import helper as helper, routes as route
+from UA2C import helper as helper, routes as route
 
 
 class BearerAuth(requests.auth.AuthBase):
@@ -706,15 +706,27 @@ def extract_login_token(h: dict, u: str, p: str):
     # Definir la carga útil (payload) con las credenciales
     payload = {"email": u, "password": p}
 
-    # Realizar la solicitud POST para autenticarse
-    response = requests.post(login_url, json = payload, headers = h)
+    try:
+        # Realizar la solicitud POST para autenticarse
+        response = requests.post(login_url, json=payload, headers=h)
 
-    # Verificar si la autenticación fue exitosa
-    if response.status_code == 200:
-        # Obtener el token de sesión de la respuesta
-        response = response.json()
-        return response["token"]
-    return None
+        # Verificar si la autenticación fue exitosa
+        if response.status_code == 200:
+            # Obtener el token de sesión de la respuesta
+            response = response.json()
+            return response["token"]
+        else:
+            # Manejar respuestas de error del servidor
+            print(f"Error de autenticación: {response.status_code}")
+            return None
+    except requests.exceptions.ConnectionError as e:
+        # Manejar errores de conexión
+        print(f"Error de conexión: {e}")
+        return None
+    except Exception as e:
+        # Manejar cualquier otro error
+        print(f"Error: {e}")
+        return None
 
 
 def extract_tokens(h: dict, u: str, p: str):
@@ -862,9 +874,10 @@ def extract_all_players_value_and_gw_md(h: dict, ai: AIModel, ab: Absences, gw: 
         }
         month = date.split(" ")[1]
         return "-".join([date.split(" ")[-1]] + [date_mapping[month]] + [date.split(" ")[0]])
+
     progress_bar_1 = tqdm(total = 600, desc = "Scraping")
     for num in range(0, 601, 50):
-        # sleep(uniform(6, 14))
+        helper.sleep(helper.uniform(6, 14))
         payload = {
             "post": "players", "filters[ position ]": 0, "filters[ value ]": 0, "filters[ team ]": 0,
             "filters[ injured ]": 0, "filters[ favs ]": 0, "filters[ owner ]": 0, "filters[ benched ]": 0,
@@ -880,7 +893,7 @@ def extract_all_players_value_and_gw_md(h: dict, ai: AIModel, ab: Absences, gw: 
                 for aux_players in aux["data"]["players"]:
                     if aux_players["id"] not in players.get_all_player_ids():
                         payload_2 = {"post": "players", "id": aux_players["id"]}
-                        # sleep(uniform(6, 14))
+                        helper.sleep(helper.uniform(6, 14))
                         res_2 = requests.post(url, data = payload_2, headers = h)
                         if res_2.status_code == 200:
                             res_json_2 = res_2.json()["data"]
@@ -1370,6 +1383,7 @@ finally:
 md_balance_url = "https://mister.mundodeportivo.com/ajax/balance"
 md_gw_url = "https://mister.mundodeportivo.com/ajax/player-gameweek"
 md_sw_url = "https://mister.mundodeportivo.com/ajax/sw"
+md_team_url = "https://mister.mundodeportivo.com/team"
 user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 " \
              "Safari/537.36"
 
