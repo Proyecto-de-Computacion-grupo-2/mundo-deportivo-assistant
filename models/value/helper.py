@@ -12,7 +12,7 @@ import asyncio, base64, csv, glob, hashlib, http.client, io, json, logging, math
     threading
 
 from bs4 import BeautifulSoup
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, date
 import mysql.connector
 from random import choice, uniform
 from os import chdir, getcwd, getenv, listdir, makedirs, path, remove, system
@@ -473,6 +473,132 @@ def create_database_connection():
 def close_database_connection(conn):
     if conn is not None:
         conn.close()
+
+def get_all_attributes_for_points_predicction():
+    mariadb = create_database_connection()
+    cursor = mariadb.cursor()
+
+    try:
+        sql = """SELECT
+        player.id_mundo_deportivo AS "ID",
+        player.full_name AS "Player full name",
+        player.position AS "Position",
+        game.game_week AS "Game Week",
+        game.team AS "Team",
+        game.opposing_team AS "Opposing Team",
+        game.mixed AS "Mixed",
+        game.as_score AS "AS Score",
+        game.marca_score AS "Marca Score",
+        game.mundo_deportivo_score AS "Mundo Deportivo Score",
+        game.sofa_score AS "Sofa Score",
+        game.current_value AS "Current Value",
+        game.points AS "Points",
+        game.average AS "Average",
+        game.matches AS "Matches",
+        game.goals_metadata AS "Goals Metadata",
+        game.cards AS "Cards",
+        game.total_passes AS "Total Passes",
+        game.accurate_passes AS "Accurate Passes",
+        game.total_long_balls AS "Total Long Balls",
+        game.accurate_long_balls AS "Accurate Long Balls",
+        game.total_cross AS "Total Crosses",
+        game.accurate_cross AS "Accurate Crosses",
+        game.total_clearance AS "Total clearances",
+        game.clearance_off_line AS "Clearances on goal line",
+        game.aerial_lost AS "Aerial Duels Lost",
+        game.aerial_won AS "Aerial Duels Won",
+        game.duel_lost AS "Duels Lost",
+        game.duel_won AS "Duels Won",
+        game.dispossessed AS "Dribbled Past",
+        game.challenge_lost AS "Losses",
+        game.total_contest AS "Total Dribbles",
+        game.won_contest AS "Completed dribbles",
+        game.good_high_claim AS "High clearances",
+        game.punches AS "Fist clearances",
+        game.error_lead_to_a_shot AS "Failures that lead to shot",
+        game.error_lead_to_a_goal AS "Failures that lead to goal",
+        game.shot_off_target AS "Shots Off Target",
+        game.on_target_scoring_attempt AS "Shots on Target",
+        game.blocked_scoring_attempt AS "Shots blocked in attack",
+        game.outfielder_block AS "Shots blocked in defence",
+        game.big_chance_created AS "Occasions created",
+        game.goal_assist AS "Goal assists",
+        game.hit_woodwork AS "Shots to the crossbar",
+        game.big_chance_missed AS "Failed obvious occasions",
+        game.penalty_conceded AS "Penalties commited",
+        game.penalty_won AS "Penalties caused",
+        game.penalty_miss AS "Failed penalties",
+        game.penalty_save AS "Stopped penalties",
+        game.goals AS "Goals",
+        game.own_goals AS "Own goals",
+        game.saved_shots_from_inside_the_box AS "Stops from inside the area",
+        game.saves AS "Stops",
+        game.goals_against AS "Goals avoided",
+        game.interception_won AS "Interceptions",
+        game.total_keeper_sweeper AS "Total outputs",
+        game.accurate_keeper_sweeper AS "Precise outputs",
+        game.total_tackle AS "Total Tackles",
+        game.was_fouled AS "Fouls Received",
+        game.fouls AS "Fouls Committed",
+        game.total_offside AS "Offsides",
+        game.minutes_played AS "Minutes Played",
+        game.touches AS "Touches",
+        game.last_man_tackle AS "Entries as last man",
+        game.possession_lost_control AS "Possessions Lost",
+        game.expected_goals AS "Expected Goals",
+        game.key_pass AS "Key Passes",
+        game.expected_assists AS "Expected Assists",
+        player.season_15_16 AS "Average Season 15/16",
+        player.season_16_17 AS "Average Season 16/17",
+        player.season_17_18 AS "Average Season 17/18",
+        player.season_18_19 AS "Average Season 18/19",
+        player.season_19_20 AS "Average Season 19/20",
+        player.season_20_21 AS "Average Season 20/21",
+        player.season_21_22 AS "Average Season 21/22",
+        player.season_22_23 AS "Average Season 22/23",
+        player.season_23_24 AS "Average Season 23/24",
+        game.ts AS "Timestamp"
+        FROM game
+        JOIN player ON game.id_mundo_deportivo = player.id_mundo_deportivo
+        """
+
+        cursor.execute(sql)
+        results = cursor.fetchall()
+
+        players_information = []
+        for row in results:
+            players_information.append(row)
+
+        return players_information
+
+    finally:
+        if mariadb.is_connected():
+            cursor.close()
+            mariadb.close()
+
+
+def database_insert_prediction(players_id, gameweek, point_predictions):
+    mariadb = create_database_connection()
+    cursor = mariadb.cursor()
+    print(players_id)
+    print(gameweek)
+    print(point_predictions)
+    try:
+        for player_id, point_prediction in zip(players_id, point_predictions):
+            sql = """INSERT INTO prediction_points(
+            id_mundo_deportivo,
+            gameweek,
+            date_prediction,
+            point_prediction
+            ) VALUES (%s,%s,%s,%s)"""
+            values = (player_id, gameweek, date.today(), point_prediction)
+            cursor.execute(sql, values)
+            mariadb.commit()
+            print(f'Inserted prediction for {player_id} in gameweek {gameweek}')
+    finally:
+        cursor.close()
+        mariadb.close()
+    pass
 
 
 #logger = define_logger(route.helper_log)
