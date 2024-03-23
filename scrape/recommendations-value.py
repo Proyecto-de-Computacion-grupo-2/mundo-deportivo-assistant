@@ -3,7 +3,7 @@ import recommendations
 def value_recommendations_team(user_id):
     players_teams_ids = recommendations.get_players_id_in_a_team(user_id)
 
-    recommend_sell = create_value_change_recommendations(players_teams_ids,20,False)
+    recommend_sell = create_value_change_recommendations(players_teams_ids,5,False)
     return recommend_sell
 
 
@@ -74,6 +74,8 @@ def suggest_players_to_buy(user_current_balance, players_id, minimum_profit_perc
 def get_recommendations(id_user):
 
     def process_suggestions(id_user, suggestions, is_sell):
+        if suggestions is None:
+            return
         action = "Vender" if is_sell else "Comprar"
         for player_id, date_suggestion, percentage_suggestion in suggestions:
             recommendations.database_insert_user_recommendations(
