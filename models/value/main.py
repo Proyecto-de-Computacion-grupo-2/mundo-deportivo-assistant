@@ -61,6 +61,29 @@ class PriceVariations:
             insert_statements.extend([price_variation.to_insert_statements()])
         return insert_statements
 
+def insert_prediction_database(file_path):
+    try:
+        connection = helper.mysql.connector.connect()
+        cursor = connection.cursor()
+
+        with open(file_path, mode='r', encoding='utf-8') as f:
+            sql_file = f.read()
+
+        sql_commands = sql_file.split(';')
+
+        for command in sql_commands:
+            if command.strip():
+                cursor.execute(command)
+
+        connection.commit()
+
+    except helper.mysql.connector.Error as error:
+        print("Failed to execute commands from file", error)
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
 def evaluate_arima_model(data, arima_order):
     try:
         model = ARIMA(data, order=arima_order)
@@ -243,3 +266,7 @@ if __name__ == "__main__":
     most_common_params = Counter(all_params).most_common(1)[0][0]
     print("\nMost Common ARIMA Parameters (Generic Model) for All Players:")
     print(f"P: {most_common_params[0]}, D: {most_common_params[1]}, Q: {most_common_params[2]}")
+
+    insert_prediction_database("prediction_inserts.sql")
+
+
