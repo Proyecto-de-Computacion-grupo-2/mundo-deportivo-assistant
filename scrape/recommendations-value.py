@@ -3,7 +3,7 @@ import recommendations
 def value_recommendations_team(user_id):
     players_teams_ids = recommendations.get_players_id_in_a_team(user_id)
 
-    recommend_sell = create_value_change_recommendations(players_teams_ids,5,False)
+    recommend_sell = create_value_change_recommendations(players_teams_ids,20,False)
     return recommend_sell
 
 

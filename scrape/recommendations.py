@@ -1,7 +1,5 @@
-import random
 from datetime import datetime, date
 import Utils.helper as helper
-
 
 def query_database(sql, params=None, fetch='one'):
     """Execute a SELECT query and fetch results."""
@@ -65,7 +63,7 @@ def get_players_in_market():
 
 def get_user_current_balance(user_id):
     sql = "SELECT current_balance FROM league_user WHERE id_user = %s"
-    return query_database(sql, [user_id])
+    return query_database(sql, [user_id])[0]
 
 
 def get_all_players_id():
@@ -74,9 +72,13 @@ def get_all_players_id():
 
 
 def get_player_points_prediction(players_id, gameweek):
-    return [
-        query_database("SELECT point_prediction FROM prediction_points WHERE id_mundo_deportivo = %s AND gameweek = %s",
-                       [player_id, gameweek]) for player_id in players_id]
+    positions = []
+    for player_id in players_id:
+        sql = "SELECT point_prediction FROM prediction_points WHERE id_mundo_deportivo = %s AND gameweek = %s"
+        result = query_database(sql, [player_id, gameweek], fetch='one')
+        if result is not None:
+            positions.append(result[0])
+    return positions
 
 
 def get_players_id_in_a_team(id_user):
@@ -85,8 +87,16 @@ def get_players_id_in_a_team(id_user):
 
 
 def get_players_position(players_id):
-    return [query_database("SELECT position FROM player WHERE id_mundo_deportivo = %s", [player_id]) for player_id in
-            players_id]
+    positions = []
+    for player_id in players_id:
+        result = query_database(
+            "SELECT position FROM player WHERE id_mundo_deportivo = %s",
+            [player_id],
+            fetch='one'
+        )
+        if result is not None:
+            positions.append(result[0])
+    return positions
 
 
 def insert_global_recommendation(id_mundo_deportivo, gameweek, lineup):
@@ -94,15 +104,13 @@ def insert_global_recommendation(id_mundo_deportivo, gameweek, lineup):
     execute_database_operation(sql, [id_mundo_deportivo, gameweek, lineup])
 
 
-def database_insert_user_recommendation(id_user, id_mundo_deportivo, market_team_recommendation, my_team_recommendation,
-                                        gameweek, operation_type):
+def database_insert_user_recommendation(id_user, id_mundo_deportivo, market_team_recommendation, my_team_recommendation,gameweek, operation_type):
     sql = """INSERT INTO user_recommendation (id_user, id_mundo_deportivo, recommendation_day, market_team_recommendation, my_team_recommendation, gameweek, operation_type) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
     execute_database_operation(sql, [id_user, id_mundo_deportivo, date.today(), market_team_recommendation, my_team_recommendation,
                          gameweek, operation_type])
 
 
-def database_insert_user_recommendations(id_user, player_id, date, percentage, my_team_recommendation,
-                                         market_team_recommendation, operation_type):
+def database_insert_user_recommendations(id_user, player_id, date, percentage, my_team_recommendation,market_team_recommendation, operation_type):
     sql = """INSERT INTO user_recommendation(
                 id_user,
                 id_mundo_deportivo,
@@ -113,7 +121,7 @@ def database_insert_user_recommendations(id_user, player_id, date, percentage, m
                 market_team_recommendation,
                 operation_type) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
     execute_database_operation(sql, [id_user, player_id, date.today(), date, percentage, my_team_recommendation,
-                                     market_team_recommendation, operation_type], commit=True)
+                                     market_team_recommendation, operation_type])
 
 
 def avaiable_lineups():
