@@ -63,8 +63,8 @@ class PriceVariations:
 
 def insert_prediction_database(file_path):
     try:
-        connection = helper.mysql.connector.connect()
-        cursor = connection.cursor()
+        mariadb = helper.create_database_connection()
+        cursor = mariadb.cursor()
 
         with open(file_path, mode='r', encoding='utf-8') as f:
             sql_file = f.read()
@@ -75,14 +75,14 @@ def insert_prediction_database(file_path):
             if command.strip():
                 cursor.execute(command)
 
-        connection.commit()
+        mariadb.commit()
 
     except helper.mysql.connector.Error as error:
         print("Failed to execute commands from file", error)
     finally:
-        if connection.is_connected():
+        if mariadb.is_connected():
             cursor.close()
-            connection.close()
+            mariadb.close()
 
 def evaluate_arima_model(data, arima_order):
     try:
