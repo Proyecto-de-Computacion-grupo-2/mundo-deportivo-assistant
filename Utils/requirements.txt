@@ -92,6 +92,7 @@ wcwidth==0.2.10
 wsproto==1.2.0
 yarg==0.1.9
 yfinance==0.1.70
+mysql-connector-python==8.3.0
 pandas
 tensorflow
 scikit-learn
