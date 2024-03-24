@@ -441,8 +441,8 @@ def scrape_backup(folder, backup):
 
 # Database
 def create_database_connection():
-    host = getenv("DB_HOST", "localhost")
-    port = getenv("DB_PORT", "13306")
+    host = getenv("DB_HOST", "db")
+    port = getenv("DB_PORT", "3306")
     user = getenv("DB_USER", "root")
     password = getenv("DB_PASSWORD", "uem.ua2c19789!")
     database = getenv("DB_NAME", "pc2")
