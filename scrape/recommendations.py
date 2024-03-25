@@ -1,5 +1,4 @@
-from datetime import datetime, date
-import Utils.helper as helper
+from UA2C import helper as helper, routes as route
 
 def query_database(sql, params=None, fetch='one'):
     """Execute a SELECT query and fetch results."""
@@ -106,7 +105,7 @@ def insert_global_recommendation(id_mundo_deportivo, gameweek, lineup):
 
 def database_insert_user_recommendation(id_user, id_mundo_deportivo, market_team_recommendation, my_team_recommendation,gameweek, operation_type):
     sql = """INSERT INTO user_recommendation (id_user, id_mundo_deportivo, recommendation_day, market_team_recommendation, my_team_recommendation, gameweek, operation_type) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
-    execute_database_operation(sql, [id_user, id_mundo_deportivo, date.today(), market_team_recommendation, my_team_recommendation,
+    execute_database_operation(sql, [id_user, id_mundo_deportivo, helper.date.today(), market_team_recommendation, my_team_recommendation,
                          gameweek, operation_type])
 
 

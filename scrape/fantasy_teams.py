@@ -4,9 +4,7 @@
 # fantasy_teams.py
 
 #
-
-import Utils.helper as helper
-import Utils.routes as route
+from UA2C import helper as helper, routes as route
 
 # todo PENDNING TO FINISH FUNCTION.
 def database_insert_players_users(teams_data):

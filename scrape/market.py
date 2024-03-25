@@ -5,10 +5,7 @@
 
 #
 
-
-import Utils.helper as helper
-import Utils.routes as route
-
+from UA2C import helper as helper, routes as route
 
 def database_update_players_in_market(players):
     connection = helper.create_database_connection()

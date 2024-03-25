@@ -5,10 +5,7 @@
 
 #
 
-
-import Utils.helper as helper
-import Utils.routes as route
-
+from UA2C import helper as helper, routes as route
 
 # Gameweek headers.
 spanish_map_list = ["id", "player full name", "posición", "game week", "equipo", "contrincante", "mixto", "as score",
