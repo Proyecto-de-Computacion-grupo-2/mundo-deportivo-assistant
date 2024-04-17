@@ -30,7 +30,7 @@ def get_player_latest_value(player_id, prediction_bool):
 
 def get_player_sell_price(player_id):
     sql = "SELECT sell_price FROM player WHERE id_mundo_deportivo = %s;"
-    return query_database(sql, [player_id])
+    return query_database(sql, [player_id])[0]
 
 
 def get_player_latest_prediction(player_id):

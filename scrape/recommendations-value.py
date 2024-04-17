@@ -3,7 +3,7 @@ import recommendations
 def value_recommendations_team(user_id):
     players_teams_ids = recommendations.get_players_id_in_a_team(user_id)
 
-    recommend_sell = create_value_change_recommendations(players_teams_ids,20,False)
+    recommend_sell = create_value_change_recommendations(players_teams_ids,10,False)
     return recommend_sell
 
 
@@ -34,7 +34,7 @@ def value_recommendations_market(user_id):
     user_current_balance = recommendations.get_user_current_balance(user_id)
     players_market_ids = recommendations.get_players_id_in_market()
 
-    recommend_buy = suggest_players_to_buy(user_current_balance, players_market_ids, 20)
+    recommend_buy = suggest_players_to_buy(user_current_balance, players_market_ids, 10)
 
     if recommend_buy:
         return recommend_buy
