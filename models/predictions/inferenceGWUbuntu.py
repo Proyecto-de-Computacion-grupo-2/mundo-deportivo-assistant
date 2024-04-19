@@ -109,17 +109,30 @@ def predict_dataset():
     original_df = df_players_information_database.copy()
     df = preprocess_data(df_players_information_database)
 
+    print("unmodified")
+    print(len(df))
+
     maxgame = df['Game Week'].max()
     print(maxgame)
-    df = df[df['Game Week'] == maxgame]
-    original_df = original_df[original_df['Game Week'] == maxgame]
 
-    original_df = original_df.drop_duplicates(subset=['ID'])
+    #get the numbers of rows for the last game week only
+    print("last game week")
+    print(len(df[df['Game Week'] == maxgame]))
+
+    # Sort the dataframe by 'Game Week' in descending order
+    df = df.sort_values('Game Week', ascending=False)
+    original_df = original_df.sort_values('Game Week', ascending=False)
+
+    # Drop duplicates based on 'ID', but keep the first occurrence (which is the latest game week data)
+    df = df.drop_duplicates(subset=['ID'], keep='first')
+    original_df = original_df.drop_duplicates(subset=['ID'], keep='first')
 
     selected_features = num_features
     numerical_features = original_df[selected_features].values
 
     print(numerical_features)
+    print("original size")
+    print(len(original_df))
 
     # Scaling features
     scaler = StandardScaler()
