@@ -3,3 +3,5 @@
 /models/points/BERTGamesWeek/models/model_data_0201.txt
 /models/points/BERTGamesWeek/models/best_model.h5
 /models/predictions/models/best_model.h5
+.env
+/scrape/.env

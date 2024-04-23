@@ -178,30 +178,24 @@ def extract_marca_img(marca_h: dict, rt: int):
                 p_data["id"] + "/256x256/p" + p_data["id"] + "_" + \
                 p_data["team"]["badgeColor"].split("/")[-1].split("_")[0] + "_1_001_000.png"
             res = helper.requests.get(player_image)
-            if res.status_code != 200:
-                player_image = img_url + p_data["team"]["badgeColor"].split("/")[-1].split("_")[0] + "/p" + \
-                               p_data["id"] + "/128x128/p" + p_data["id"] + "_" + \
-                               p_data["team"]["badgeColor"].split("/")[-1].split("_")[0] + "_1_001_000.png"
-                res = helper.requests.get(player_image)
-                if res.status_code != 200:
-                    player_image = img_url + p_data["team"]["badgeColor"].split("/")[-1].split("_")[0] + "/p" + \
-                                   p_data["id"] + "/64x64/p" + p_data["id"] + "_" + \
-                                   p_data["team"]["badgeColor"].split("/")[-1].split("_")[0] + "_1_001_000.png"
-                    res = helper.requests.get(player_image)
             if res.status_code == 200:
-                img_file = helper.path.join("marca_img", p_data["id"] + ".png")
+                img_file = helper.path.join("marca_img", p_data["id"] + "_" + p_data["name"].replace(" ", "_") + ".png")
+                img_url_file = helper.path.join("marca_img", p_data["id"] + ".txt")
                 helper.makedirs(helper.path.dirname(img_file), exist_ok = True)
                 with open(img_file, "wb") as img:
                     img.write(res.content)
+                with open(img_url_file, "w") as img:
+                    img.write(player_image)
             else:
                 faulty.append(p_data["id"] + ", " + p_data["name"] + ", " + p_data["nickname"] + ", " +
                               p_data["slug"] + ", " + p_data["team"]["badgeColor"].split("/")[-1].split("_")[0])
+    print(faulty)
     return faulty
 
 
 def extract_all_players_value_and_gw_md(u: str, p: str, h: dict, ai: helper.AIModel, ab: helper.Absences,
                                         gw: helper.Games, players: helper.Players, pv: helper.PriceVariations,
-                                        users: helper.Users,url: str, url2: str):
+                                        users: helper.Users, url: str, url2: str):
     def date_formatting(date: str):
         date_mapping = {
             # Meses en inglés
@@ -236,7 +230,7 @@ def extract_all_players_value_and_gw_md(u: str, p: str, h: dict, ai: helper.AIMo
                                 res_json_season = res_json_2["season"]
                                 users.add_user(res_json_2["id"], "", "", res_json_2["user"]["name"],
                                                res_json_season["points"], res_json_season["avg"], res_json_2["value"],
-                                               len(res_json_2["team_now"]), 0, 0, 0)
+                                               len(res_json_2["team_now"]), 0, 0, 0, False)
                     progress_bar_2.update(1)
                 progress_bar_2.close()
                 progress_bar_3 = helper.tqdm(total = len(res_json_1["data"]["players"]),
@@ -303,15 +297,12 @@ def extract_all_players_value_and_gw_md(u: str, p: str, h: dict, ai: helper.AIMo
                                                 s2324 = history["points"]
                                             else:
                                                 s2324 = 0
-                                res = helper.requests.get(res_3.json()["data"]["player"]["photoUrl"])
+                                res = helper.requests.get(res_json_3["player"]["photoUrl"])
                                 img_file = helper.path.join(route.image_folder, str(aux_players["id"]) + "_" +
                                                             aux_players["name"].replace(" ", "_") + ".png")
                                 helper.makedirs(helper.path.dirname(img_file), exist_ok = True)
                                 with open(img_file, "wb") as img:
                                     img.write(res.content)
-                                with (open(img_file, "rb") as file):
-                                    image = helper.Image.open(file)
-                                    b64_image = helper.base64.b64encode(image.tobytes()).decode("utf-8")
                                 if aux_players["id_uc"] is None:
                                     team_id = 1010
                                 else:
@@ -319,8 +310,9 @@ def extract_all_players_value_and_gw_md(u: str, p: str, h: dict, ai: helper.AIMo
                                 players.add_player(res_json_player["id"], res_json_p_repo["sofaScoreId"], 0,
                                                    team_id, res_json_player["name"], res_json_player["position"],
                                                    res_json_player["value"], True if res_json_market["active"] == 1
-                                                   else False, res_json_market["input"], 0, b64_image, s56,
-                                                   s67, s78, s89, s1920,s2021, s2122, s2223, s2324)
+                                                   else False, res_json_market["input"], 0,
+                                                   res_json_3["player"]["photoUrl"], s56, s67, s78, s89, s1920, s2021,
+                                                   s2122, s2223, s2324)
                                 if aux_players["is_mine"] == 1:
                                     user_team = users.find_user(team_id)
                                     if user_team.email == "" and user_team.password == "":
@@ -356,11 +348,15 @@ def extract_all_players_value_and_gw_md(u: str, p: str, h: dict, ai: helper.AIMo
                                     if res_json_3 is not None:
                                         special = False
                                         test = None
-                                        own_team = res_json_3["id_team"]
-                                        if res_json_3["id_home"] == own_team:
-                                            opposing_team = res_json_3["id_away"]
+                                        own = res_json_3["id_team"]
+                                        if res_json_3["id_home"] == own:
+                                            opposing = res_json_3["id_away"]
                                         else:
-                                            opposing_team = res_json_3["id_home"]
+                                            opposing = res_json_3["id_home"]
+                                        own_team = ("https://cdn.gomister.com/file/cdn-common/teams/" + str(own) +
+                                                    ".png")
+                                        opposing_team = ("https://cdn.gomister.com/file/cdn-common/teams/" +
+                                                         str(opposing) + ".png")
                                         if res_json_3["marca_stats_rating_detailed"]:
                                             test = res_json_3["marca_stats_rating_detailed"]
                                             special = False
@@ -637,61 +633,131 @@ def find_id_marca_to_md(h: dict, pl: list, player_md: helper.Players, url: str):
 
     progress_bar = helper.tqdm(total = len(pl), desc = "ID Marca mapping: ")
     for p in pl:
-        if "fdez" in p["full_name"].lower():
-            p["full_name"] = p["full_name"].replace("Fdez", "Fernandez")
-        elif "fdez" in p["nickname"].lower():
-            p["nickname"] = p["nickname"].replace("Fdez", "Fernandez")
-        if "fdez" in p["slug"].lower():
-            p["slug"] = p["slug"].replace("Fdez", "Fernandez")
-        elif "-1" in p["slug"].lower():
-            p["slug"] = p["slug"].replace("-1", "")
-        elif "-2" in p["slug"].lower():
-            p["slug"] = p["slug"].replace("-2", "")
-        elif "-3" in p["slug"].lower():
-            p["slug"] = p["slug"].replace("-3", "")
-        elif "-4" in p["slug"].lower():
-            p["slug"] = p["slug"].replace("-4", "")
-        elif "-5" in p["slug"].lower():
-            p["slug"] = p["slug"].replace("-5", "")
-        elif "-6" in p["slug"].lower():
-            p["slug"] = p["slug"].replace("-6", "")
-        payload["name"] = p["full_name"]
-        res = helper.requests.post(url, data = payload, headers = h)
-        if res.status_code == 200:
-            final_player = None
-            res_json = res.json()
-            fail = True
-            if len(res_json["data"]["players"]) >= 1:
-                res_json["data"]["players"][0], fail = find_exact_matches(res_json["data"]["players"], p["full_name"])
-            if fail:
-                payload["name"] = p["nickname"]
-                res = helper.requests.post(url, data = payload, headers = h)
-                if res.status_code == 200:
-                    res_json = res.json()
-                    if len(res_json["data"]["players"]) >= 1:
-                        res_json["data"]["players"][0], fail = find_exact_matches(res_json["data"]["players"],
-                                                                                  p["nickname"])
-                    if fail:
-                        payload["name"] = p["slug"].replace("-", " ")
-                        res = helper.requests.post(url, data = payload, headers = h)
-                        if res.status_code == 200:
-                            res_json = res.json()
-                            if len(res_json["data"]["players"]) >= 1:
-                                res_json["data"]["players"][0], fail = find_exact_matches(res_json["data"]["players"],
-                                                                                          p["slug"].replace("-", " "))
-                            if fail:
-                                faulty.append(p["id_marca"] + ", " + p["full_name"] + ", " + p["nickname"] + ", " +
-                                              p["slug"])
-                                print(p["id_marca"], p["full_name"])
+        if p["id_marca"] != "1772":
+            if "fdez" in p["full_name"].lower():
+                p["full_name"] = p["full_name"].replace("Fdez", "Fernández")
+            if "fdez" in p["nickname"].lower():
+                p["nickname"] = p["nickname"].replace("Fdez", "Fernández")
+            if "fdez" in p["slug"].lower():
+                p["slug"] = p["slug"].replace("Fdez", "Fernández")
+            elif "-1" in p["slug"].lower():
+                p["slug"] = p["slug"].replace("-1", "")
+            elif "-2" in p["slug"].lower():
+                p["slug"] = p["slug"].replace("-2", "")
+            elif "-3" in p["slug"].lower():
+                p["slug"] = p["slug"].replace("-3", "")
+            elif "-4" in p["slug"].lower():
+                p["slug"] = p["slug"].replace("-4", "")
+            elif "-5" in p["slug"].lower():
+                p["slug"] = p["slug"].replace("-5", "")
+            elif "-6" in p["slug"].lower():
+                p["slug"] = p["slug"].replace("-6", "")
+            if "domenech" in p["full_name"].lower():
+                p["full_name"] = p["full_name"].replace("Domenech", "Doménech")
+            if "domenech" in p["nickname"].lower():
+                p["nickname"] = p["nickname"].replace("Domenech", "Doménech")
+            if "domenech" in p["slug"].lower():
+                p["slug"] = p["slug"].replace("Domenech", "Doménech")
+            if "javi" in p["nickname"].lower():
+                p["nickname"] = p["nickname"].replace("Javi", "Javier")
+            if "javi" in p["slug"].lower():
+                p["slug"] = p["slug"].replace("Javi", "Javier")
+            if "alex" in p["nickname"].lower():
+                p["nickname"] = p["nickname"].replace("Alex", "Alejandro")
+            if "alex" in p["slug"].lower():
+                p["slug"] = p["slug"].replace("Alex", "Alejandro")
+            if "alejandro pozo" in p["full_name"].lower():
+                p["full_name"] = p["full_name"].replace("Alejandro Pozo", "Álex Pozo")
+            if "urko" in p["full_name"].lower():
+                p["full_name"] = p["full_name"].replace("Urko González de Zárate", "Urko González")
+            if "samu costa" in p["nickname"].lower():
+                p["nickname"] = p["nickname"].replace("Samu Costa", "Samuel Costa")
+            if "javier hernández" in p["nickname"].lower():
+                p["nickname"] = p["nickname"].replace("Javier Hernández", "Javi Hernández")
+            if "alejandro pozo" in p["full_name"].lower():
+                p["full_name"] = p["full_name"].replace("Alejandro Pozo", "Álex Pozo")
+            if "abderrahman rebbach" in p["full_name"].lower():
+                p["full_name"] = p["full_name"].replace("Abderrahman Rebbach", "Abde Rebbach")
+            if "a. rebbach" in p["nickname"].lower():
+                p["nickname"] = p["nickname"].replace("A. Rebbach", "Abde Rebbach")
+            if "abderrahman rebbach" in p["slug"].lower():
+                p["slug"] = p["slug"].replace("Abderrahman Rebbach", "Abde Rebbach")
+            if "abderrahman rebbach" in p["full_name"].lower():
+                p["full_name"] = p["full_name"].replace("Gerard Moreno Balagueró", "Gerard Moreno")
+            payload["name"] = p["full_name"]
+            res = helper.requests.post(url, data = payload, headers = h)
+            if res.status_code == 200:
+                final_player = None
+                res_json = res.json()
+                json_players = res_json["data"]["players"]
+                fail = True
+                if len(json_players) == 1:
+                    fail = False
+                elif len(json_players) > 1:
+                    json_players[0], fail = find_exact_matches(json_players, p["full_name"])
+                if fail:
+                    payload["name"] = p["nickname"]
+                    res = helper.requests.post(url, data = payload, headers = h)
+                    if res.status_code == 200:
+                        res_json = res.json()
+                        json_players = res_json["data"]["players"]
+                        if len(json_players) == 1:
+                            fail = False
+                        elif len(json_players) > 1:
+                            if "José María Giménez de Vargas" in p["full_name"] and "José Giménez" in str(json_players):
+                                fail = False
+                                json_players[0] = json_players[1]
+                            elif ("José Ignacio Fernández Iglesias" in p["full_name"] and
+                                  "Nacho Fernández" in str(json_players)):
+                                fail = False
+                            elif ("Rodrigo Sánchez Rodriguez" in p["full_name"] and
+                                  "Rodrigo Sánchez" in str(json_players)):
+                                fail = False
+                            elif ("Juan Miguel Jiménez López" in p["full_name"] and
+                                  "Juanmi Jiménez" in str(json_players)):
+                                fail = False
+                            elif ("Gerard Moreno Balagueró" in p["full_name"] and
+                                  "Gerard Gumbau" in str(json_players)):
+                                fail = False
                             else:
-                                final_player = res_json["data"]["players"][0]
-                    else:
-                        final_player = res_json["data"]["players"][0]
-            else:
-                final_player = res_json["data"]["players"][0]
-            if final_player is not None:
-                found_player = player_md.find_player(int(final_player["id"]))
-                found_player.id_marca = int(p["id_marca"])
+                                json_players[0], fail = find_exact_matches(json_players, p["nickname"])
+                        if fail:
+                            payload["name"] = p["slug"].replace("-", " ")
+                            res = helper.requests.post(url, data = payload, headers = h)
+                            if res.status_code == 200:
+                                res_json = res.json()
+                                json_players = res_json["data"]["players"]
+                                if len(json_players) == 1:
+                                    fail = False
+                                elif len(json_players) > 1:
+                                    json_players[0], fail = find_exact_matches(json_players,
+                                                                               p["slug"].replace("-", " ").title())
+                                if fail:
+                                    faulty.append(p["id_marca"] + ", " + p["full_name"] + ", " + p["nickname"] + ", " +
+                                                  p["slug"].replace("-", " ").title())
+                                    print(p["id_marca"], p["full_name"])
+                                else:
+                                    if isinstance(json_players, list):
+                                        final_player = json_players[0]
+                                    elif isinstance(json_players, dict):
+                                        final_player = json_players
+                        else:
+                            if isinstance(json_players, list):
+                                final_player = json_players[0]
+                            elif isinstance(json_players, dict):
+                                final_player = json_players
+                else:
+                    if isinstance(json_players, list):
+                        final_player = json_players[0]
+                    elif isinstance(json_players, dict):
+                        final_player = json_players
+                if final_player is not None:
+                    found_player = player_md.find_player(int(final_player["id"]))
+                    found_player.id_marca = int(p["id_marca"])
+                    marca_img_path = helper.path.join("marca_img", p["id_marca"] + ".txt")
+                    if helper.path.exists(marca_img_path):
+                        with open(marca_img_path, "r", encoding = "utf-8") as marca_file:
+                            found_player.photo_body = marca_file.read()
         progress_bar.update(1)
     progress_bar.close()
     return faulty, player_md
@@ -737,12 +803,14 @@ def extract_market(h: dict):
 def extract_balance(h: dict, url: str):
     response = helper.requests.post(url, data = {}, headers = h)
     if response.status_code == 200:
-        return {"balance": response.json()["data"]["balance"], "future balance": response.json()["data"]["future"],
-                "max debt": response.json()["data"]["max_debt"]}
+        return {"current_balance": response.json()["data"]["balance"],
+                "future_balance": response.json()["data"]["future"],
+                "maximum_debt": response.json()["data"]["max_debt"]}
     return None
 
 
 mariadb = helper.create_database_connection()
+cursor = mariadb.cursor(buffered = True)
 cursor1 = mariadb.cursor(buffered = True)
 cursor2 = mariadb.cursor(buffered = True)
 ai_list = helper.AIModel()
@@ -766,7 +834,7 @@ try:
 except helper.mysql.connector.Error as err:
     if "doesn\'t exist" in err.msg and err.errno == 1146:
         try:
-            multi_stmt_insert("pc2-database.sql", True, True, mariadb)
+            multi_stmt_insert(helper.path.join(route.scrape_folder, "pc2-database.sql"), True, True, cursor)
             empty = True
             mariadb.commit()
         except Exception as err:
@@ -792,8 +860,7 @@ request_timeout = 30
 
 marca_header = {"User-Agent": user_agent, "Origin": "https://fantasy.laliga.com", "Referer":
                 "https://fantasy.laliga.com/", "X-App": "Fantasy-web", "X-Lang": "es"}
-
-
+empty = True
 if empty:
     users_list.add_user(1010, team_name = "Mister")
     extract_all_players_value_and_gw_md(user, password, new_header, ai_list, absences_list, gameweeks_list,
@@ -807,12 +874,13 @@ else:
 # extract_market(new_header, md_ajax_url)
 
 failed_img = extract_marca_img(marca_header, request_timeout)
-# y = extract_marca_all_p_id(marca_header, request_timeout)
-# unkown, player_list = find_id_marca_to_md(new_header, y, players_list, md_sw_url)
+y = extract_marca_all_p_id(marca_header, request_timeout)
+unkown, player_list = find_id_marca_to_md(new_header, y, players_list, md_sw_url)
+print(unkown)
 
 all_i_tables = [users_list.to_insert_statements(), players_list.to_insert_statements(),
-              gameweeks_list.to_insert_statements(), absences_list.to_insert_statements(),
-              price_variations_list.to_insert_statements()]
+                gameweeks_list.to_insert_statements(), absences_list.to_insert_statements(),
+                price_variations_list.to_insert_statements()]
 # all_u_tables = [users_list.to_insert_statements(), players_list.to_insert_statements(),
 #               gameweeks_list.to_insert_statements(), absences_list.to_insert_statements(),
 #               price_variations_list.to_insert_statements()]
@@ -832,9 +900,9 @@ with open(helper.path.join(route.scrape_folder, "insert_statements.sql"), mode =
 #         for row in table:
 #             f.write(row + "\n")
 
-mariadb = helper.create_database_connection()
-cursor = mariadb.cursor(buffered = True)
-multi_stmt_insert(route.scrape_folder + "insert_statements.sql", False, True, cursor)
-# multi_stmt_insert(route.scrape_folder + "update_statements.sql", False, True, cursor)
-mariadb.commit()
-mariadb.close()
+# mariadb = helper.create_database_connection()
+# cursor = mariadb.cursor(buffered = True)
+# multi_stmt_insert(helper.path.join(route.scrape_folder, "insert_statements.sql"), False, True, cursor)
+# multi_stmt_insert(helper.path.join(route.scrape_folder, "update_statements.sql"), False, True, cursor)
+# mariadb.commit()
+# mariadb.close()

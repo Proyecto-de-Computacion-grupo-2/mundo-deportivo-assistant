@@ -4,88 +4,9 @@
 # fantasy_teams.py
 
 #
-from UA2C import helper as helper, routes as route
 
-# todo PENDNING TO FINISH FUNCTION.
-def database_insert_players_users(teams_data):
-    """Once all players have been added to the database, we need to run this code to identify where each player is."""
-    pass
-
-def database_get_id_by_name(team_name):
-    connection = helper.create_database_connection()
-    data = [team_name]
-    try:
-        cursor = connection.cursor()
-        sql = "SELECT id_user FROM user WHERE team_name=%s;"
-
-        cursor.execute(sql, data)
-
-        result = cursor.fetchone()
-
-        if result:
-            return result[0]
-        else:
-            return None
-
-    finally:
-        if connection.is_connected():
-            cursor.close()
-            connection.close()
-
-def database_get_all_users():
-    connection = helper.create_database_connection()
-    try:
-        cursor = connection.cursor()
-        sql = "SELECT team_name FROM user;"
-        cursor.execute(sql)
-
-        results = cursor.fetchall()
-
-        teams_title = [result[0] for result in results]
-
-        return teams_title
-
-    finally:
-        if connection.is_connected():
-            cursor.close()
-            connection.close()
-
-
-def database_insert_users(teams_data):
-    connection = helper.create_database_connection()
-    teams_in_db = database_get_all_users()
-    try:
-        cursor = connection.cursor()
-        sql_insert = """
-        INSERT INTO user (
-            team_name,team_points,team_average,team_value,team_players
-        ) VALUES (%s, %s, %s,%s,%s)
-        """
-
-        sql_update = """
-        UPDATE user
-        SET team_points = %s, team_average = %s, team_value = %s, team_players = %s
-        WHERE id_user = %s;
-        """
-        for team_data in teams_data:
-            team_name = team_data[0]
-            team_id = database_get_id_by_name(team_name)
-            team_data[1] = int(team_data[1])
-            team_data[2] = float(team_data[2])
-            team_data[3] = float(team_data[3].replace("M", ""))
-            team_data[4] = int(team_data[4])
-            if team_name not in teams_in_db:
-                cursor.execute(sql_insert, team_data)
-            else:
-                data_update = team_data[1:5]
-                data_update.append(team_id)
-                cursor.execute(sql_update, data_update)
-        connection.commit()
-
-    finally:
-        if connection.is_connected():
-            cursor.close()
-            connection.close()
+import PC2_Utils.PC2_Utils.helper as helper
+import PC2_Utils.PC2_Utils.routes as route
 
 
 def scrape_all_players_fantasy():
@@ -158,15 +79,21 @@ def scrape_teams_information():
     """
     driver = helper.login_fantasy_mundo_deportivo()
 
+    # Select the markets section, wait ten seconds as it usually takes some time to load the page.
     driver.get("https://mister.mundodeportivo.com/standings")
 
+    # Get the table with all the teams' information.
+    # Find all the user elements
     table_elements = driver.find_elements(by = helper.By.CSS_SELECTOR, value = "ul.user-list li a.btn.btn-sw-link.user")
 
+    # Extract the href values from each userTeam element
     user_hrefs = [user.get_attribute("href") for user in table_elements]
+    # Since each player can have different positon, this is so that we can find depending on which pos the player is at
+    position_mapping = {"pos-1": "Goalkeeper", "pos-2": "Defence", "pos-3": "Midfielder", "pos-4": "Forward"}
 
     user_hrefs = list(set(user_hrefs))
 
-    teams_players_header = ["Team Name", "Player id"]
+    teams_players_header = ["Team Name", "Position", "Name", "Surname"]
     original_labels = ["Team Name", "Puntos", "Media", "Valor", "Jugadores"]
     team_data_header = ["Team Name", "Points", "Average", "Value", "Players"]
     label_mapping = dict(zip(original_labels, team_data_header))
@@ -199,11 +126,24 @@ def scrape_teams_information():
 
         # In this for once with all players links we get the name, surname and position
         for player in player_hrefs:
-            player_id = helper.re.findall(r'\d+', player)
-            teams_players_data.append([team_name, player_id])
+            driver.get(player)
+            soup = helper.BeautifulSoup(driver.page_source, "html.parser")
 
+            # Extract class = pos-" text
+            position_class = soup.select_one(".team-position i")["class"][0]
 
+            # Find the "left" div
+            left_div = soup.find("div", class_ = "left")
 
+            # Extract the name from within the "left" div
+            name = left_div.find("div", class_ = "name").text
+            surname = left_div.find("div", class_ = "surname").text
+
+            # Map the position class to the corresponding position
+            position = position_mapping.get(position_class, "Unknown")
+
+            teams_players_data.append([team_name, position, name, surname])
+        driver.get(user_element)
         soup = helper.BeautifulSoup(driver.page_source, "html.parser")
 
         # Select the parent div element with the class "wrapper" to narrow down the search
@@ -230,7 +170,6 @@ def scrape_teams_information():
         # Write the data to the CSV file
         team_data_data.append([team_name, points, average, team_value, players_count])
 
-    database_insert_users(team_data_data)
     helper.write_to_csv(route.team_data_file, team_data_header, sorted(team_data_data, key = lambda x: x[0][0]), "w")
     helper.write_to_csv(route.teams_players_file, teams_players_header,
                         sorted(teams_players_data, key = lambda x: x[0][0]), "w")
@@ -240,8 +179,8 @@ def scrape_teams_information():
 
 if __name__ == "__main__":
     logger = helper.define_logger(route.teams_log)
-    #scrape_all_players_fantasy()
-    #scrape_personal_team_fantasy()
+    scrape_all_players_fantasy()
+    scrape_personal_team_fantasy()
     scrape_teams_information()
     for folder in route.all_folders:
         helper.scrape_backup(folder, route.backup_folder)

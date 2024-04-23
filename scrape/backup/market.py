@@ -5,30 +5,10 @@
 
 #
 
-from UA2C import helper as helper, routes as route
 
-def database_update_players_in_market(players):
-    connection = helper.create_database_connection()
-    try:
-        cursor = connection.cursor()
-        sql = """
-            UPDATE player
-            SET is_in_market = %s, sell_price = %s
-            WHERE id_mundo_deportivo = %s;
-        """
+import PC2_Utils.PC2_Utils.helper as helper
+import PC2_Utils.PC2_Utils.routes as route
 
-        for player in players:
-            player_id = int(player[0])
-            player_price = int(player[7].replace(".", ""))  # Assuming player[7] is the price with dots
-            data = (True, player_price, player_id)
-            cursor.execute(sql, data)
-
-        connection.commit()
-
-    finally:
-        if connection.is_connected():
-            cursor.close()
-            connection.close()
 
 def scrape_market_section_fantasy():
     driver = helper.login_fantasy_mundo_deportivo()
@@ -45,7 +25,6 @@ def scrape_market_section_fantasy():
     market_players_info = market_players_table.find_elements(helper.By.CLASS_NAME, "player-row")
 
     players = helper.scrape_player_info("m", market_players_info, market_players_icons, whole_team_id)
-    database_update_players_in_market(players)
 
     # ------ Start process to save all the information in a CSV. ------
     market_structure_header = ["ID", "Points", "Market value", "Average value",
@@ -83,6 +62,6 @@ if __name__ == "__main__":
     logger = helper.define_logger(route.market_log)
     scrape_market_section_fantasy()
     scrape_personal_lineup_fantasy()
-    #helper.extract()
+    helper.extract()
     for folder in route.all_folders:
         helper.scrape_backup(folder, route.backup_folder)
