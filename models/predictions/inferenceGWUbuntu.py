@@ -43,7 +43,6 @@ def preprocess_data(df):
     return df
 
 
-
 # Function to convert dataframe for model input (updated for new dataset)
 def get_new_model_input(df, tokenizer, text_columns):
     text_columns = [col for col in text_columns if col != 'Mixed']
@@ -53,7 +52,6 @@ def get_new_model_input(df, tokenizer, text_columns):
     # Tokenize the concatenated text
     encoded = tokenizer(df_text.tolist(), padding='max_length', max_length=128, truncation=True, return_tensors='tf')
     return [encoded['input_ids'], encoded['attention_mask']]
-
 
 
 # Function to evaluate the model
@@ -76,8 +74,8 @@ def evaluate_model(model, test_features, true_values):
 
     return rmse
 
-def predict_dataset():
 
+def predict_dataset():
     # convert the current structure to pandas dataframes.
     players_information = helper.get_all_attributes_for_points_predicction()
 
@@ -115,7 +113,7 @@ def predict_dataset():
     maxgame = df['Game Week'].max()
     print(maxgame)
 
-    #get the numbers of rows for the last game week only
+    # get the numbers of rows for the last game week only
     print("last game week")
     print(len(df[df['Game Week'] == maxgame]))
 
@@ -161,13 +159,13 @@ def predict_dataset():
     # Evaluate the model
     predictions = model.predict(model_input).flatten()  # Flatten if predictions are in a multi-dimensional array
 
-    #round predictions
+    # round predictions
     predictions = [round(x) for x in predictions]
 
     # make negative predictions positive
     predictions = [abs(x) for x in predictions]
 
-    #print all sizes
+    # print all sizes
     print(len(predictions))
     print(len(original_df['ID']))
     print(len(original_df['Position']))
@@ -180,12 +178,9 @@ def predict_dataset():
     })
 
     print(results_df)
-
-
-    helper.database_insert_prediction(original_df['ID'],int(maxgame)+1,predictions)
-
-
+    helper.database_insert_prediction(original_df['ID'], int(maxgame) + 1, predictions)
     return results_df
+
 
 if __name__ == "__main__":
     results_df = predict_dataset()
