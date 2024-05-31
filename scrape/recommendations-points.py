@@ -126,4 +126,4 @@ def get_recommendations_points(id_user,gameweek):
     best_team_league(gameweek)
 
 if __name__ == '__main__':
-    get_recommendations_points(12705845, 32)
+    get_recommendations_points(12705845, 39)

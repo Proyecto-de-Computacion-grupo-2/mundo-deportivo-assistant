@@ -1,0 +1,17 @@
+beautifulsoup4
+deprecated
+matplotlib
+mysql-connector-python
+numpy
+pandas
+Pillow
+pycryptodome
+python-telegram-bot
+requests
+scikit-learn
+selenium
+statsmodels
+tensorflow==2.16.1
+tf-keras
+transformers
+tqdm
